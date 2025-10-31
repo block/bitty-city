@@ -40,6 +40,7 @@ guiceAssistedInject = { module = "com.google.inject.extensions:guice-assistedinj
 hikari = { module = "com.zaxxer:HikariCP", version.ref = "hikari" }
 jodaMoney = { module = "org.joda:joda-money", version.ref = "jodaMoney" }
 jooq = { module = "org.jooq:jooq", version.ref = "jooq" }
+jooqCodegen = { module = "org.jooq:jooq-codegen", version.ref = "jooq" }
 jooqKotlin = { module = "org.jooq:jooq-kotlin", version.ref = "jooq" }
 jooqKotlinCoroutines = { module = "org.jooq:jooq-kotlin-coroutines", version.ref = "jooq" }
 junit4 = { module = "junit:junit", version.ref = "junit4" }
@@ -64,6 +65,7 @@ resilience4jKotlin = { module = "io.github.resilience4j:resilience4j-kotlin", ve
 resilience4jRetry = { module = "io.github.resilience4j:resilience4j-retry", version.ref = "resilience4j" }
 slf4jApi = { module = "org.slf4j:slf4j-api", version.ref = "slf4j" }
 slf4jNop = { module = "org.slf4j:slf4j-nop", version.ref = "slf4j" }
+testContainers = { module = "org.testcontainers:testcontainers", version.ref = "testContainersMySql" }
 testContainersMySql = { module = "org.testcontainers:mysql", version.ref = "testContainersMySql" }
 
 [bundles]

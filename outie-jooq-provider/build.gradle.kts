@@ -1,8 +1,30 @@
+import org.flywaydb.core.Flyway
+import org.jooq.codegen.GenerationTool
+import org.jooq.meta.jaxb.*
+import org.testcontainers.containers.MySQLContainer
+import org.testcontainers.utility.DockerImageName
+
 plugins {
     id("java-library")
     id("org.jetbrains.kotlin.jvm")
     id("base") // Provides standard task grouping
     id("nu.studer.jooq") version "9.0"
+    id("org.flywaydb.flyway") version "11.15.0"
+}
+
+buildscript {
+  repositories {
+    mavenCentral()
+  }
+  dependencies {
+    classpath(libs.flyway)
+    classpath(libs.flywayMySql)
+    classpath(libs.jooqCodegen)
+    classpath(libs.jooqKotlin)
+    classpath(libs.mysqlConnectorJava)
+    classpath(libs.testContainers)
+    classpath(libs.testContainersMySql)
+  }
 }
 
 repositories {
@@ -13,6 +35,13 @@ java {
     toolchain {
         languageVersion.set(JavaLanguageVersion.of(21))
     }
+}
+
+val jooqOut = layout.buildDirectory.dir("generated-src/jooq")
+sourceSets {
+  named("main") {
+      kotlin.srcDir(jooqOut)
+  }
 }
 
 dependencies {
@@ -32,173 +61,82 @@ dependencies {
     api(libs.jooqKotlinCoroutines)
 
     // JOOQ code generation dependencies
-    jooqGenerator("com.mysql:mysql-connector-j:8.3.0")
+    jooqGenerator(libs.mysqlConnectorJava)
 }
 
-// Configure jOOQ code generation
-jooq {
-    configurations {
-        create("main") {  // The name of the jOOQ configuration
-            generateSchemaSourceOnCompilation.set(false)  // Disable automatic generation
+tasks.register("generateJooq") {
+  group = "code generation"
+  description = "Start MySQL via Testcontainers, run Flyway, generate jOOQ sources."
 
-            jooqConfiguration.apply {
-                logging = org.jooq.meta.jaxb.Logging.WARN
+  dependsOn("processResources")
 
-                jdbc.apply {
-                    driver = "com.mysql.cj.jdbc.Driver"
-                    url = "jdbc:mysql://127.0.0.1:3306/bitty_city"
-                    user = "root"
-                    password = ""
-                }
+  doLast {
+    val image = DockerImageName.parse("mysql:8.4")
+    val mysql = MySQLContainer(image)
+      .withDatabaseName("app")
+      .withUsername("root")
+      .withPassword("password")
 
-                generator.apply {
-                    name = "org.jooq.codegen.KotlinGenerator"
+    logger.lifecycle("Starting MySQL Testcontainer…")
+    mysql.start()
 
-                    database.apply {
-                        name = "org.jooq.meta.mysql.MySQLDatabase"
-                        inputSchema = "bitty_city"
-                        includes = ".*"
-                        excludes = "flyway_schema_history"
-                    }
+    try {
+      val jdbc = mysql.jdbcUrl
+      val user = mysql.username
+      val pass = mysql.password
 
-                    generate.apply {
-                        isPojosAsKotlinDataClasses = true
-                        isDeprecated = false
-                        isRecords = true
-                        isImmutablePojos = true
-                        isFluentSetters = true
-                    }
+      logger.lifecycle("Running Flyway migrations…")
+      Flyway.configure()
+        .dataSource(jdbc, user, pass)
+        .locations("filesystem:${project.projectDir}/src/main/resources/db/migration")
+        .baselineOnMigrate(true)
+        .load()
+        .migrate()
 
-                    target.apply {
-                        packageName = "xyz.block.bittycity.outie.jooq.generated"
-                        directory = "${project.projectDir}/src/main/kotlin"
-                    }
+      val outDir = jooqOut.get().asFile.apply { mkdirs() }
 
-                    strategy.name = "org.jooq.codegen.DefaultGeneratorStrategy"
-                }
-            }
-        }
+      logger.lifecycle("Generating jOOQ…")
+      GenerationTool.generate(
+        Configuration()
+          .withJdbc(Jdbc()
+            .withDriver("com.mysql.cj.jdbc.Driver")
+            .withUrl(jdbc)
+            .withUser(user)
+            .withPassword(pass)
+          )
+          .withGenerator(Generator()
+            .withName("org.jooq.codegen.KotlinGenerator")
+            .withDatabase(
+              Database()
+                .withName("org.jooq.meta.mysql.MySQLDatabase")
+                .withInputSchema("app")
+                .withExcludes("flyway_schema_history")
+            )
+            .withGenerate(
+              Generate()
+                .withPojosAsKotlinDataClasses(true)
+                .withKotlinNotNullPojoAttributes(true)
+                .withKotlinNotNullRecordAttributes(true)
+                .withKotlinDefaultedNullablePojoAttributes(true)
+                .withKotlinDefaultedNullableRecordAttributes(true)
+                .withKotlinSetterJvmNameAnnotationsOnIsPrefix(true)
+                .withImplicitJoinPathsAsKotlinProperties(true)
+            )
+            .withTarget(
+              org.jooq.meta.jaxb.Target()
+                .withDirectory(outDir.absolutePath)
+                .withPackageName("xyz.block.bittycity.outie.jooq.generated")
+            )
+          )
+      )
+      logger.lifecycle("jOOQ generated into ${outDir.absolutePath}")
+    } finally {
+      mysql.stop()
     }
+  }
 }
 
-// Task to apply migrations to the local MySQL database using Flyway
-tasks.register("migrateLocal") {
-    group = "database"
-    description = "Apply Flyway migrations to the local MySQL database using Flyway Docker image"
-
-    // Ensure MySQL is running before executing the migration
-    dependsOn(rootProject.tasks.named("startMysql"))
-
-    doLast {
-        val migrationsDir = file("${projectDir}/src/main/resources/migrations")
-        logger.lifecycle("Applying Flyway migrations from: ${migrationsDir.absolutePath}")
-
-        // Run Flyway in Docker container
-        val process = ProcessBuilder(
-            "docker", "run", "--rm",
-            "--network=host", // Connect to host network to access MySQL
-            "-v", "${migrationsDir.absolutePath}:/flyway/sql",
-            "flyway/flyway:latest",
-            "-url=jdbc:mysql://127.0.0.1:3306/bitty_city",
-            "-user=root",
-            "-password=",
-            "-validateMigrationNaming=true",
-            "-locations=filesystem:/flyway/sql",
-            "migrate"
-        ).redirectErrorStream(true).start()
-
-        // Capture and log the output
-        val output = process.inputStream.bufferedReader().use { it.readText() }
-        if (output.isNotEmpty()) {
-            logger.lifecycle(output)
-        }
-
-        // Check the exit code
-        val exitCode = process.waitFor()
-        if (exitCode != 0) {
-            throw GradleException("Flyway migration failed with exit code: $exitCode")
-        } else {
-            logger.lifecycle("Flyway migrations completed successfully!")
-        }
-    }
-}
-
-// Task to view the current migration status and pending migrations
-tasks.register("migrationStatus") {
-    group = "database"
-    description = "Display information about migration status using Flyway Docker image"
-
-    dependsOn(rootProject.tasks.named("startMysql"))
-
-    doLast {
-        val migrationsDir = file("${projectDir}/src/main/resources/migrations")
-        logger.lifecycle("Checking migration status...")
-
-        // Run Flyway info command in Docker container
-        val process = ProcessBuilder(
-            "docker", "run", "--rm",
-            "--network=host", // Connect to host network to access MySQL
-            "-v", "${migrationsDir.absolutePath}:/flyway/sql",
-            "flyway/flyway:latest",
-            "-url=jdbc:mysql://127.0.0.1:3306/bitty_city",
-            "-user=root",
-            "-password=",
-            "-locations=filesystem:/flyway/sql",
-            "info"
-        ).redirectErrorStream(true).start()
-
-        // Capture and log the output
-        val output = process.inputStream.bufferedReader().use { it.readText() }
-        if (output.isNotEmpty()) {
-            logger.lifecycle(output)
-        }
-    }
-}
-
-// Task to clean the database (CAUTION: removes all objects in the schema)
-tasks.register("cleanDatabase") {
-    group = "database"
-    description = "CAUTION: Drops all objects in the schema (tables, views, etc.) using Flyway Docker image"
-
-    dependsOn(rootProject.tasks.named("startMysql"))
-
-    doLast {
-        val migrationsDir = file("${projectDir}/src/main/resources/migrations")
-        logger.lifecycle("WARNING: About to clean the database. This will remove all tables and data!")
-
-        // Run Flyway clean command in Docker container
-        val process = ProcessBuilder(
-            "docker", "run", "--rm",
-            "--network=host", // Connect to host network to access MySQL
-            "-v", "${migrationsDir.absolutePath}:/flyway/sql",
-            "flyway/flyway:latest",
-            "-url=jdbc:mysql://127.0.0.1:3306/bitty_city",
-            "-user=root",
-            "-password=",
-            "-cleanDisabled=false",
-            "clean"
-        ).redirectErrorStream(true).start()
-
-        // Capture and log the output
-        val output = process.inputStream.bufferedReader().use { it.readText() }
-        if (output.isNotEmpty()) {
-            logger.lifecycle(output)
-        }
-    }
-}
-
-// Task to generate jOOQ classes from the local database
-tasks.register("jooqGenerate") {
-    group = "database"
-    description = "Generate jOOQ classes from the local MySQL database"
-
-    // Depend on migrateLocal to ensure the database schema is up to date
-    dependsOn("migrateLocal")
-
-    // This task triggers the built-in generateJooq task provided by the jOOQ plugin
-    finalizedBy("generateJooq")
-
-    doLast {
-        logger.lifecycle("Generating jOOQ classes from database schema...")
-    }
+// Make compileKotlin depend on generateJooq to ensure code is generated before compilation
+tasks.named("compileKotlin") {
+    dependsOn("generateJooq")
 }

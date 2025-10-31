@@ -54,7 +54,7 @@ dokka {
   }
 }
 
-task("publishToMavenCentral") {
+tasks.register("publishToMavenCentral") {
   group = "publishing"
   dependsOn(
     ":innie:publishToMavenCentral",
