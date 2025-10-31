@@ -20,7 +20,7 @@ object TestDatabase {
    */
   val container: MySQLContainer<*> by lazy {
     MySQLContainer("mysql:8.0")
-      .withDatabaseName("bitty_city")
+      .withDatabaseName("app")
       .withUsername("test")
       .withPassword("test")
       .apply {
@@ -41,7 +41,8 @@ object TestDatabase {
   private fun runMigrations(dataSource: DataSource) {
     Flyway.configure()
       .dataSource(dataSource)
-      .locations("classpath:migrations")
+      .schemas("app")
+      .locations("classpath:db/migration")
       .load()
       .migrate()
   }
