@@ -9,6 +9,7 @@ plugins {
   alias(libs.plugins.versionsGradlePlugin)
   alias(libs.plugins.versionCatalogUpdateGradlePlugin)
   alias(libs.plugins.kotlinBinaryCompatibilityPlugin) apply false
+  id("com.vanniktech.maven.publish") version "0.33.0" apply false
 }
 
 subprojects {
@@ -57,7 +58,8 @@ dokka {
 tasks.register("publishToMavenCentral") {
   group = "publishing"
   dependsOn(
-    ":innie:publishToMavenCentral",
-    ":outie:publishToMavenCentral"
+//    ":innie:publishToMavenCentral",
+    ":outie:publishToMavenCentral",
+    ":outie-jooq-provider:publishToMavenCentral"
   )
 }
