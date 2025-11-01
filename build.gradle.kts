@@ -9,7 +9,7 @@ plugins {
   alias(libs.plugins.versionsGradlePlugin)
   alias(libs.plugins.versionCatalogUpdateGradlePlugin)
   alias(libs.plugins.kotlinBinaryCompatibilityPlugin) apply false
-  id("com.vanniktech.maven.publish") version "0.33.0" apply false
+  id("com.vanniktech.maven.publish") version "0.34.0" apply false
 }
 
 subprojects {
