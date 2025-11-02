@@ -21,17 +21,9 @@ bin/gradle build
 
 ## Project Structure
 
-- `innie/` - Deposits module
 - `outie/` - Withdrawals module
-
-## Development
-
-The project is set up with:
-- Kotlin 2.0.21
-- Java 11 target
-- Kotest for testing
-- Dokka for documentation
-- Maven publishing support
+- `outie-jooq-provider` - jOOQ bindings for the `outie` module
+- `innie/` - Deposits module (WIP)
 
 ## Modules
 
@@ -41,11 +33,14 @@ Handles bitcoin deposit operations and related custodial product experience.
 ### Outie
 Handles bitcoin withdrawal operations and related custodial product experience.
 
-## Database Migrations
+### Outie-jOOQ-Provider
+jOOQ bindings for the `outie` module.
 
-The project uses Flyway for database migrations. Migrations are located in the `outie-jooq-provider/src/main/resources/migrations` directory.
+#### Database Migrations
 
-### Migration File Naming Convention
+This module uses Flyway for database migrations. Migrations are located in the `outie-jooq-provider/src/main/resources/migrations` directory.
+
+#### Migration File Naming Convention
 
 Migration files must follow the Flyway naming convention:
 - Format: `V{version}__{description}.sql`
@@ -54,28 +49,3 @@ Migration files must follow the Flyway naming convention:
 - Use periods (not underscores) in the version number
 - Double underscores between version and description
 - Description uses underscores for spaces
-
-### Available Gradle Tasks
-
-The following Gradle tasks are available for database management:
-
-```bash
-# Apply migrations to local database
-./bin/gradle :outie-jooq-provider:migrateLocal
-
-# Show current migration status
-./bin/gradle :outie-jooq-provider:migrationStatus
-
-# Validate migration files (without executing)
-./bin/gradle :outie-jooq-provider:validateMigrations
-
-# Clean the database (CAUTION: removes all tables and data)
-./bin/gradle :outie-jooq-provider:cleanDatabase
-```
-
-### Creating New Migrations
-
-1. Create a new SQL file in the migrations directory following the naming convention
-2. Write your SQL migration statements (create table, alter table, etc.)
-3. Run the validateMigrations task to verify your migration file is valid
-4. Run the migrateLocal task to apply your migration
