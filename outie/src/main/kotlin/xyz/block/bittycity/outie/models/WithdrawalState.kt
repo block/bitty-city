@@ -44,7 +44,8 @@ sealed class WithdrawalState(
     private val aliasedStatesMap: Map<String, WithdrawalState> = mapOf(
       "COLLECTING_SPEED_SELECTION" to CollectingInfo,
       "COLLECTING_USER_CONFIRMATION" to CollectingInfo,
-      "PERFORMING_STEP_UP_AUTHENTICATION" to CollectingInfo
+      "PERFORMING_STEP_UP_AUTHENTICATION" to CollectingInfo,
+      "RESERVING_FUNDS" to CollectingInfo,
     )
 
     fun byName(name: String): Result<WithdrawalState> = result {
