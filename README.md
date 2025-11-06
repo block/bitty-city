@@ -2,7 +2,8 @@
 
 <img src="https://www.herecomesbitcoin.org/assets/HereComesBitcoinAssets/Brrr-cat.png" alt="Brrr Cat Bitcoin" width="200">
 
-This project prescribes the custodial product experience for bitcoin on-chain operations. It is used currently by Block for Square Bitcoin withdrawals.
+This project prescribes the custodial product experience for bitcoin on-chain operations. It is 
+used currently by [Block](https://block.xyz/) for [Square Bitcoin](https://squareup.com/us/en/bitcoin) withdrawals.
 
 ## Building
 
