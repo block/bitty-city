@@ -1,5 +1,8 @@
 package xyz.block.bittycity.outie.store
 
+import kotlin.time.Duration
+import org.bitcoinj.base.Address
+import org.joda.money.Money
 import xyz.block.bittycity.outie.models.BalanceId
 import xyz.block.bittycity.outie.models.Bitcoins
 import xyz.block.bittycity.outie.models.CustomerId
@@ -9,10 +12,8 @@ import xyz.block.bittycity.outie.models.WithdrawalSpeed
 import xyz.block.bittycity.outie.models.WithdrawalSpeedOption
 import xyz.block.bittycity.outie.models.WithdrawalState
 import xyz.block.bittycity.outie.models.WithdrawalToken
-import org.bitcoinj.base.Address
-import org.joda.money.Money
+import xyz.block.domainapi.InfoOnly
 import java.time.Instant
-import kotlin.time.Duration
 
 @Suppress("TooManyFunctions")
 interface WithdrawalEntityOperations {
@@ -78,3 +79,23 @@ interface WithdrawalEntityOperations {
 
   fun update(withdrawal: Withdrawal): Result<Withdrawal>
 }
+
+sealed class WithdrawalStoreError(message: String) :
+  Exception(message),
+  InfoOnly
+
+class WithdrawalNotPresent(val withdrawalToken: WithdrawalToken) :
+  WithdrawalStoreError("Withdrawal not present: $withdrawalToken")
+
+class WithdrawalTokensEmpty : WithdrawalStoreError("Withdrawal tokens not present")
+
+class TooManyWithdrawalTokens(val withdrawalTokenCount: Int, val withdrawalTokenLimit: Int) :
+  WithdrawalStoreError(
+    "Too many withdrawal tokens: $withdrawalTokenCount, exceeded limit: $withdrawalTokenLimit"
+  )
+
+class WithdrawalVersionMismatch(val withdrawal: Withdrawal) :
+  WithdrawalStoreError(
+    "Withdrawal not at expected version ${withdrawal.version}: ${withdrawal.id}"
+  )
+
