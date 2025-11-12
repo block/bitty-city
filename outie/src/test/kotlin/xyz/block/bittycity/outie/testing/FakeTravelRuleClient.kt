@@ -2,7 +2,7 @@ package xyz.block.bittycity.outie.testing
 
 import app.cash.quiver.extensions.success
 import xyz.block.bittycity.outie.client.TravelRuleClient
-import xyz.block.bittycity.outie.models.CustomerId
+import xyz.block.bittycity.common.models.CustomerId
 import org.bitcoinj.base.Address
 import org.joda.money.Money
 

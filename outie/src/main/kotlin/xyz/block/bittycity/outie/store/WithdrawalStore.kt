@@ -3,8 +3,8 @@ package xyz.block.bittycity.outie.store
 import app.cash.quiver.extensions.success
 import arrow.core.raise.result
 import xyz.block.bittycity.outie.models.BalanceId
-import xyz.block.bittycity.outie.models.Bitcoins
-import xyz.block.bittycity.outie.models.CustomerId
+import xyz.block.bittycity.common.models.Bitcoins
+import xyz.block.bittycity.common.models.CustomerId
 import xyz.block.bittycity.outie.models.ServiceFee
 import xyz.block.bittycity.outie.models.Withdrawal
 import xyz.block.bittycity.outie.models.WithdrawalSpeed

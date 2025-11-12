@@ -1,7 +1,6 @@
-package xyz.block.bittycity.outie.models
+package xyz.block.bittycity.common.models
 
 import org.joda.money.CurrencyUnit
-import kotlin.math.pow
 
 /**
  * A BIP-177 oriented value type for Bitcoin.
@@ -20,9 +19,9 @@ data class Bitcoins(val units: Long) : Comparable<Bitcoins> {
     val currency: CurrencyUnit by lazy {
       CurrencyUnit.registerCurrency(
         "BTC", // currency code
-        0, // numeric code (0 since BTC isn’t ISO 4217)
+        0, // numeric code (0 since BTC isn't ISO 4217)
         DECIMAL_PLACES,
-        emptyList(), // country codes (none, since BTC isn’t tied to a country)
+        emptyList(), // country codes (none, since BTC isn't tied to a country)
         true // force overwrite if already registered
       )
     }

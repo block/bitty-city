@@ -1,8 +1,8 @@
 package xyz.block.bittycity.outie.utils
 
 import arrow.core.raise.result
-import xyz.block.bittycity.outie.models.Bitcoins
-import xyz.block.bittycity.outie.models.CustomerId
+import xyz.block.bittycity.common.models.Bitcoins
+import xyz.block.bittycity.common.models.CustomerId
 import xyz.block.bittycity.outie.models.WithdrawalState
 import xyz.block.domainapi.CompareOperator
 import xyz.block.domainapi.CompareValue

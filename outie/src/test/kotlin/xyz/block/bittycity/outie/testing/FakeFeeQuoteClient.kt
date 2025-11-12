@@ -6,7 +6,7 @@ import xyz.block.bittycity.outie.models.FlatFee
 import xyz.block.bittycity.outie.models.OnchainFeeQuote
 import xyz.block.bittycity.outie.models.WithdrawalServiceFeeQuote
 import xyz.block.bittycity.outie.models.WithdrawalSpeed
-import xyz.block.bittycity.outie.models.Bitcoins
+import xyz.block.bittycity.common.models.Bitcoins
 
 class FakeFeeQuoteClient :
   TestFake(),

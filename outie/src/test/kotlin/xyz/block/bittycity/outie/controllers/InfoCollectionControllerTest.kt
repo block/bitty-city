@@ -3,9 +3,10 @@ package xyz.block.bittycity.outie.controllers
 import app.cash.quiver.extensions.success
 import xyz.block.bittycity.outie.models.BalanceId
 import xyz.block.bittycity.outie.models.BitcoinAccount
-import xyz.block.bittycity.outie.models.BitcoinDisplayUnits
-import xyz.block.bittycity.outie.models.BitcoinDisplayUnits.BITCOIN
-import xyz.block.bittycity.outie.models.Bitcoins
+import xyz.block.bittycity.common.models.BitcoinDisplayUnits
+import xyz.block.bittycity.common.utils.CurrencyConversionUtils
+import xyz.block.bittycity.common.models.BitcoinDisplayUnits.BITCOIN
+import xyz.block.bittycity.common.models.Bitcoins
 import xyz.block.bittycity.outie.models.CollectingInfo
 import xyz.block.bittycity.outie.models.CurrencyDisplayPreference
 import xyz.block.bittycity.outie.models.CurrencyDisplayUnits.USD
@@ -73,7 +74,7 @@ class InfoCollectionControllerTest : BittyCityTestCase() {
       maximumAmount = Bitcoins(50000L),
       maximumAmountReason = BALANCE,
       exchangeRate = exchangeRate,
-      maximumAmountFiatEquivalent = Withdrawal.satoshiToUsd(Bitcoins(50000L), exchangeRate)
+      maximumAmountFiatEquivalent = CurrencyConversionUtils.bitcoinsToUsd(Bitcoins(50000L), exchangeRate)
     )
     result.hurdles[2] shouldBe WithdrawalHurdle.NoteHurdle(MAX_NOTE_LENGTH)
   }
@@ -163,7 +164,7 @@ class InfoCollectionControllerTest : BittyCityTestCase() {
       maximumAmount = balance,
       maximumAmountReason = BALANCE,
       exchangeRate = exchangeRate,
-      maximumAmountFiatEquivalent = Withdrawal.satoshiToUsd(balance, exchangeRate)
+      maximumAmountFiatEquivalent = CurrencyConversionUtils.bitcoinsToUsd(balance, exchangeRate)
     )
     result.hurdles[2] shouldBe WithdrawalHurdle.NoteHurdle(MAX_NOTE_LENGTH)
   }
@@ -307,7 +308,7 @@ class InfoCollectionControllerTest : BittyCityTestCase() {
     maximumAmount = maximumAmount,
     selectable = selectable,
     adjustedAmount = adjustedAmount,
-    adjustedAmountFiatEquivalent = adjustedAmount?.let { Withdrawal.satoshiToUsd(it, exchangeRate) }
+    adjustedAmountFiatEquivalent = adjustedAmount?.let { CurrencyConversionUtils.bitcoinsToUsd(it, exchangeRate) }
   )
 
   private fun getExpectedSpeedHurdle(

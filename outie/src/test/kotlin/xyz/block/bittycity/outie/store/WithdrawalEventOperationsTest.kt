@@ -3,7 +3,7 @@ package xyz.block.bittycity.outie.store
 import xyz.block.bittycity.outie.jooq.JooqWithdrawalEntityOperations
 import xyz.block.bittycity.outie.jooq.generated.tables.references.WITHDRAWALS
 import xyz.block.bittycity.outie.jooq.generated.tables.references.WITHDRAWAL_EVENTS
-import xyz.block.bittycity.outie.models.Bitcoins
+import xyz.block.bittycity.common.models.Bitcoins
 import xyz.block.bittycity.outie.models.CheckingRisk
 import xyz.block.bittycity.outie.models.CollectingInfo
 import xyz.block.bittycity.outie.models.SubmittingOnChain

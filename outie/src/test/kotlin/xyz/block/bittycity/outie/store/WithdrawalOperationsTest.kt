@@ -12,7 +12,7 @@ import io.kotest.property.arbitrary.next
 import java.time.ZoneOffset
 import org.junit.jupiter.api.Test
 import xyz.block.bittycity.outie.jooq.generated.tables.references.WITHDRAWALS
-import xyz.block.bittycity.outie.models.Bitcoins
+import xyz.block.bittycity.common.models.Bitcoins
 import xyz.block.bittycity.outie.models.FailureReason
 import xyz.block.bittycity.outie.models.SubmittingOnChain
 import xyz.block.bittycity.outie.models.WithdrawalSpeed

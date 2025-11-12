@@ -2,11 +2,13 @@ package xyz.block.bittycity.outie.models
 
 import app.cash.kfsm.Value
 import org.bitcoinj.base.Address
-import org.joda.money.CurrencyUnit
 import org.joda.money.Money
-import xyz.block.bittycity.outie.models.Bitcoins.Companion.BITCOINS_PER_BTC
+import xyz.block.bittycity.common.models.BitcoinDisplayUnits
+import xyz.block.bittycity.common.models.Bitcoins
+import xyz.block.bittycity.common.models.CustomerId
+import xyz.block.bittycity.common.models.LedgerTransactionId
+import xyz.block.bittycity.common.utils.CurrencyConversionUtils.bitcoinsToUsd
 import xyz.block.domainapi.ProcessingState
-import java.math.RoundingMode
 import java.time.Instant
 
 data class Withdrawal(
@@ -126,7 +128,7 @@ data class Withdrawal(
   override fun update(newState: WithdrawalState): Withdrawal = this.copy(state = newState)
 
   val fiatEquivalentAmount: Money? = this.amount?.let { amount ->
-    exchangeRate?.let { satoshiToUsd(amount, exchangeRate) }
+    exchangeRate?.let { bitcoinsToUsd(amount, exchangeRate) }
   }
 
   fun asProcessingState(
@@ -135,22 +137,5 @@ data class Withdrawal(
 
   companion object {
     const val DEFAULT_SOURCE = "BITTY"
-
-    fun satoshiToUsd(amount: Bitcoins, exchangeRate: Money): Money = Money.ofMinor(
-      CurrencyUnit.USD,
-      amount.units.toBigDecimal()
-        .multiply(exchangeRate.amountMinor)
-        .divide(BITCOINS_PER_BTC.toBigDecimal(), 0, RoundingMode.HALF_DOWN)
-        .toLong()
-    )
-
-    fun usdToSatoshi(usdAmount: Money, exchangeRate: Money): Bitcoins {
-      val satoshiValue = usdAmount.amountMinor
-        .multiply(BITCOINS_PER_BTC.toBigDecimal())
-        .divide(exchangeRate.amountMinor, 0, RoundingMode.HALF_DOWN)
-        .toLong()
-
-      return Bitcoins(satoshiValue)
-    }
   }
 }

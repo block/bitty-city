@@ -1,6 +1,6 @@
 package xyz.block.bittycity.outie.client
 
-import xyz.block.bittycity.outie.models.Withdrawal
+import xyz.block.bittycity.common.utils.CurrencyConversionUtils
 import io.kotest.matchers.shouldBe
 import io.kotest.property.Arb
 import io.kotest.property.arbitrary.long
@@ -20,8 +20,8 @@ class ExchangeRateClientTest {
       checkAll(usdPricePerBtc, amount) { rate, amount ->
         val exchangeRete = Money.ofMinor(CurrencyUnit.USD, rate)
         val amountToConvert = Money.ofMinor(CurrencyUnit.USD, amount)
-        val satsEquivalent = Withdrawal.usdToSatoshi(amountToConvert, exchangeRete)
-        val convertedAmount = Withdrawal.satoshiToUsd(satsEquivalent, exchangeRete)
+        val satsEquivalent = CurrencyConversionUtils.usdToBitcoins(amountToConvert, exchangeRete)
+        val convertedAmount = CurrencyConversionUtils.bitcoinsToUsd(satsEquivalent, exchangeRete)
         convertedAmount shouldBe amountToConvert
       }
     }

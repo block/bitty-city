@@ -1,3 +1,3 @@
-package xyz.block.bittycity.outie.models
+package xyz.block.bittycity.common.models
 
 data class LedgerTransactionId(val id: String)

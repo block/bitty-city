@@ -1,6 +1,6 @@
 package xyz.block.bittycity.outie.client
 
-import xyz.block.bittycity.outie.models.Bitcoins
+import xyz.block.bittycity.common.models.Bitcoins
 import org.joda.money.CurrencyUnit
 import org.joda.money.Money
 

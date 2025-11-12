@@ -1,6 +1,6 @@
 package xyz.block.bittycity.outie.client
 
-import xyz.block.bittycity.outie.models.CustomerId
+import xyz.block.bittycity.common.models.CustomerId
 import xyz.block.bittycity.outie.models.WithdrawalToken
 
 /**

@@ -4,6 +4,7 @@ import app.cash.kfsm.Invariant
 import app.cash.kfsm.State
 import app.cash.kfsm.invariant
 import arrow.core.raise.result
+import xyz.block.bittycity.common.models.BitcoinDisplayUnits
 import xyz.block.domainapi.DomainApi
 import xyz.block.domainapi.ProcessingState
 import xyz.block.domainapi.ProcessingState.Complete

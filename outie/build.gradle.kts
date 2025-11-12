@@ -20,6 +20,7 @@ mavenPublishing {
 }
 
 dependencies {
+    implementation(project(":common"))
     implementation(libs.arrowCore)
     implementation(libs.bitcoinj)
     implementation(libs.domainApi)

@@ -3,8 +3,8 @@ package xyz.block.bittycity.outie.validation
 import arrow.core.raise.result
 import xyz.block.bittycity.outie.client.LedgerClient
 import xyz.block.bittycity.outie.models.BalanceId
-import xyz.block.bittycity.outie.models.CustomerId
-import xyz.block.bittycity.outie.models.Bitcoins
+import xyz.block.bittycity.common.models.CustomerId
+import xyz.block.bittycity.common.models.Bitcoins
 import jakarta.inject.Inject
 import jakarta.inject.Named
 import jakarta.inject.Singleton

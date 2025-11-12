@@ -1,4 +1,4 @@
-package xyz.block.bittycity.outie.models
+package xyz.block.bittycity.common.models
 
 enum class BitcoinDisplayUnits {
   BITCOIN,
