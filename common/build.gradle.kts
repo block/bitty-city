@@ -21,6 +21,7 @@ mavenPublishing {
 
 dependencies {
     implementation(libs.jodaMoney)
+    implementation(libs.kfsm)
 
     testImplementation(libs.kotestAssertions)
     testImplementation(libs.kotestJunitRunnerJvm)
