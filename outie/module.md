@@ -6,6 +6,8 @@ This is the outie module of the bitty-city project.
 
 The outie module provides external interface functionality for the bitty-city project.
 
+See the [state machine diagram](docs/state-machine.md) for details on the withdrawal flow.
+
 ## Usage
 
 ```kotlin
