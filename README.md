@@ -32,7 +32,7 @@ bin/gradle build
 Handles bitcoin deposit operations and related custodial product experience.
 
 ### Outie
-Handles bitcoin withdrawal operations and related custodial product experience.
+Handles bitcoin withdrawal operations and related custodial product experience. See the [state machine diagram](outie/docs/state-machine.md) for details on the withdrawal flow.
 
 ### Outie-jOOQ-Provider
 jOOQ bindings for the `outie` module.
