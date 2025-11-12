@@ -16,6 +16,8 @@ import xyz.block.bittycity.outie.models.RequirementId.TARGET_WALLET_ADDRESS
 import xyz.block.bittycity.outie.models.RequirementId.USER_CONFIRMATION
 import org.bitcoinj.base.Address
 import org.joda.money.Money
+import xyz.block.bittycity.common.models.BitcoinDisplayUnits
+import xyz.block.bittycity.common.models.Bitcoins
 import xyz.block.domainapi.Input
 import xyz.block.domainapi.Input.HurdleResponse
 import xyz.block.domainapi.ResultCode

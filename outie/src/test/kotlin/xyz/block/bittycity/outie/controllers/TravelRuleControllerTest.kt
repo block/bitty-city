@@ -8,7 +8,7 @@ import xyz.block.bittycity.outie.models.RequirementId
 import xyz.block.bittycity.outie.models.Withdrawal
 import xyz.block.bittycity.outie.testing.BittyCityTestCase
 import xyz.block.bittycity.outie.testing.shouldBeWithdrawal
-import xyz.block.bittycity.outie.models.Bitcoins
+import xyz.block.bittycity.common.models.Bitcoins
 import io.kotest.matchers.result.shouldBeFailure
 import io.kotest.matchers.result.shouldBeSuccess
 import io.kotest.matchers.types.shouldBeInstanceOf

@@ -1,7 +1,7 @@
 package xyz.block.bittycity.outie.client
 
 import xyz.block.bittycity.outie.models.WithdrawalToken
-import xyz.block.bittycity.outie.models.Bitcoins
+import xyz.block.bittycity.common.models.Bitcoins
 import org.bitcoinj.base.Address
 
 /**

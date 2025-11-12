@@ -51,6 +51,7 @@ sourceSets {
 
 dependencies {
     implementation(kotlin("stdlib"))
+    implementation(project(":common"))
     implementation(project(":outie"))
     implementation(libs.arrowCore)
     implementation(libs.bitcoinj)

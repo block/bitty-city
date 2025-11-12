@@ -13,9 +13,9 @@ import xyz.block.bittycity.outie.client.IneligibleCustomer
 import xyz.block.bittycity.outie.controllers.AdminFailController
 import xyz.block.bittycity.outie.controllers.DomainController
 import xyz.block.bittycity.outie.models.BalanceId
-import xyz.block.bittycity.outie.models.Bitcoins
+import xyz.block.bittycity.common.models.Bitcoins
 import xyz.block.bittycity.outie.models.CollectingInfo
-import xyz.block.bittycity.outie.models.CustomerId
+import xyz.block.bittycity.common.models.CustomerId
 import xyz.block.bittycity.outie.models.RequirementId
 import xyz.block.bittycity.outie.models.Withdrawal
 import xyz.block.bittycity.outie.models.WithdrawalState

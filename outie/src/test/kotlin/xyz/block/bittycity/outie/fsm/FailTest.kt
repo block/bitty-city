@@ -5,7 +5,7 @@ import xyz.block.bittycity.outie.models.CheckingSanctions
 import xyz.block.bittycity.outie.models.Failed
 import xyz.block.bittycity.outie.models.FailureReason.CUSTOMER_DECLINED_DUE_TO_SCAM_WARNING
 import xyz.block.bittycity.outie.models.LedgerEntryToken
-import xyz.block.bittycity.outie.models.LedgerTransactionId
+import xyz.block.bittycity.common.models.LedgerTransactionId
 import xyz.block.bittycity.outie.testing.BittyCityTestCase
 import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.collections.shouldHaveSingleElement

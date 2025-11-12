@@ -1,6 +1,6 @@
 package xyz.block.bittycity.outie.models
 
-import xyz.block.bittycity.outie.models.Bitcoins
+import xyz.block.bittycity.common.models.Bitcoins
 
 /**
  * Represents a fee quote for a specific block target and destination address.

@@ -1,7 +1,8 @@
 package xyz.block.bittycity.outie.json
 
-import xyz.block.bittycity.outie.models.BitcoinDisplayUnits
-import xyz.block.bittycity.outie.models.Bitcoins
+import xyz.block.bittycity.common.models.BitcoinDisplayUnits
+import xyz.block.bittycity.common.models.Bitcoins
+import xyz.block.bittycity.common.utils.CurrencyConversionUtils
 import xyz.block.bittycity.outie.models.CurrencyDisplayPreference
 import xyz.block.bittycity.outie.models.CurrencyDisplayUnits
 import xyz.block.bittycity.outie.models.FlatFee
@@ -77,7 +78,7 @@ class WithdrawalMoshiTest {
         maximumAmount = Bitcoins(10000),
         maximumAmountReason = BALANCE,
         exchangeRate = Money.ofMinor(CurrencyUnit.USD, 1000),
-        maximumAmountFiatEquivalent = Withdrawal.satoshiToUsd(
+        maximumAmountFiatEquivalent = CurrencyConversionUtils.bitcoinsToUsd(
           Bitcoins(10000),
           Money.ofMinor(CurrencyUnit.USD, 1000)
         )

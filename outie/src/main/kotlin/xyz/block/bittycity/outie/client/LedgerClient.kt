@@ -1,9 +1,9 @@
 package xyz.block.bittycity.outie.client
 
 import xyz.block.bittycity.outie.models.BalanceId
-import xyz.block.bittycity.outie.models.Bitcoins
-import xyz.block.bittycity.outie.models.CustomerId
-import xyz.block.bittycity.outie.models.LedgerTransactionId
+import xyz.block.bittycity.common.models.Bitcoins
+import xyz.block.bittycity.common.models.CustomerId
+import xyz.block.bittycity.common.models.LedgerTransactionId
 import xyz.block.bittycity.outie.models.Withdrawal
 
 /**

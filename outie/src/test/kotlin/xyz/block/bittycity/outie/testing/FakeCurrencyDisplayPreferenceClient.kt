@@ -2,7 +2,7 @@ package xyz.block.bittycity.outie.testing
 
 import app.cash.quiver.extensions.success
 import xyz.block.bittycity.outie.client.CurrencyDisplayPreferenceClient
-import xyz.block.bittycity.outie.models.BitcoinDisplayUnits
+import xyz.block.bittycity.common.models.BitcoinDisplayUnits
 import xyz.block.bittycity.outie.models.CurrencyDisplayPreference
 import xyz.block.bittycity.outie.models.CurrencyDisplayUnits
 

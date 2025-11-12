@@ -10,10 +10,10 @@ import xyz.block.bittycity.outie.client.LimitClient
 import xyz.block.bittycity.outie.client.MetricsClient
 import xyz.block.bittycity.outie.models.BalanceId
 import xyz.block.bittycity.outie.models.BitcoinAccount
-import xyz.block.bittycity.outie.models.Bitcoins
+import xyz.block.bittycity.common.models.Bitcoins
 import xyz.block.bittycity.outie.models.CheckingSanctions
 import xyz.block.bittycity.outie.models.CollectingInfo
-import xyz.block.bittycity.outie.models.CustomerId
+import xyz.block.bittycity.common.models.CustomerId
 import xyz.block.bittycity.outie.models.RequirementId
 import xyz.block.bittycity.outie.models.RequirementId.AMOUNT
 import xyz.block.bittycity.outie.models.RequirementId.NOTE
@@ -21,8 +21,8 @@ import xyz.block.bittycity.outie.models.RequirementId.SPEED
 import xyz.block.bittycity.outie.models.RequirementId.TARGET_WALLET_ADDRESS
 import xyz.block.bittycity.outie.models.RequirementId.USER_CONFIRMATION
 import xyz.block.bittycity.outie.models.Withdrawal
-import xyz.block.bittycity.outie.models.Withdrawal.Companion.satoshiToUsd
-import xyz.block.bittycity.outie.models.Withdrawal.Companion.usdToSatoshi
+import xyz.block.bittycity.common.utils.CurrencyConversionUtils.bitcoinsToUsd
+import xyz.block.bittycity.common.utils.CurrencyConversionUtils.usdToBitcoins
 import xyz.block.bittycity.outie.models.WithdrawalHurdle
 import xyz.block.bittycity.outie.models.WithdrawalHurdle.AmountHurdle
 import xyz.block.bittycity.outie.models.WithdrawalHurdle.MaximumAmountReason.BALANCE
@@ -266,7 +266,7 @@ class AmountHandler @Inject constructor(
       maximumAmount = Bitcoins(maxWithdrawalAmount),
       maximumAmountReason = reason,
       exchangeRate = exchangeRate,
-      maximumAmountFiatEquivalent = satoshiToUsd(Bitcoins(maxWithdrawalAmount), exchangeRate),
+      maximumAmountFiatEquivalent = bitcoinsToUsd(Bitcoins(maxWithdrawalAmount), exchangeRate),
       previousUserAmount = value.previousAmount,
     )
   }
@@ -310,12 +310,12 @@ class AmountHandler @Inject constructor(
 
     return Pair(
       if (remainingDailyLimit.amount >= BigDecimal.ZERO) {
-        usdToSatoshi(remainingDailyLimit, exchangeRate)
+        usdToBitcoins(remainingDailyLimit, exchangeRate)
       } else {
         Bitcoins.ZERO
       },
       if (remainingWeeklyLimit.amount >= BigDecimal.ZERO) {
-        usdToSatoshi(remainingWeeklyLimit, exchangeRate)
+        usdToBitcoins(remainingWeeklyLimit, exchangeRate)
       } else {
         Bitcoins.ZERO
       }
@@ -379,7 +379,7 @@ class SpeedHandler @Inject constructor(
               STANDARD -> Bitcoins(0L)
               else -> Bitcoins(onChainFee.fee.units + serviceFee.fee.value.units)
             }
-            val totalFeeFiatEquivalent = satoshiToUsd(totalFee, exchangeRate)
+            val totalFeeFiatEquivalent = bitcoinsToUsd(totalFee, exchangeRate)
 
             WithdrawalSpeedOption(
               speed = speed,
@@ -437,7 +437,7 @@ class SpeedHandler @Inject constructor(
       speedOption.copy(
         adjustedAmount = speedOption.maximumAmount,
         adjustedAmountFiatEquivalent = speedOption.maximumAmount?.let {
-          satoshiToUsd(it, exchangeRate)
+          bitcoinsToUsd(it, exchangeRate)
         }
       )
     } else {

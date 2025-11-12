@@ -1,4 +1,4 @@
-package xyz.block.bittycity.outie.models
+package xyz.block.bittycity.common.models
 
 import io.kotest.matchers.comparables.shouldBeGreaterThan
 import io.kotest.matchers.comparables.shouldBeLessThan

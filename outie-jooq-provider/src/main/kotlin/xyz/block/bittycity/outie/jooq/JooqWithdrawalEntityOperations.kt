@@ -16,11 +16,11 @@ import xyz.block.bittycity.outie.jooq.generated.tables.records.WithdrawalsRecord
 import xyz.block.bittycity.outie.jooq.generated.tables.references.WITHDRAWALS
 import xyz.block.bittycity.outie.jooq.generated.tables.references.WITHDRAWAL_SPEED_OPTIONS
 import xyz.block.bittycity.outie.models.BalanceId
-import xyz.block.bittycity.outie.models.Bitcoins
-import xyz.block.bittycity.outie.models.CustomerId
+import xyz.block.bittycity.common.models.Bitcoins
+import xyz.block.bittycity.common.models.CustomerId
 import xyz.block.bittycity.outie.models.FailureReason
 import xyz.block.bittycity.outie.models.FlatFee
-import xyz.block.bittycity.outie.models.LedgerTransactionId
+import xyz.block.bittycity.common.models.LedgerTransactionId
 import xyz.block.bittycity.outie.models.MarginFee
 import xyz.block.bittycity.outie.models.ServiceFee
 import xyz.block.bittycity.outie.models.Withdrawal

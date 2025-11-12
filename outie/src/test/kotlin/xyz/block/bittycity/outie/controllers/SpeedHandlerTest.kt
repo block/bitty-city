@@ -15,11 +15,11 @@ import kotlin.time.Duration.Companion.minutes
 import org.joda.money.CurrencyUnit
 import org.joda.money.Money
 import org.junit.jupiter.api.Test
-import xyz.block.bittycity.outie.models.Bitcoins
+import xyz.block.bittycity.common.models.Bitcoins
 import xyz.block.bittycity.outie.models.CollectingInfo
 import xyz.block.bittycity.outie.models.FlatFee
 import xyz.block.bittycity.outie.models.OnchainFeeQuote
-import xyz.block.bittycity.outie.models.Withdrawal.Companion.satoshiToUsd
+import xyz.block.bittycity.common.utils.CurrencyConversionUtils.bitcoinsToUsd
 import xyz.block.bittycity.outie.models.WithdrawalHurdle
 import xyz.block.bittycity.outie.models.WithdrawalServiceFeeQuote
 import xyz.block.bittycity.outie.models.WithdrawalSpeed
@@ -61,7 +61,7 @@ class SpeedHandlerTest : BittyCityTestCase() {
           it.selectable shouldBe true
           it.serviceFee shouldBe FlatFee(Bitcoins(1_000))
           it.totalFee shouldBe Bitcoins(3_000)
-          it.totalFeeFiatEquivalent shouldBe satoshiToUsd(
+          it.totalFeeFiatEquivalent shouldBe bitcoinsToUsd(
             Bitcoins(3_000),
             withdrawal.exchangeRate!!
           )
@@ -72,7 +72,7 @@ class SpeedHandlerTest : BittyCityTestCase() {
           it.selectable shouldBe true
           it.serviceFee shouldBe FlatFee(Bitcoins(500))
           it.totalFee shouldBe Bitcoins(2_000)
-          it.totalFeeFiatEquivalent shouldBe satoshiToUsd(
+          it.totalFeeFiatEquivalent shouldBe bitcoinsToUsd(
             Bitcoins(2_000),
             withdrawal.exchangeRate!!
           )
