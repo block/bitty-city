@@ -4,16 +4,17 @@ import app.cash.kfsm.StateMachine
 import arrow.core.raise.result
 import jakarta.inject.Inject
 import jakarta.inject.Named
+import java.time.Instant
+import kotlin.time.Duration.Companion.minutes
 import org.bitcoinj.base.Address
 import org.joda.money.CurrencyUnit
 import org.joda.money.Money
-import xyz.block.bittycity.outie.api.OnChainWithdrawalDomainApi
-import xyz.block.bittycity.outie.fsm.WithdrawalEventBatchProcessor
-import xyz.block.bittycity.outie.jooq.JooqTransactor
-import xyz.block.bittycity.outie.jooq.JooqWithdrawalOperations
+import org.jooq.DSLContext
 import xyz.block.bittycity.common.models.Bitcoins
 import xyz.block.bittycity.common.models.CustomerId
 import xyz.block.bittycity.common.models.FlatFee
+import xyz.block.bittycity.outie.api.OnChainWithdrawalDomainApi
+import xyz.block.bittycity.outie.fsm.WithdrawalEventBatchProcessor
 import xyz.block.bittycity.outie.models.LedgerEntryToken
 import xyz.block.bittycity.outie.models.RequirementId
 import xyz.block.bittycity.outie.models.Withdrawal
@@ -24,21 +25,17 @@ import xyz.block.bittycity.outie.models.WithdrawalSpeed.STANDARD
 import xyz.block.bittycity.outie.models.WithdrawalSpeedOption
 import xyz.block.bittycity.outie.models.WithdrawalState
 import xyz.block.bittycity.outie.models.WithdrawalToken
-import xyz.block.bittycity.outie.store.WithdrawalStore
-import xyz.block.domainapi.ExecuteResponse
-import xyz.block.domainapi.Input
-import java.time.Instant
-import kotlin.time.Duration.Companion.minutes
-import org.jooq.DSLContext
 import xyz.block.bittycity.outie.store.TestPersistenceModule.Companion.DATASOURCE
 import xyz.block.bittycity.outie.store.Transactor
 import xyz.block.bittycity.outie.store.WithdrawalOperations
+import xyz.block.bittycity.outie.store.WithdrawalStore
+import xyz.block.domainapi.ExecuteResponse
+import xyz.block.domainapi.Input
 
 class TestApp @Inject constructor(
   @Named(DATASOURCE) val dslContext: DSLContext,
   @Named("withdrawal.amounts.minimum") val minAmount: Long,
   @Named("withdrawal.amounts.free_tier_minimum") val minAmountFreeTier: Long,
-  @Named("withdrawal.supported_countries") val supportedCountries: List<String>,
 ) {
 
   @Inject lateinit var data: TestRunData

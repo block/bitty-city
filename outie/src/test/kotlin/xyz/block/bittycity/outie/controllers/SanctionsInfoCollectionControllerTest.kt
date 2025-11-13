@@ -57,9 +57,8 @@ class SanctionsInfoCollectionControllerTest : BittyCityTestCase() {
     complete.hurdles.size shouldBe 1
     complete.hurdles[0] shouldBe WithdrawalNotification.WithdrawalSanctionsHeld
 
-    withdrawalStore.getWithdrawalByToken(withdrawal.id).getOrThrow() should {
-      it.state shouldBe WaitingForSanctionsHeldDecision
-    }
+    withdrawalStore.getWithdrawalByToken(withdrawal.id).getOrThrow()
+      .state shouldBe WaitingForSanctionsHeldDecision
   }
 
   @Test
@@ -79,9 +78,8 @@ class SanctionsInfoCollectionControllerTest : BittyCityTestCase() {
     complete.hurdles.size shouldBe 1
     complete.hurdles[0] shouldBe WithdrawalNotification.WithdrawalSanctionsHeld
 
-    withdrawalStore.getWithdrawalByToken(withdrawal.id).getOrThrow() should {
-      it.state shouldBe WaitingForSanctionsHeldDecision
-    }
+    withdrawalStore.getWithdrawalByToken(withdrawal.id).getOrThrow()
+      .state shouldBe WaitingForSanctionsHeldDecision
   }
 
   @Test
@@ -96,8 +94,7 @@ class SanctionsInfoCollectionControllerTest : BittyCityTestCase() {
       Operation.EXECUTE
     ).shouldBeFailure<DomainApiError.InvalidRequirementResult>()
 
-    withdrawalStore.getWithdrawalByToken(withdrawal.id).getOrThrow() should {
-      it.state shouldBe CollectingSanctionsInfo
-    }
+    withdrawalStore.getWithdrawalByToken(withdrawal.id).getOrThrow()
+      .state shouldBe CollectingSanctionsInfo
   }
 }

@@ -233,9 +233,8 @@ class OnChainControllerTest : BittyCityTestCase() {
     onChainWithdrawalDomainApi.resume(withdrawal.id, resumeResult)
       .shouldBeFailure<IllegalArgumentException>()
 
-    withdrawalStore.getWithdrawalByToken(withdrawal.id).getOrThrow() should {
-      it.state shouldBe WaitingForPendingConfirmationStatus
-    }
+    withdrawalStore.getWithdrawalByToken(withdrawal.id).getOrThrow()
+      .state shouldBe WaitingForPendingConfirmationStatus
   }
 
   @Test
