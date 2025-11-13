@@ -34,7 +34,7 @@ class ResponseOperationsTest : BittyCityTestCase() {
       findResponse(idempotencyKey, withdrawalToken)
     }
 
-    result.shouldBeSuccess() shouldBe null
+    result.getOrThrow() shouldBe null
   }
 
   @Test
@@ -61,14 +61,12 @@ class ResponseOperationsTest : BittyCityTestCase() {
       findResponse(idempotencyKey, withdrawalToken)
     }
 
-    result.shouldBeSuccess() should { foundResponse ->
-      foundResponse.shouldNotBeNull() should {
-        it.idempotencyKey shouldBe idempotencyKey
-        it.withdrawalToken shouldBe withdrawalToken
-        it.version shouldBe 1L
-        it.result shouldBe executeResponse
-        it.error shouldBe null
-      }
+    result.getOrThrow().shouldNotBeNull() should {
+      it.idempotencyKey shouldBe idempotencyKey
+      it.withdrawalToken shouldBe withdrawalToken
+      it.version shouldBe 1L
+      it.result shouldBe executeResponse
+      it.error shouldBe null
     }
   }
 
@@ -92,14 +90,12 @@ class ResponseOperationsTest : BittyCityTestCase() {
       findResponse(idempotencyKey, withdrawalToken)
     }
 
-    result.shouldBeSuccess() should { foundResponse ->
-      foundResponse.shouldNotBeNull() should {
-        it.idempotencyKey shouldBe idempotencyKey
-        it.withdrawalToken shouldBe withdrawalToken
-        it.version shouldBe 1L
-        it.result shouldBe null
-        it.error shouldBe error
-      }
+    result.getOrThrow().shouldNotBeNull() should {
+      it.idempotencyKey shouldBe idempotencyKey
+      it.withdrawalToken shouldBe withdrawalToken
+      it.version shouldBe 1L
+      it.result shouldBe null
+      it.error shouldBe error
     }
   }
 
@@ -318,7 +314,7 @@ class ResponseOperationsTest : BittyCityTestCase() {
       findResponse(idempotencyKey, withdrawalToken2)
     }
 
-    result.shouldBeSuccess() shouldBe null
+    result.getOrThrow() shouldBe null
   }
 
   @Test
@@ -352,10 +348,8 @@ class ResponseOperationsTest : BittyCityTestCase() {
       findResponse(idempotencyKey, withdrawalToken)
     }
 
-    foundResult.shouldBeSuccess() should { foundResponse ->
-      foundResponse.shouldNotBeNull() should {
-        it.result shouldBe executeResponse
-      }
+    foundResult.getOrThrow().shouldNotBeNull() should {
+      it.result shouldBe executeResponse
     }
   }
 

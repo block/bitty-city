@@ -107,7 +107,7 @@ class WithdrawalOperationsTest : BittyCityTestCase() {
     }
 
     // Then the result should contain only the existing withdrawals
-    result.shouldBeSuccess() should { withdrawals ->
+    result.getOrThrow() should { withdrawals ->
       withdrawals.size shouldBe 3
       withdrawals[withdrawal1.id] shouldBeWithdrawal withdrawal1
       withdrawals[withdrawal2.id] shouldBeWithdrawal withdrawal2
@@ -155,7 +155,7 @@ class WithdrawalOperationsTest : BittyCityTestCase() {
     }
 
     // Then the withdrawal should include the speed option
-    result.shouldBeSuccess() should { withdrawals ->
+    result.getOrThrow() should { withdrawals ->
       withdrawals.size shouldBe 1
       withdrawals[withdrawal.id].shouldNotBeNull() should { retrievedWithdrawal ->
         retrievedWithdrawal.selectedSpeed.shouldNotBeNull() should { retrievedSpeedOption ->
