@@ -5,7 +5,7 @@ import xyz.block.bittycity.common.models.Bitcoins
 import xyz.block.bittycity.common.utils.CurrencyConversionUtils
 import xyz.block.bittycity.outie.models.CurrencyDisplayPreference
 import xyz.block.bittycity.outie.models.CurrencyDisplayUnits
-import xyz.block.bittycity.outie.models.FlatFee
+import xyz.block.bittycity.common.models.FlatFee
 import xyz.block.bittycity.outie.models.Inputs
 import xyz.block.bittycity.outie.models.RequirementId
 import xyz.block.bittycity.outie.models.Withdrawal

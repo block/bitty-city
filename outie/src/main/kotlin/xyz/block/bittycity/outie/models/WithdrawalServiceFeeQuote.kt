@@ -1,5 +1,7 @@
 package xyz.block.bittycity.outie.models
 
+import xyz.block.bittycity.common.models.ServiceFee
+
 /**
  * Represents a quote for the fee that the service charges in addition to the raw fee (the cost of
  * submitting the withdrawal on-chain within the predefined SLAs).

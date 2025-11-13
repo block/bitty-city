@@ -1,6 +1,4 @@
-package xyz.block.bittycity.outie.models
-
-import xyz.block.bittycity.common.models.Bitcoins
+package xyz.block.bittycity.common.models
 
 /**
  * Represents a fee that is charged by the on-chain withdrawal service on top of the raw fee, which
