@@ -31,7 +31,7 @@ class EligibilityControllerTest : BittyCityTestCase() {
 
     subject.execute(withdrawal, emptyList(), Operation.EXECUTE).getOrThrow()
 
-    withdrawalStore.getWithdrawalByToken(withdrawal.id).getOrThrow() should {
+    withdrawalWithToken(withdrawal.id) should {
       it.state shouldBe Failed
       it.failureReason shouldBe CUSTOMER_IS_INELIGIBLE
     }
@@ -49,7 +49,7 @@ class EligibilityControllerTest : BittyCityTestCase() {
 
     subject.execute(withdrawal, emptyList(), Operation.EXECUTE).getOrThrow()
 
-    withdrawalStore.getWithdrawalByToken(withdrawal.id).getOrThrow()
+    withdrawalWithToken(withdrawal.id)
       .state shouldBe WaitingForPendingConfirmationStatus
   }
 }

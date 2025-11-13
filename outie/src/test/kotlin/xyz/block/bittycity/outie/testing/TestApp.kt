@@ -54,7 +54,7 @@ class TestApp @Inject constructor(
   @Inject lateinit var sanctionsClient: FakeSanctionsClient
   @Inject lateinit var travelRuleClient: FakeTravelRuleClient
 
-  @Inject lateinit var withdrawalStore: WithdrawalStore
+  @Inject private lateinit var withdrawalStore: WithdrawalStore
   @Inject lateinit var withdrawalTransactor: Transactor<WithdrawalOperations>
   @Inject lateinit var onChainWithdrawalDomainApi: OnChainWithdrawalDomainApi
 
@@ -166,4 +166,7 @@ class TestApp @Inject constructor(
   fun processWithdrawalEvents() {
     withdrawalEventBatchProcessor.processBatches().getOrThrow()
   }
+
+  fun withdrawalWithToken(token: WithdrawalToken): Withdrawal =
+    withdrawalStore.getWithdrawalByToken(token).getOrThrow()
 }
