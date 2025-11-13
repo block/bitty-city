@@ -76,6 +76,9 @@ tasks.register("generateJooq") {
 
   dependsOn("processResources")
 
+  inputs.files(fileTree("src/main/resources/db/migration"))
+  outputs.dir(jooqOut)
+
   doLast {
     val image = DockerImageName.parse("mysql:8.4")
     val mysql = MySQLContainer(image)
