@@ -2,7 +2,7 @@ package xyz.block.bittycity.outie.testing
 
 import app.cash.quiver.extensions.success
 import xyz.block.bittycity.outie.client.FeeQuoteClient
-import xyz.block.bittycity.outie.models.FlatFee
+import xyz.block.bittycity.common.models.FlatFee
 import xyz.block.bittycity.outie.models.OnchainFeeQuote
 import xyz.block.bittycity.outie.models.WithdrawalServiceFeeQuote
 import xyz.block.bittycity.outie.models.WithdrawalSpeed

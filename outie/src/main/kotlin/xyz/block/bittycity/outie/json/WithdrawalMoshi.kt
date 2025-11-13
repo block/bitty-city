@@ -6,11 +6,11 @@ import arrow.core.raise.result
 import xyz.block.bittycity.outie.models.BalanceId
 import xyz.block.bittycity.common.models.Bitcoins
 import xyz.block.bittycity.common.models.CustomerId
-import xyz.block.bittycity.outie.models.FlatFee
+import xyz.block.bittycity.common.models.FlatFee
 import xyz.block.bittycity.common.models.LedgerTransactionId
-import xyz.block.bittycity.outie.models.MarginFee
+import xyz.block.bittycity.common.models.MarginFee
 import xyz.block.bittycity.outie.models.RequirementId
-import xyz.block.bittycity.outie.models.ServiceFee
+import xyz.block.bittycity.common.models.ServiceFee
 import xyz.block.bittycity.outie.models.WithdrawalHurdle
 import xyz.block.bittycity.outie.models.WithdrawalHurdle.AmountHurdle
 import xyz.block.bittycity.outie.models.WithdrawalHurdle.ConfirmationHurdle

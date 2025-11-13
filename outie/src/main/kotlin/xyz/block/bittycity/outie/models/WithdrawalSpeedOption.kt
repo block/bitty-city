@@ -2,6 +2,7 @@ package xyz.block.bittycity.outie.models
 
 import org.joda.money.Money
 import xyz.block.bittycity.common.models.Bitcoins
+import xyz.block.bittycity.common.models.ServiceFee
 import kotlin.time.Duration
 
 data class WithdrawalSpeedOption(

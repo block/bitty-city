@@ -13,7 +13,7 @@ import xyz.block.bittycity.outie.jooq.JooqTransactor
 import xyz.block.bittycity.outie.jooq.JooqWithdrawalOperations
 import xyz.block.bittycity.common.models.Bitcoins
 import xyz.block.bittycity.common.models.CustomerId
-import xyz.block.bittycity.outie.models.FlatFee
+import xyz.block.bittycity.common.models.FlatFee
 import xyz.block.bittycity.outie.models.LedgerEntryToken
 import xyz.block.bittycity.outie.models.RequirementId
 import xyz.block.bittycity.outie.models.Withdrawal

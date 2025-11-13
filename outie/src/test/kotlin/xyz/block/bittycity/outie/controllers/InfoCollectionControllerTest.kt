@@ -10,7 +10,7 @@ import xyz.block.bittycity.common.models.Bitcoins
 import xyz.block.bittycity.outie.models.CollectingInfo
 import xyz.block.bittycity.outie.models.CurrencyDisplayPreference
 import xyz.block.bittycity.outie.models.CurrencyDisplayUnits.USD
-import xyz.block.bittycity.outie.models.FlatFee
+import xyz.block.bittycity.common.models.FlatFee
 import xyz.block.bittycity.outie.models.Withdrawal
 import xyz.block.bittycity.outie.models.WithdrawalHurdle
 import xyz.block.bittycity.outie.models.WithdrawalHurdle.MaximumAmountReason.BALANCE

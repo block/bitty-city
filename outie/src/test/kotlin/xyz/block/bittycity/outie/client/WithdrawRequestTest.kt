@@ -3,7 +3,7 @@ package xyz.block.bittycity.outie.client
 import xyz.block.bittycity.outie.client.WithdrawRequest.Companion.toWithdrawalRequest
 import xyz.block.bittycity.common.models.Bitcoins
 import xyz.block.bittycity.outie.models.CollectingInfo
-import xyz.block.bittycity.outie.models.FlatFee
+import xyz.block.bittycity.common.models.FlatFee
 import xyz.block.bittycity.outie.models.Withdrawal
 import xyz.block.bittycity.outie.models.WithdrawalSpeed
 import xyz.block.bittycity.outie.models.WithdrawalSpeedOption
