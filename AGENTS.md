@@ -225,3 +225,5 @@ The project is published to Maven Central:
 - **Check `.editorconfig`** before making formatting decisions
 - **Use jOOQ** for database operations in the outie module (type-safe SQL)
 - **All tests use JUnit 5** (Jupiter) - configured in root `build.gradle.kts`
+
+@ai-rules/ai-issue-tracking.md
