@@ -76,6 +76,9 @@ tasks.register("generateJooq") {
 
   dependsOn("processResources")
 
+  inputs.files(fileTree("src/main/resources/db/migration"))
+  outputs.dir(jooqOut)
+
   doLast {
     val image = DockerImageName.parse("mysql:8.4")
     val mysql = MySQLContainer(image)
@@ -144,5 +147,10 @@ tasks.register("generateJooq") {
 
 // Make compileKotlin depend on generateJooq to ensure code is generated before compilation
 tasks.named("compileKotlin") {
+    dependsOn("generateJooq")
+}
+
+// Make sourcesJar depend on generateJooq since it includes generated sources
+tasks.named("sourcesJar") {
     dependsOn("generateJooq")
 }
