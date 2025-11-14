@@ -38,7 +38,7 @@ class ScamWarningControllerTest : BittyCityTestCase() {
     updated.state shouldBe Failed
     updated.failureReason shouldBe FailureReason.CUSTOMER_CANCELLED
 
-    withdrawalStore.getWithdrawalByToken(withdrawal.id).getOrThrow().shouldBeWithdrawal(updated)
+    withdrawalWithToken(withdrawal.id).shouldBeWithdrawal(updated)
   }
 
   @Test
@@ -63,8 +63,7 @@ class ScamWarningControllerTest : BittyCityTestCase() {
     subject
       .updateValue(withdrawal, WithdrawalHurdleResponse.ScamWarningHurdleResponse(FINISHED_OK))
       .shouldBeFailure(UnsupportedHurdleResultCode(withdrawal.customerId.id, FINISHED_OK))
-    withdrawalStore.getWithdrawalByToken(withdrawal.id)
-      .getOrThrow().version shouldBe withdrawal.version
+    withdrawalWithToken(withdrawal.id).version shouldBe withdrawal.version
   }
 
   @Test
@@ -77,8 +76,7 @@ class ScamWarningControllerTest : BittyCityTestCase() {
         WithdrawalHurdleResponse.SpeedHurdleResponse(ResultCode.CLEARED, WithdrawalSpeed.PRIORITY)
       )
       .shouldBeFailure<IllegalArgumentException>()
-    withdrawalStore.getWithdrawalByToken(withdrawal.id)
-      .getOrThrow().version shouldBe withdrawal.version
+    withdrawalWithToken(withdrawal.id).version shouldBe withdrawal.version
   }
 
   @Test

@@ -60,7 +60,7 @@ class SanctionsControllerTest : BittyCityTestCase() {
     this@SanctionsControllerTest.subject.processInputs(withdrawal, emptyList(), Operation.EXECUTE)
       .shouldBeFailure<RiskBlocked>()
 
-    withdrawalStore.getWithdrawalByToken(withdrawal.id).getOrThrow() should {
+    withdrawalWithToken(withdrawal.id) should {
       it.state shouldBe Failed
       it.failureReason shouldBe FailureReason.SANCTIONS_FAILED
     }

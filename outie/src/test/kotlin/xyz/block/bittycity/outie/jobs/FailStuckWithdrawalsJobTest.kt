@@ -42,12 +42,12 @@ class FailStuckWithdrawalsJobTest : BittyCityTestCase() {
     )
     failStuckWithdrawalsJob.execute(false)
 
-    withdrawalStore.getWithdrawalByToken(stuckWithdrawal.id).getOrThrow() should {
+    withdrawalWithToken(stuckWithdrawal.id) should {
       it.state shouldBe Failed
       it.failureReason shouldBe FailureReason.CUSTOMER_ABANDONED
     }
 
-    withdrawalStore.getWithdrawalByToken(stillNotStuckWithdrawal.id).getOrThrow()
+    withdrawalWithToken(stillNotStuckWithdrawal.id)
       .state shouldBe CollectingSelfAttestation
   }
 
@@ -73,10 +73,10 @@ class FailStuckWithdrawalsJobTest : BittyCityTestCase() {
     )
     failStuckWithdrawalsJob.execute(logOnly = true)
 
-    withdrawalStore.getWithdrawalByToken(stuckWithdrawal.id).getOrThrow()
+    withdrawalWithToken(stuckWithdrawal.id)
       .state shouldBe CollectingInfo
 
-    withdrawalStore.getWithdrawalByToken(stillNotStuckWithdrawal.id).getOrThrow()
+    withdrawalWithToken(stillNotStuckWithdrawal.id)
       .state shouldBe CollectingSelfAttestation
   }
 }

@@ -17,12 +17,15 @@ import io.kotest.matchers.result.shouldBeSuccess
 import io.kotest.matchers.should
 import io.kotest.matchers.shouldBe
 import io.kotest.property.arbitrary.next
+import jakarta.inject.Inject
 import org.junit.jupiter.api.Test
 import java.time.Duration
 import java.time.Instant
 import java.time.temporal.ChronoUnit
 
 class WithdrawalStoreTest : BittyCityTestCase() {
+
+  @Inject lateinit var withdrawalStore: WithdrawalStore
 
   @Test
   fun `create new withdrawal success`() = runTest {

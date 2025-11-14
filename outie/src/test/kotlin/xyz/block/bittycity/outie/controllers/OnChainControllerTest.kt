@@ -53,7 +53,7 @@ class OnChainControllerTest : BittyCityTestCase() {
       .getOrThrow()
       .shouldBeInstanceOf<ProcessingState.UserInteractions<Withdrawal, RequirementId>>()
 
-    withdrawalStore.getWithdrawalByToken(withdrawal.id).getOrThrow()
+    withdrawalWithToken(withdrawal.id)
       .shouldBeWithdrawal(withdrawal.copy(state = WaitingForPendingConfirmationStatus))
 
     // Process outbox
@@ -62,7 +62,7 @@ class OnChainControllerTest : BittyCityTestCase() {
     onChainService.getSubmittedWithdrawal(withdrawal.id).shouldNotBeNull()
       .destinationAddress shouldBe withdrawal.targetWalletAddress
 
-    withdrawalStore.getWithdrawalByToken(withdrawal.id).getOrThrow()
+    withdrawalWithToken(withdrawal.id)
       .shouldNotBeNull()
       .state shouldBe WaitingForPendingConfirmationStatus
   }
@@ -176,7 +176,7 @@ class OnChainControllerTest : BittyCityTestCase() {
       .shouldBeFailure<LimitWouldBeExceeded>()
 
     // Verify the withdrawal was stored with the correct state
-    withdrawalStore.getWithdrawalByToken(withdrawal.id).getOrThrow() should {
+    withdrawalWithToken(withdrawal.id) should {
       it.state shouldBe Failed
       it.failureReason shouldBe FailureReason.LIMITED
     }
@@ -196,7 +196,7 @@ class OnChainControllerTest : BittyCityTestCase() {
       subject.processInputs(withdrawal, listOf(resumeResult), Operation.EXECUTE)
         .shouldBeSuccess()
 
-      withdrawalStore.getWithdrawalByToken(withdrawal.id).getOrThrow() should {
+      withdrawalWithToken(withdrawal.id) should {
         it.state shouldBe Failed
         it.failureReason shouldBe FailureReason.FAILED_ON_CHAIN
       }
@@ -215,7 +215,7 @@ class OnChainControllerTest : BittyCityTestCase() {
     subject.processInputs(withdrawal, listOf(resumeResult), Operation.EXECUTE)
       .shouldBeSuccess()
 
-    withdrawalStore.getWithdrawalByToken(withdrawal.id).getOrThrow() should {
+    withdrawalWithToken(withdrawal.id) should {
       it.state shouldBe Failed
       it.failureReason shouldBe FailureReason.FAILED_ON_CHAIN
     }
@@ -233,7 +233,7 @@ class OnChainControllerTest : BittyCityTestCase() {
     onChainWithdrawalDomainApi.resume(withdrawal.id, resumeResult)
       .shouldBeFailure<IllegalArgumentException>()
 
-    withdrawalStore.getWithdrawalByToken(withdrawal.id).getOrThrow()
+    withdrawalWithToken(withdrawal.id)
       .state shouldBe WaitingForPendingConfirmationStatus
   }
 
@@ -249,7 +249,7 @@ class OnChainControllerTest : BittyCityTestCase() {
     onChainWithdrawalDomainApi.execute(withdrawal.id, emptyList())
       .shouldBeFailure<Exception>()
 
-    withdrawalStore.getWithdrawalByToken(withdrawal.id).getOrThrow() should {
+    withdrawalWithToken(withdrawal.id) should {
       it.state shouldBe Failed
       it.failureReason shouldBe FailureReason.UNKNOWN
     }
@@ -268,7 +268,7 @@ class OnChainControllerTest : BittyCityTestCase() {
       .getOrThrow()
       .shouldBeInstanceOf<ProcessingState.Complete<Withdrawal, RequirementId>>()
 
-    withdrawalStore.getWithdrawalByToken(withdrawal.id).getOrThrow()
+    withdrawalWithToken(withdrawal.id)
       .shouldBeWithdrawal(withdrawal.copy(state = ConfirmedComplete))
   }
 }
