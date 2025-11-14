@@ -1,5 +1,6 @@
 package xyz.block.bittycity.outie.store
 
+import xyz.block.bittycity.common.store.Operations
 import xyz.block.bittycity.outie.models.Response
 import xyz.block.bittycity.outie.models.WithdrawalToken
 import xyz.block.domainapi.InfoOnly

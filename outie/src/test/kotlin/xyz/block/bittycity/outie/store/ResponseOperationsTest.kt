@@ -9,6 +9,7 @@ import io.kotest.matchers.string.shouldContain
 import io.kotest.property.arbitrary.next
 import jakarta.inject.Inject
 import org.junit.jupiter.api.Test
+import xyz.block.bittycity.common.store.Transactor
 import xyz.block.bittycity.outie.jooq.JooqResponseOperations
 import xyz.block.bittycity.outie.jooq.ResponseNotPresent
 import xyz.block.bittycity.outie.jooq.generated.tables.references.WITHDRAWAL_RESPONSES

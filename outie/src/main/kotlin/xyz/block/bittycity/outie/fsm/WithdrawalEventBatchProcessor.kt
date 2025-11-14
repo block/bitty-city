@@ -1,7 +1,7 @@
 package xyz.block.bittycity.outie.fsm
 
 import arrow.core.raise.result
-import xyz.block.bittycity.outie.store.Transactor
+import xyz.block.bittycity.common.store.Transactor
 import xyz.block.bittycity.outie.store.WithdrawalOperations
 import io.github.oshai.kotlinlogging.KLogger
 import io.github.oshai.kotlinlogging.KotlinLogging

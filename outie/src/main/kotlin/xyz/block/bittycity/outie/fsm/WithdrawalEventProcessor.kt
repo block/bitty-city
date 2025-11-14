@@ -13,7 +13,7 @@ import xyz.block.bittycity.outie.models.Sanctioned
 import xyz.block.bittycity.outie.models.WaitingForPendingConfirmationStatus
 import xyz.block.bittycity.outie.models.Withdrawal
 import xyz.block.bittycity.outie.models.WithdrawalTransitionEvent
-import xyz.block.bittycity.outie.store.Transactor
+import xyz.block.bittycity.common.store.Transactor
 import xyz.block.bittycity.outie.store.WithdrawalOperations
 import com.squareup.moshi.Moshi
 import io.github.oshai.kotlinlogging.KLogger

@@ -1,5 +1,6 @@
 package xyz.block.bittycity.innie.models
 
+import org.bitcoinj.base.Address
 import java.time.Instant
 import xyz.block.bittycity.common.models.ServiceFee
 
@@ -15,6 +16,9 @@ data class DepositReversal(
 
   /** Each time the withdrawal's state is updated, the version increments. Zero-based. */
   val version: Long,
+
+  /** The wallet address where this reversal will be sent to. */
+  val targetWalletAddress: Address? = null,
 
   /** The cost to us of submitting the reversal on-chain. */
   val serviceFee: ServiceFee,
