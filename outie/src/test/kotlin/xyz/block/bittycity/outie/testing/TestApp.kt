@@ -26,7 +26,7 @@ import xyz.block.bittycity.outie.models.WithdrawalSpeedOption
 import xyz.block.bittycity.outie.models.WithdrawalState
 import xyz.block.bittycity.outie.models.WithdrawalToken
 import xyz.block.bittycity.outie.store.TestPersistenceModule.Companion.DATASOURCE
-import xyz.block.bittycity.outie.store.Transactor
+import xyz.block.bittycity.common.store.Transactor
 import xyz.block.bittycity.outie.store.WithdrawalOperations
 import xyz.block.bittycity.outie.store.WithdrawalStore
 import xyz.block.domainapi.ExecuteResponse

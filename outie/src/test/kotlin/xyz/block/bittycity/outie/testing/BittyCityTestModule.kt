@@ -13,7 +13,7 @@ import xyz.block.bittycity.outie.jooq.JooqTransactor
 import xyz.block.bittycity.outie.jooq.JooqWithdrawalOperations
 import xyz.block.bittycity.outie.store.ResponseOperations
 import xyz.block.bittycity.outie.store.TestPersistenceModule.Companion.DATASOURCE
-import xyz.block.bittycity.outie.store.Transactor
+import xyz.block.bittycity.common.store.Transactor
 import xyz.block.bittycity.outie.store.WithdrawalOperations
 import xyz.block.bittycity.outie.validation.WalletAddressParser
 

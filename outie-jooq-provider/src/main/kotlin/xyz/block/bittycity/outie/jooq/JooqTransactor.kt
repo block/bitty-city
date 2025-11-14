@@ -4,8 +4,8 @@ import app.cash.quiver.extensions.catch
 import app.cash.quiver.extensions.mapFailure
 import org.jooq.DSLContext
 import org.jooq.impl.DSL
-import xyz.block.bittycity.outie.store.Operations
-import xyz.block.bittycity.outie.store.Transactor
+import xyz.block.bittycity.common.store.Operations
+import xyz.block.bittycity.common.store.Transactor
 
 class JooqTransactor<O : Operations>(
   private val dslContext: DSLContext,

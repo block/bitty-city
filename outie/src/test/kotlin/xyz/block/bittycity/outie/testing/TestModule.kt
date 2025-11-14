@@ -4,6 +4,7 @@ import com.google.inject.AbstractModule
 import com.google.inject.Provides
 import com.google.inject.Scopes
 import com.google.inject.name.Names
+import xyz.block.bittycity.common.client.PreFlightClient
 import xyz.block.bittycity.outie.client.BitcoinAccountClient
 import xyz.block.bittycity.outie.client.CurrencyDisplayPreferenceClient
 import xyz.block.bittycity.outie.client.EligibilityClient
@@ -14,7 +15,6 @@ import xyz.block.bittycity.outie.client.LedgerClient
 import xyz.block.bittycity.outie.client.LimitClient
 import xyz.block.bittycity.outie.client.MetricsClient
 import xyz.block.bittycity.outie.client.OnChainClient
-import xyz.block.bittycity.outie.client.PreFlightClient
 import xyz.block.bittycity.outie.client.RiskClient
 import xyz.block.bittycity.outie.client.SanctionsClient
 import xyz.block.bittycity.outie.client.TravelRuleClient
@@ -44,7 +44,10 @@ class TestModule : AbstractModule() {
     bindSingletonFake<SanctionsClient, FakeSanctionsClient>()
     bindSingletonFake<TravelRuleClient, FakeTravelRuleClient>()
     bindSingletonFake<EligibilityClient, FakeEligibilityClient>()
-    bindSingletonFake<PreFlightClient, FakePreFlightClient>()
+    bind(FakePreFlightClient::class.java).`in`(Scopes.SINGLETON)
+    bind(object : com.google.inject.TypeLiteral<PreFlightClient<xyz.block.bittycity.outie.models.Withdrawal>>() {})
+      .to(FakePreFlightClient::class.java)
+      .`in`(Scopes.SINGLETON)
     bindSingletonFake<MetricsClient, FakeMetricsClient>()
 
     bind(String::class.java).annotatedWith(Names.named("withdrawal.sanctions.freeze_to"))

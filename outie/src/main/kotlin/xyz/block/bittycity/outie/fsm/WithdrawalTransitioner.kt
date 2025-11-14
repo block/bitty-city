@@ -3,12 +3,12 @@ package xyz.block.bittycity.outie.fsm
 import app.cash.kfsm.Transition
 import app.cash.kfsm.Transitioner
 import arrow.core.raise.result
+import xyz.block.bittycity.common.client.PreFlightClient
 import xyz.block.bittycity.outie.client.MetricsClient
-import xyz.block.bittycity.outie.client.PreFlightClient
 import xyz.block.bittycity.outie.models.Withdrawal
 import xyz.block.bittycity.outie.models.WithdrawalState
 import xyz.block.bittycity.outie.models.WithdrawalToken
-import xyz.block.bittycity.outie.store.Transactor
+import xyz.block.bittycity.common.store.Transactor
 import xyz.block.bittycity.outie.store.WithdrawalOperations
 import io.github.oshai.kotlinlogging.KLogger
 import io.github.oshai.kotlinlogging.KotlinLogging
@@ -24,7 +24,7 @@ import java.util.concurrent.CompletableFuture.supplyAsync
 @Singleton
 class WithdrawalTransitioner @Inject constructor(
   private val withdrawalTransactor: Transactor<WithdrawalOperations>,
-  private val preflightClient: PreFlightClient,
+  private val preflightClient: PreFlightClient<Withdrawal>,
   private val metricsClient: MetricsClient,
 ) : Transitioner<
   WithdrawalToken,

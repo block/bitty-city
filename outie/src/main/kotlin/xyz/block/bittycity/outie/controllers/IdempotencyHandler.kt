@@ -11,7 +11,7 @@ import xyz.block.bittycity.outie.models.Response
 import xyz.block.bittycity.outie.models.SerializableError
 import xyz.block.bittycity.outie.models.WithdrawalToken
 import xyz.block.bittycity.outie.store.ResponseOperations
-import xyz.block.bittycity.outie.store.Transactor
+import xyz.block.bittycity.common.store.Transactor
 import com.squareup.moshi.Moshi
 import jakarta.inject.Inject
 import xyz.block.bittycity.outie.store.AlreadyProcessingException

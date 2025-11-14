@@ -2,12 +2,14 @@ package xyz.block.bittycity.innie.models
 
 import app.cash.kfsm.Invariant
 import app.cash.kfsm.State
+import app.cash.kfsm.invariant
 import arrow.core.raise.result
 import xyz.block.bittycity.common.models.BitcoinDisplayUnits
 import xyz.block.domainapi.ProcessingState
 import xyz.block.domainapi.ProcessingState.Complete
+import xyz.block.domainapi.ProcessingState.Waiting
 
-class DepositState(
+sealed class DepositState(
   to: () -> Set<DepositState> = { emptySet() },
   invariants: List<Invariant<DepositToken, Deposit, DepositState>> = emptyList(),
   val processingState: (Deposit, BitcoinDisplayUnits?) ->
@@ -43,3 +45,71 @@ class DepositState(
     }
   }
 }
+
+data object WaitingForDepositPendingConfirmationStatus : DepositState(
+  to = { setOf(WaitingForDepositConfirmedOnChainStatus, ExpiredPending, Voided) }
+)
+
+data object WaitingForDepositConfirmedOnChainStatus : DepositState(
+  to = { setOf(CheckingEligibility) }
+)
+
+data object ExpiredPending : DepositState(
+  to = { setOf(CheckingEligibility, Voided) }
+)
+
+data object Voided : DepositState()
+
+data object CheckingEligibility : DepositState(
+  to = { setOf(CheckingDepositRisk, WaitingForReversal) },
+)
+
+data object CheckingDepositRisk : DepositState(
+  to = { setOf(Settled, WaitingForReversal) }
+)
+
+data object Settled : DepositState()
+
+data object WaitingForReversal : DepositState(
+  to = { setOf(CollectingInfo) },
+  invariants =  listOf(
+    invariant("failure reason must be set") { it.failureReason != null },
+  ),
+  processingState = { deposit, displayPref -> Waiting(deposit) }
+)
+
+data object CollectingInfo : DepositState(
+  to = { setOf(CheckingSanctions, WaitingForReversal) }
+)
+
+data object CheckingSanctions : DepositState(
+  to = { setOf(CollectingSanctionsInfo, CheckingReversalRisk, WaitingForReversal) }
+)
+
+data object CheckingReversalRisk : DepositState(
+  to = { setOf(WaitingForReversalPendingConfirmationStatus, WaitingForReversal) },
+  invariants = listOf(
+    invariant("target address must be set") { it.reversals.isNotEmpty() && it.reversals.last().targetWalletAddress != null }
+  )
+)
+
+data object CollectingSanctionsInfo : DepositState(
+  to = { setOf(WaitingForSanctionsHeldDecision, Sanctioned, WaitingForReversalPendingConfirmationStatus) }
+)
+
+data object WaitingForSanctionsHeldDecision : DepositState(
+  to = { setOf(Sanctioned, WaitingForReversalPendingConfirmationStatus) }
+)
+
+data object Sanctioned : DepositState()
+
+data object WaitingForReversalPendingConfirmationStatus : DepositState(
+  to = { setOf(WaitingForReversalConfirmedOnChainStatus, WaitingForReversal) }
+)
+
+data object WaitingForReversalConfirmedOnChainStatus : DepositState(
+  to = { setOf(ReversalConfirmedComplete, WaitingForReversal) },
+  processingState = { deposit, displayPref -> Waiting(deposit) }
+)
+
+data object ReversalConfirmedComplete : DepositState()

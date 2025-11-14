@@ -2,6 +2,7 @@ package xyz.block.bittycity.outie.store
 
 import app.cash.quiver.extensions.success
 import arrow.core.raise.result
+import xyz.block.bittycity.common.store.Transactor
 import xyz.block.bittycity.outie.models.BalanceId
 import xyz.block.bittycity.common.models.Bitcoins
 import xyz.block.bittycity.common.models.CustomerId
