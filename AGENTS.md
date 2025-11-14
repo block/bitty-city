@@ -214,7 +214,7 @@ The project is published to Maven Central:
 5. **Documentation**: Update module documentation and regenerate diagrams when modifying state machines
 6. **Build Verification**: Always run `bin/gradle build` before committing to ensure tests pass
 7. **Dependencies**: Check existing dependencies before adding new ones
-8. **Licensing**: New runtime dependencies must be licensed with Apache 2.0 or MIT (test & build dependencies can be more flexible)
+8. **Licensing**: New runtime dependencies must be licensed with Apache 2.0, MIT, BSD, ISC, or Creative Commons Attribution (test & build dependencies can be more flexible)
 
 ## Important Notes for LLMs
 
