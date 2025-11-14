@@ -1,36 +1,36 @@
- # AGENTS.md - LLM Contribution Guide for Bitty-City
- 
- ## Project Overview
- 
- Bitty-City is a Bitcoin custodial product experience library for on-chain operations, used by Block for Square Bitcoin withdrawals. The project handles both withdrawals (`outie`) and deposits (`innie`) with a focus on Bitcoin on-chain operations.
- 
- ## Technology Stack
- 
- - **Language**: Kotlin (JVM)
- - **Build System**: Gradle with Kotlin DSL
- - **Java Version**: JVM 21
- - **Test Framework**: JUnit 5 (Jupiter) + Kotest
- - **Database**: MySQL with jOOQ for type-safe SQL and Flyway for migrations
- - **Key Dependencies**:
-   - bitcoinj (Bitcoin operations)
-   - Arrow (Functional programming)
-   - kfsm (Finite state machine)
-   - Guice (Dependency injection)
-   - Resilience4j (Resilience patterns)
-   - Moshi (JSON)
-   - Kotest (Testing and assertions)
-   - Mockk (Mocking)
-   - TestContainers (Integration testing)
- 
- ## Build & Development Commands
- 
- ### Prerequisites
- This project uses [Hermit](https://cashapp.github.io/hermit/) for consistent tooling. Activate it with:
+# AGENTS.md - LLM Contribution Guide for Bitty-City
+
+## Project Overview
+
+Bitty-City is a Bitcoin custodial product experience library for on-chain operations, used by Block for Square Bitcoin withdrawals. The project handles both withdrawals (`outie`) and deposits (`innie`) with a focus on Bitcoin on-chain operations.
+
+## Technology Stack
+
+- **Language**: Kotlin (JVM)
+- **Build System**: Gradle with Kotlin DSL
+- **Java Version**: JVM 21
+- **Test Framework**: JUnit 5 (Jupiter) + Kotest
+- **Database**: MySQL with jOOQ for type-safe SQL and Flyway for migrations
+- **Key Dependencies**:
+  - bitcoinj (Bitcoin operations)
+  - Arrow (Functional programming)
+  - kfsm (Finite state machine)
+  - Guice (Dependency injection)
+  - Resilience4j (Resilience patterns)
+  - Moshi (JSON)
+  - Kotest (Testing and assertions)
+  - Mockk (Mocking)
+  - TestContainers (Integration testing)
+
+## Build & Development Commands
+
+### Prerequisites
+This project uses [Hermit](https://cashapp.github.io/hermit/) for consistent tooling. Activate it with:
  ```bash
  . ./bin/activate-hermit
  ```
- 
- ### Essential Commands
+
+### Essential Commands
  ```bash
  # Build the entire project (includes tests)
  bin/gradle build
@@ -47,9 +47,9 @@
  # Publish to Maven Central
  bin/gradle publishToMavenCentral
  ```
- 
- ## Project Structure
- 
+
+## Project Structure
+
  ```
  bitty-city/
  ├── common/             # Shared models and utilities
@@ -62,64 +62,65 @@
  └── outie-jooq-provider/ # jOOQ bindings and database layer for outie
      └── src/main/resources/migrations/  # Flyway migration files
  ```
- 
- ## Code Conventions
- 
- ### General Style
- - **Indentation**: 2 spaces (NOT tabs)
- - **Line Length**: Maximum 100 characters
- - **Line Endings**: LF (Unix-style)
- - **Charset**: UTF-8
- - **Final Newline**: Always insert
- 
- ### Kotlin-Specific
- - **Imports**: No wildcard imports (use explicit imports)
- - **Naming**: Follow standard Kotlin conventions
- - **Null Safety**: Leverage Kotlin's null safety features
- - **Functional Style**: Use Arrow for functional programming patterns
- - **Type Safety**: Prefer type-safe solutions (e.g., jOOQ for SQL)
- 
- ### Testing
- 
- #### Testing Philosophy: Sociable Unit Testing
- 
- Bitty-City follows the **Sociable Unit Testing** approach for comprehensive, resilient test coverage.
- 
- **Core Principle**: Write unit tests for all classes, but let them connect through to real dependencies until hitting the system boundary.
- 
- - ✅ **Real object graphs**: Classes use their actual dependencies (services, stores, validators)
- - ✅ **Real database**: Tests run against actual database with TestContainers
- - ✅ **Fake external services**: Only external APIs and services are faked at system boundaries
- - ✅ **Fast execution**: Still runs quickly despite using real components
- - ✅ **Less brittle**: No need to update mocks when internal implementations change
- 
- **System Boundaries** (what gets faked):
- - External APIs (Bitcoin RPC, blockchain explorers, etc.)
- - External event systems
- 
- **Benefits over traditional mock-based testing**:
- - Tests behavior, not implementation details
- - Resilient to refactoring
- - Real integration confidence
- - Simpler test setup
- 
- #### Test Framework & Conventions
- 
- - **Framework**: JUnit 5 (Jupiter) - configured in root `build.gradle.kts`
- - **Base Class**: Extend `BittyCityTestCase` for integration tests with database and dependency injection
- - **Test Structure**: Use `runTest { ... }` wrapper for test body (resets fakes automatically)
- - **Test App**: Access `app` property for data seeding, fakes, and test utilities
- - **Test Data**: Access `app.data` for arbitrary test values (`TestRunData`)
- - **Assertions**: Use Kotest matchers (`shouldBe`, `shouldBeGreaterThan`, etc.) - NOT JUnit assertions
- - **Test Naming**: Test class suffix is `Test` (e.g., `BitcoinsTest.kt`)
- - **Test Names**: Use backtick syntax for readable test names
- - **Integration Tests**: Use TestContainers for database tests (provides real MySQL instance)
- - **Mocking**: Use Mockk only for external system boundaries, not internal dependencies
- - **Result Handling**: Always use `.getOrThrow()` to unwrap Arrow `Result` values in tests (never use `.shouldBeSuccess()` as it hides stack traces)
- - **Test Data Generation**: Prefer `Arb<T>` generators over hard-coded values. Compose existing `Arb` generators for new types
- 
- #### Test Example
- 
+
+## Code Conventions
+
+### General Style
+- **Indentation**: 2 spaces (NOT tabs)
+- **Line Length**: Maximum 100 characters
+- **Line Endings**: LF (Unix-style)
+- **Charset**: UTF-8
+- **Final Newline**: Always insert
+
+### Kotlin-Specific
+- **Imports**: No wildcard imports (use explicit imports)
+- **Naming**: Follow standard Kotlin conventions
+- **Null Safety**: Leverage Kotlin's null safety features
+- **Functional Style**: Use Arrow for functional programming patterns
+- **Type Safety**: Prefer type-safe solutions (e.g., jOOQ for SQL)
+
+### Testing
+
+#### Testing Philosophy: Sociable Unit Testing
+
+Bitty-City follows the **Sociable Unit Testing** approach for comprehensive, resilient test coverage.
+
+**Core Principle**: Write unit tests for all classes, but let them connect through to real dependencies until hitting the system boundary.
+
+- ✅ **Real object graphs**: Classes use their actual dependencies (services, stores, validators)
+- ✅ **Real database**: Tests run against actual database with TestContainers
+- ✅ **Fake external services**: Only external APIs and services are faked at system boundaries
+- ✅ **Fast execution**: Still runs quickly despite using real components
+- ✅ **Less brittle**: No need to update mocks when internal implementations change
+
+**System Boundaries** (what gets faked):
+- External APIs (Bitcoin RPC, blockchain explorers, etc.)
+- External event systems
+
+**Benefits over traditional mock-based testing**:
+- Tests behavior, not implementation details
+- Resilient to refactoring
+- Real integration confidence
+- Simpler test setup
+
+#### Test Framework & Conventions
+
+- **Framework**: JUnit 5 (Jupiter) - configured in root `build.gradle.kts`
+- **Base Class**: Extend `BittyCityTestCase` for integration tests with database and dependency injection
+- **Test Structure**: Use `runTest { ... }` wrapper for test body (resets fakes automatically)
+- **Test App**: Access `app` property for data seeding, fakes, and test utilities
+- **Test Data**: Access `app.data` for arbitrary test values (`TestRunData`)
+- **Assertions**: Use Kotest matchers (`shouldBe`, `shouldBeGreaterThan`, etc.) - NOT JUnit assertions
+- **Test Naming**: Test class suffix is `Test` (e.g., `BitcoinsTest.kt`)
+- **Test Names**: Use backtick syntax for readable test names
+- **Integration Tests**: Use TestContainers for database tests (provides real MySQL instance)
+- **Mocking**: Use Mockk only for external system boundaries, not internal dependencies
+- **Result Handling**: Always use `.getOrThrow()` to unwrap Arrow `Result` values in tests (never use `.shouldBeSuccess()` as it hides stack traces)
+- **Test Data Generation**: Prefer `Arb<T>` generators over hard-coded values. Compose existing `Arb` generators for new types
+- **Assertion Style**: For single assertions after `getOrThrow()`, chain directly instead of using `should { }` block. Use `should { }` only for multiple assertions with `assertSoftly`
+
+#### Test Example
+
  ```kotlin
  // Simple unit test (no database/DI needed)
  class BitcoinsTest {
@@ -152,78 +153,76 @@
    }
  }
  ```
- 
- #### Testing Best Practices
- 
- 1. **Use real dependencies** - Let controllers use real stores, validators, etc.
- 2. **Fake at boundaries** - Only mock external APIs and services
- 3. **Test both paths** - Write tests for success and failure cases
- 4. **Use assertSoftly** - Show all assertion failures, not just the first
- 5. **Avoid redundant comments** - Let test names be descriptive. Never add AAA (Arrange/Act/Assert) comments
- 6. **Prefer brevity** - Keep tests concise and to the point
- 7. **Independent tests** - Each test creates its own test data
- 8. **Property-based test data** - Use Kotest's `Arb` generators where applicable
- 
- ### Database Migrations (Flyway)
- 
- Migration files must follow strict naming conventions:
- - **Location**: `outie-jooq-provider/src/main/resources/migrations/`
- - **Format**: `V{version}__{description}.sql`
- - **Example**: `V20250414.1414__create_withdrawals_table.sql`
- - **Rules**:
-   - Start with uppercase 'V'
-   - Use periods (not underscores) in version number
-   - Double underscores between version and description
-   - Description uses underscores for spaces
- 
- ## Module Responsibilities
- 
- ### common/
- Shared models and utilities used across modules.
- 
- ### outie/ (Withdrawals)
- Handles Bitcoin withdrawal operations. See `outie/docs/state-machine.md` for the withdrawal state machine flow.
- 
- ### innie/ (Deposits)
- Handles Bitcoin deposit operations (Work in Progress).
- 
- ### outie-jooq-provider/
- Database layer for the outie module using jOOQ for type-safe SQL operations and Flyway for schema migrations.
- 
- ## State Machine Documentation
- 
- The outie module uses a finite state machine (kfsm) for withdrawal flow management. The state machine diagram can be regenerated with:
+
+#### Testing Best Practices
+
+1. **Use real dependencies** - Let controllers use real stores, validators, etc.
+2. **Fake at boundaries** - Only mock external APIs and services
+3. **Test both paths** - Write tests for success and failure cases
+4. **Use assertSoftly** - Show all assertion failures, not just the first
+5. **Avoid redundant comments** - Let test names be descriptive. Never add AAA (Arrange/Act/Assert) comments
+6. **Prefer brevity** - Keep tests concise and to the point
+7. **Independent tests** - Each test creates its own test data
+8. **Property-based test data** - Use Kotest's `Arb` generators where applicable
+
+### Database Migrations (Flyway)
+
+Migration files must follow strict naming conventions:
+- **Location**: `outie-jooq-provider/src/main/resources/migrations/`
+- **Format**: `V{version}__{description}.sql`
+- **Example**: `V20250414.1414__create_withdrawals_table.sql`
+- **Rules**:
+  - Start with uppercase 'V'
+  - Use periods (not underscores) in version number
+  - Double underscores between version and description
+  - Description uses underscores for spaces
+
+## Module Responsibilities
+
+### common/
+Shared models and utilities used across modules.
+
+### outie/ (Withdrawals)
+Handles Bitcoin withdrawal operations. See `outie/docs/state-machine.md` for the withdrawal state machine flow.
+
+### innie/ (Deposits)
+Handles Bitcoin deposit operations (Work in Progress).
+
+### outie-jooq-provider/
+Database layer for the outie module using jOOQ for type-safe SQL operations and Flyway for schema migrations.
+
+## State Machine Documentation
+
+The outie module uses a finite state machine (kfsm) for withdrawal flow management. The state machine diagram can be regenerated with:
  ```bash
  bin/gradle :outie:generateStateMachineDiagram
  ```
- 
- ## Publishing
- 
- The project is published to Maven Central:
- - **Group**: `xyz.block.bittycity`
- - **License**: Apache License 2.0
- - **Repository**: https://github.com/block/bitty-city
- 
- ## Contributing Guidelines
- 
- 1. **Code Style**: Follow the `.editorconfig` settings (automatically enforced by IntelliJ IDEA)
- 2. **Testing**: All new features must include comprehensive tests
- 3. **Type Safety**: Prefer type-safe solutions over stringly-typed or dynamic approaches
- 4. **Functional Programming**: Use Arrow's functional patterns where appropriate
- 5. **Documentation**: Update module documentation and regenerate diagrams when modifying state machines
- 6. **Build Verification**: Always run `bin/gradle build` before committing to ensure tests pass
- 7. **Dependencies**: Check existing dependencies before adding new ones
- 8. **Licensing**: New runtime dependencies must be licensed with Apache 2.0 or MIT (test & build dependencies can be more flexible)
- 
- ## Important Notes for LLMs
- 
- - **Never add wildcard imports** - use explicit imports for all Kotlin files
- - **Database changes require Flyway migrations** - never modify schema directly
- - **Use Kotest for assertions**, not JUnit assertions
- - **Follow the established pattern** of state machines in the outie module
- - **Regenerate diagrams** after modifying FSM code
- - **Check `.editorconfig`** before making formatting decisions
- - **Use jOOQ** for database operations in the outie module (type-safe SQL)
- - **All tests use JUnit 5** (Jupiter) - configured in root `build.gradle.kts`
 
-@ai-rules/ai-issue-tracking.md
+## Publishing
+
+The project is published to Maven Central:
+- **Group**: `xyz.block.bittycity`
+- **License**: Apache License 2.0
+- **Repository**: https://github.com/block/bitty-city
+
+## Contributing Guidelines
+
+1. **Code Style**: Follow the `.editorconfig` settings (automatically enforced by IntelliJ IDEA)
+2. **Testing**: All new features must include comprehensive tests
+3. **Type Safety**: Prefer type-safe solutions over stringly-typed or dynamic approaches
+4. **Functional Programming**: Use Arrow's functional patterns where appropriate
+5. **Documentation**: Update module documentation and regenerate diagrams when modifying state machines
+6. **Build Verification**: Always run `bin/gradle build` before committing to ensure tests pass
+7. **Dependencies**: Check existing dependencies before adding new ones
+8. **Licensing**: New runtime dependencies must be licensed with Apache 2.0 or MIT (test & build dependencies can be more flexible)
+
+## Important Notes for LLMs
+
+- **Never add wildcard imports** - use explicit imports for all Kotlin files
+- **Database changes require Flyway migrations** - never modify schema directly
+- **Use Kotest for assertions**, not JUnit assertions
+- **Follow the established pattern** of state machines in the outie module
+- **Regenerate diagrams** after modifying FSM code
+- **Check `.editorconfig`** before making formatting decisions
+- **Use jOOQ** for database operations in the outie module (type-safe SQL)
+- **All tests use JUnit 5** (Jupiter) - configured in root `build.gradle.kts`

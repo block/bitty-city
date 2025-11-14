@@ -43,13 +43,11 @@ class RetryStuckWithdrawalsJobTest : BittyCityTestCase() {
 
     retryStuckWithdrawalsJob.execute(false)
 
-    withdrawalStore.getWithdrawalByToken(stuckWithdrawal.id).getOrThrow() should {
-      it.state shouldBe WaitingForPendingConfirmationStatus
-    }
+    withdrawalStore.getWithdrawalByToken(stuckWithdrawal.id).getOrThrow()
+      .state shouldBe WaitingForPendingConfirmationStatus
 
-    withdrawalStore.getWithdrawalByToken(stillNotStuckWithdrawal.id).getOrThrow() should {
-      it.state shouldBe CheckingEligibility
-    }
+    withdrawalStore.getWithdrawalByToken(stillNotStuckWithdrawal.id).getOrThrow()
+      .state shouldBe CheckingEligibility
   }
 
   @Test
@@ -74,12 +72,10 @@ class RetryStuckWithdrawalsJobTest : BittyCityTestCase() {
     )
     retryStuckWithdrawalsJob.execute(logOnly = true)
 
-    withdrawalStore.getWithdrawalByToken(stuckWithdrawal.id).getOrThrow() should {
-      it.state shouldBe CheckingEligibility
-    }
+    withdrawalStore.getWithdrawalByToken(stuckWithdrawal.id).getOrThrow()
+      .state shouldBe CheckingEligibility
 
-    withdrawalStore.getWithdrawalByToken(stillNotStuckWithdrawal.id).getOrThrow() should {
-      it.state shouldBe CheckingEligibility
-    }
+    withdrawalStore.getWithdrawalByToken(stillNotStuckWithdrawal.id).getOrThrow()
+      .state shouldBe CheckingEligibility
   }
 }

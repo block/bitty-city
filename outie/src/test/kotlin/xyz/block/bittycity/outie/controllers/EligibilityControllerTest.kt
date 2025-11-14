@@ -49,8 +49,7 @@ class EligibilityControllerTest : BittyCityTestCase() {
 
     subject.execute(withdrawal, emptyList(), Operation.EXECUTE).getOrThrow()
 
-    withdrawalStore.getWithdrawalByToken(withdrawal.id).getOrThrow() should {
-      it.state shouldBe WaitingForPendingConfirmationStatus
-    }
+    withdrawalStore.getWithdrawalByToken(withdrawal.id).getOrThrow()
+      .state shouldBe WaitingForPendingConfirmationStatus
   }
 }
