@@ -194,7 +194,7 @@ class OnChainControllerTest : BittyCityTestCase() {
       val resumeResult = FailedOnChain(null, null)
 
       subject.processInputs(withdrawal, listOf(resumeResult), Operation.EXECUTE)
-        .shouldBeSuccess()
+        .getOrThrow()
 
       withdrawalWithToken(withdrawal.id) should {
         it.state shouldBe Failed
@@ -213,7 +213,7 @@ class OnChainControllerTest : BittyCityTestCase() {
     val resumeResult = FailedOnChain(null, null)
 
     subject.processInputs(withdrawal, listOf(resumeResult), Operation.EXECUTE)
-      .shouldBeSuccess()
+      .getOrThrow()
 
     withdrawalWithToken(withdrawal.id) should {
       it.state shouldBe Failed

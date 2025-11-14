@@ -79,7 +79,7 @@ class WithdrawalEventOperationsTest : BittyCityTestCase() {
     }
 
     // Then the result should be empty
-    result.shouldBeSuccess().shouldBeEmpty()
+    result.getOrThrow().shouldBeEmpty()
   }
 
   @Test
@@ -120,7 +120,7 @@ class WithdrawalEventOperationsTest : BittyCityTestCase() {
     }
 
     // Then only unprocessed events should be returned
-    result.shouldBeSuccess() should { events ->
+    result.getOrThrow() should { events ->
       events shouldHaveSize 1
       events.first().id shouldBe unprocessedEvent2.id
       events.first().isProcessed shouldBe false
@@ -150,7 +150,7 @@ class WithdrawalEventOperationsTest : BittyCityTestCase() {
     }
 
     // Then only batch size number of events should be returned
-    result.shouldBeSuccess() should { events ->
+    result.getOrThrow() should { events ->
       events shouldHaveSize 3
       events.forEach { event ->
         event.isProcessed shouldBe false
@@ -240,7 +240,7 @@ class WithdrawalEventOperationsTest : BittyCityTestCase() {
     }
 
     // Then the operation should succeed
-    result.shouldBeSuccess()
+    result.getOrThrow()
 
     // And the event should be marked as processed in the database
     dslContext.selectFrom(WITHDRAWAL_EVENTS)
@@ -291,12 +291,12 @@ class WithdrawalEventOperationsTest : BittyCityTestCase() {
     // When marking one event as processed
     withdrawalTransactor.transact("Mark event 1 as processed") {
       markEventAsProcessed(event1.id)
-    }.shouldBeSuccess()
+    }.getOrThrow()
 
     // Then only the unprocessed event should be returned
     val unprocessedEvents = withdrawalTransactor.transactReadOnly("Fetch unprocessed events") {
       fetchUnprocessedEvents(batchSize = 10)
-    }.shouldBeSuccess()
+    }.getOrThrow()
 
     unprocessedEvents should { events ->
       events shouldHaveSize 1
@@ -389,7 +389,6 @@ class WithdrawalEventOperationsTest : BittyCityTestCase() {
       )
     }
 
-    result.shouldBeSuccess()
     val event = result.getOrThrow()
 
     // Verify the withdrawal snapshot is stored correctly (field order may vary)

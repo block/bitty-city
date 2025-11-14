@@ -112,7 +112,7 @@ class WithdrawRequestTest {
   @Test
   fun `valid withdrawal converts to request successfully`() {
     val withdrawal = createWithdrawal()
-    val request = withdrawal.toWithdrawalRequest().shouldBeSuccess()
+    val request = withdrawal.toWithdrawalRequest().getOrThrow()
 
     request.withdrawalToken shouldBe withdrawal.id
     request.customerId shouldBe withdrawal.customerId
