@@ -24,6 +24,7 @@ import xyz.block.bittycity.outie.store.WithdrawalStore
 import io.github.oshai.kotlinlogging.KLogger
 import io.github.oshai.kotlinlogging.KotlinLogging
 import jakarta.inject.Inject
+import xyz.block.domainapi.InfoOnly
 import xyz.block.domainapi.Input
 import xyz.block.domainapi.ProcessingState
 import xyz.block.domainapi.util.Operation
@@ -183,4 +184,4 @@ class OnChainController @Inject constructor(
 data class LimitWouldBeExceeded(val violations: List<LimitViolation>) :
   Exception(
     "Withdrawal limits would be exceeded: $violations"
-  )
+  ), InfoOnly

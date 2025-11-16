@@ -5,6 +5,7 @@ import xyz.block.bittycity.common.models.Bitcoins
 import xyz.block.bittycity.common.models.CustomerId
 import xyz.block.bittycity.common.models.LedgerTransactionId
 import xyz.block.bittycity.outie.models.Withdrawal
+import xyz.block.domainapi.InfoOnly
 
 /**
  * Interface for a service that handles ledgering operations for on-chain withdrawals.
@@ -88,6 +89,6 @@ sealed class LedgerError: Exception()
 data object IdempotencyKeyReused: LedgerError()
 data object TransactionAlreadyCompleted: LedgerError()
 data object TransactionDoesNotExist : LedgerError()
-data object InsufficientFunds: LedgerError()
+data object InsufficientFunds: LedgerError(), InfoOnly
 data class InternalServerError(override val message: String): LedgerError()
 data class InvalidRequest(override val message: String): LedgerError()
