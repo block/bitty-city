@@ -1,5 +1,7 @@
 package xyz.block.bittycity.outie.client
 
+import xyz.block.domainapi.InfoOnly
+
 /**
  * Interface for a service that determines if a user is eligible to use a Bitcoin product.
  */
@@ -36,4 +38,4 @@ sealed class Eligibility {
 
 
 
-class IneligibleCustomer(val violations: List<String>) : Exception()
+class IneligibleCustomer(val violations: List<String>) : Exception(), InfoOnly
