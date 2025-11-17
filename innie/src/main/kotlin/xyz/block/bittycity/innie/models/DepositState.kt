@@ -51,7 +51,7 @@ data object WaitingForDepositPendingConfirmationStatus : DepositState(
 )
 
 data object WaitingForDepositConfirmedOnChainStatus : DepositState(
-  to = { setOf(CheckingEligibility) }
+  to = { setOf(CheckingEligibility, Voided) }
 )
 
 data object ExpiredPending : DepositState(
@@ -94,11 +94,13 @@ data object CheckingReversalRisk : DepositState(
 )
 
 data object CollectingSanctionsInfo : DepositState(
-  to = { setOf(WaitingForSanctionsHeldDecision, Sanctioned, WaitingForReversalPendingConfirmationStatus) }
+  to = {
+    setOf(WaitingForSanctionsHeldDecision, Sanctioned, WaitingForReversalPendingConfirmationStatus, WaitingForReversal)
+  }
 )
 
 data object WaitingForSanctionsHeldDecision : DepositState(
-  to = { setOf(Sanctioned, WaitingForReversalPendingConfirmationStatus) }
+  to = { setOf(Sanctioned, WaitingForReversalPendingConfirmationStatus, WaitingForReversal) }
 )
 
 data object Sanctioned : DepositState()

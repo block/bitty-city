@@ -83,6 +83,10 @@ object StateMachineModule  : AbstractModule() {
         CollectingSanctionsInfo via logOnly()
         WaitingForReversal via logOnly()
       }
+      CheckingReversalRisk becomes {
+        WaitingForReversalPendingConfirmationStatus via logOnly()
+        WaitingForReversal via logOnly()
+      }
       CollectingSanctionsInfo becomes {
         WaitingForSanctionsHeldDecision via logOnly()
         Sanctioned via sanctionsDecisionFreeze
