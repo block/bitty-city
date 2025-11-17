@@ -37,6 +37,7 @@ dependencies {
     implementation(libs.slf4jApi)
     implementation(libs.slf4jNop)
 
+    testImplementation(testFixtures(project(":common")))
     testImplementation(libs.flyway)
     testImplementation(libs.flywayMySql)
     testImplementation(libs.kotestProperty)

@@ -1,5 +1,7 @@
 package xyz.block.bittycity.outie.testing
 
+import xyz.block.bittycity.common.testing.TestFake
+
 import app.cash.quiver.extensions.success
 import xyz.block.bittycity.outie.client.BitcoinAccountClient
 import xyz.block.bittycity.outie.models.BitcoinAccount

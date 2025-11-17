@@ -32,8 +32,34 @@ dependencies {
   implementation(libs.kotlinReflect)
   implementation(libs.quiverLib)
 
+  testImplementation(testFixtures(project(":common")))
   testImplementation(libs.kotestProperty)
   testImplementation(libs.kotestAssertions)
   testImplementation(libs.kotestJunitRunnerJvm)
   testImplementation(libs.mockk)
 }
+
+tasks.register<JavaExec>("generateStateMachineDiagram") {
+  group = "documentation"
+  description = "Generate state machine diagram in Mermaid format"
+
+  classpath = sourceSets.test.get().runtimeClasspath
+  mainClass.set("xyz.block.bittycity.innie.fsm.StateMachineDiagramGeneratorKt")
+
+  val outputFile = project.file("docs/state-machine.md")
+  args(outputFile.absolutePath)
+
+  // Track FSM package files as inputs for incremental builds
+  inputs.files(fileTree("src/main/kotlin/xyz/block/bittycity/innie/fsm") {
+    include("**/*.kt")
+  })
+  inputs.file("src/test/kotlin/xyz/block/bittycity/innie/fsm/StateMachineDiagramGenerator.kt")
+
+  // Declare output for incremental builds
+  outputs.file(outputFile)
+}
+
+tasks.named("assemble") {
+  dependsOn("generateStateMachineDiagram")
+}
+

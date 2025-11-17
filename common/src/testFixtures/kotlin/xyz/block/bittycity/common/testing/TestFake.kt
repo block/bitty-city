@@ -1,4 +1,4 @@
-package xyz.block.bittycity.outie.testing
+package xyz.block.bittycity.common.testing
 
 import kotlin.properties.ReadWriteProperty
 import kotlin.reflect.KProperty

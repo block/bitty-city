@@ -1,5 +1,7 @@
 package xyz.block.bittycity.outie.testing
 
+import xyz.block.bittycity.common.testing.TestFake
+
 import arrow.core.raise.result
 import xyz.block.bittycity.outie.client.ExchangeQuote
 import xyz.block.bittycity.outie.client.ExchangeRateClient

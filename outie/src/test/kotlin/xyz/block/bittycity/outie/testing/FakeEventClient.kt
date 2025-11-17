@@ -1,5 +1,7 @@
 package xyz.block.bittycity.outie.testing
 
+import xyz.block.bittycity.common.testing.TestFake
+
 import xyz.block.bittycity.outie.client.EventClient
 import xyz.block.bittycity.outie.client.WithdrawalEvent
 import jakarta.inject.Inject

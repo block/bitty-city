@@ -1,6 +1,7 @@
 package xyz.block.bittycity.outie.testing
 
 import xyz.block.bittycity.common.client.PreFlightClient
+import xyz.block.bittycity.common.testing.TestFake
 import xyz.block.bittycity.outie.models.Withdrawal
 
 class FakePreFlightClient :

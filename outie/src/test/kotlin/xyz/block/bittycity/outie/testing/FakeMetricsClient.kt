@@ -1,5 +1,7 @@
 package xyz.block.bittycity.outie.testing
 
+import xyz.block.bittycity.common.testing.TestFake
+
 import xyz.block.bittycity.outie.client.MetricsClient
 import xyz.block.bittycity.outie.models.FailureReason
 import xyz.block.bittycity.outie.models.Withdrawal

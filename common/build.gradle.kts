@@ -1,5 +1,6 @@
 plugins {
   id("java-library")
+  id("java-test-fixtures")
   id("org.jetbrains.kotlin.jvm")
   id("com.vanniktech.maven.publish")
 }
