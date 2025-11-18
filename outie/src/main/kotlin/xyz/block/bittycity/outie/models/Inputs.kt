@@ -1,9 +1,5 @@
 package xyz.block.bittycity.outie.models
 
-import xyz.block.domainapi.Input
+import xyz.block.bittycity.common.idempotency.IdempotentInputs
 
-data class Inputs(
-  val id: WithdrawalToken,
-  val backCounter: Int,
-  val hurdleResponses: List<Input.HurdleResponse<RequirementId>>
-)
+typealias Inputs = IdempotentInputs<WithdrawalToken, RequirementId>

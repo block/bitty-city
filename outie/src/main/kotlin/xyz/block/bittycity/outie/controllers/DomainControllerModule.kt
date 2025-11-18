@@ -2,6 +2,10 @@ package xyz.block.bittycity.outie.controllers
 
 import com.google.inject.AbstractModule
 import com.google.inject.Provides
+import com.squareup.moshi.Moshi
+import com.squareup.moshi.Types.newParameterizedType
+import xyz.block.bittycity.common.idempotency.IdempotentInputs
+import xyz.block.bittycity.common.store.Transactor
 import xyz.block.bittycity.outie.models.CheckingEligibility
 import xyz.block.bittycity.outie.models.CheckingRisk
 import xyz.block.bittycity.outie.models.CheckingSanctions
@@ -77,5 +81,26 @@ object DomainControllerModule : AbstractModule() {
       }
 
     return DomainController(stateToController)
+  }
+
+  @Provides
+  @Singleton
+  fun provideIdempotencyHandler(
+    moshi: Moshi,
+    transactor: Transactor<xyz.block.bittycity.outie.store.ResponseOperations>
+  ): IdempotencyHandler {
+    return IdempotencyHandler(
+      moshi = moshi,
+      transactor = transactor,
+      inputsAdapter = { m ->
+        m.adapter(
+          newParameterizedType(
+            IdempotentInputs::class.java,
+            WithdrawalToken::class.java,
+            RequirementId::class.java
+          )
+        )
+      }
+    )
   }
 }

@@ -1,7 +1,7 @@
 package xyz.block.bittycity.outie.controllers
 
 import app.cash.quiver.extensions.success
-import xyz.block.bittycity.outie.models.CachedError
+import xyz.block.bittycity.common.idempotency.CachedError
 import xyz.block.bittycity.outie.models.Inputs
 import xyz.block.bittycity.outie.models.RequirementId
 import xyz.block.bittycity.outie.models.WithdrawalHurdleResponse
@@ -127,7 +127,7 @@ class IdempotencyHandlerTest : BittyCityTestCase() {
 
     result.getOrThrow() should { updatedResponse ->
       updatedResponse.idempotencyKey shouldBe idempotencyKey
-      updatedResponse.withdrawalToken shouldBe withdrawalToken
+      updatedResponse.requestId shouldBe withdrawalToken
       updatedResponse.version shouldBe 2L
       updatedResponse.result shouldBe executeResponse
       updatedResponse.error shouldBe null
@@ -153,7 +153,7 @@ class IdempotencyHandlerTest : BittyCityTestCase() {
 
     result.getOrThrow() should { updatedResponse ->
       updatedResponse.idempotencyKey shouldBe idempotencyKey
-      updatedResponse.withdrawalToken shouldBe withdrawalToken
+      updatedResponse.requestId shouldBe withdrawalToken
       updatedResponse.version shouldBe 2L
       updatedResponse.result shouldBe null
       updatedResponse.error.shouldNotBeNull() should {
@@ -391,7 +391,7 @@ class IdempotencyHandlerTest : BittyCityTestCase() {
 
     result.getOrThrow() should { updatedResponse ->
       updatedResponse.idempotencyKey shouldBe idempotencyKey
-      updatedResponse.withdrawalToken shouldBe withdrawalToken
+      updatedResponse.requestId shouldBe withdrawalToken
       updatedResponse.version shouldBe 2L
       updatedResponse.result shouldBe null
       updatedResponse.error.shouldNotBeNull() should {
