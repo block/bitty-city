@@ -58,7 +58,7 @@ dokka {
 tasks.register("publishToMavenCentral") {
   group = "publishing"
   dependsOn(
-//    ":innie:publishToMavenCentral",
+    ":innie:publishToMavenCentral",
     ":outie:publishToMavenCentral",
     ":outie-jooq-provider:publishToMavenCentral"
   )
