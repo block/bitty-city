@@ -3,8 +3,8 @@ package xyz.block.bittycity.outie.testing
 import xyz.block.bittycity.common.testing.TestFake
 
 import arrow.core.raise.result
-import xyz.block.bittycity.outie.client.ExchangeQuote
-import xyz.block.bittycity.outie.client.ExchangeRateClient
+import xyz.block.bittycity.common.client.ExchangeQuote
+import xyz.block.bittycity.common.client.ExchangeRateClient
 import xyz.block.bittycity.common.models.Bitcoins
 import org.joda.money.CurrencyUnit
 import org.joda.money.CurrencyUnit.USD

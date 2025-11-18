@@ -21,8 +21,12 @@ mavenPublishing {
 }
 
 dependencies {
+    implementation(libs.arrowCore)
+    implementation(libs.domainApi)
     implementation(libs.jodaMoney)
     implementation(libs.kfsm)
+    implementation(libs.moshi)
+    implementation(libs.quiverLib)
 
     testImplementation(libs.kotestAssertions)
     testImplementation(libs.kotestJunitRunnerJvm)

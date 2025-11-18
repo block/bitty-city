@@ -11,15 +11,16 @@ import org.jooq.JSON
 import org.jooq.Record
 import org.jooq.exception.DataAccessException
 import org.jooq.types.ULong
+import xyz.block.bittycity.common.idempotency.AlreadyProcessingException
+import xyz.block.bittycity.common.idempotency.ResponseNotPresent
+import xyz.block.bittycity.common.idempotency.ResponseVersionMismatch
 import xyz.block.bittycity.outie.jooq.generated.tables.WithdrawalResponses.Companion.WITHDRAWAL_RESPONSES
 import xyz.block.bittycity.outie.models.RequirementId
 import xyz.block.bittycity.outie.models.Response
 import xyz.block.bittycity.outie.models.SerializableError
 import xyz.block.bittycity.outie.models.WithdrawalToken
-import xyz.block.bittycity.outie.store.AlreadyProcessingException
 import xyz.block.bittycity.outie.store.ResponseOperations
 import xyz.block.domainapi.ExecuteResponse
-import xyz.block.domainapi.InfoOnly
 
 class JooqResponseOperations(
     private val context: DSLContext,
@@ -37,13 +38,13 @@ class JooqResponseOperations(
 
     override fun findResponse(
         idempotencyKey: String,
-        withdrawalToken: WithdrawalToken
+        requestId: WithdrawalToken
     ): Result<Response?> = result {
         val record = context
             .select(responseFields)
             .from(WITHDRAWAL_RESPONSES)
             .where(WITHDRAWAL_RESPONSES.IDEMPOTENCY_KEY.eq(idempotencyKey))
-            .and(WITHDRAWAL_RESPONSES.WITHDRAWAL_TOKEN.eq(withdrawalToken.toString()))
+            .and(WITHDRAWAL_RESPONSES.WITHDRAWAL_TOKEN.eq(requestId.toString()))
             .fetchOne()
 
         record?.let { toResponseModel(it).bind() }
@@ -54,7 +55,7 @@ class JooqResponseOperations(
         val errorJsonString = response.error?.let { serializableErrorAdapter.toJson(it) }
         val insertStep = context.insertInto(WITHDRAWAL_RESPONSES)
             .set(WITHDRAWAL_RESPONSES.IDEMPOTENCY_KEY, response.idempotencyKey)
-            .set(WITHDRAWAL_RESPONSES.WITHDRAWAL_TOKEN, response.withdrawalToken.toString())
+            .set(WITHDRAWAL_RESPONSES.WITHDRAWAL_TOKEN, response.requestId.toString())
             .set(WITHDRAWAL_RESPONSES.VERSION, ULong.valueOf(1L))
             .set(
                 WITHDRAWAL_RESPONSES.RESPONSE_SNAPSHOT,
@@ -89,7 +90,7 @@ class JooqResponseOperations(
         val updateStep = context.update(WITHDRAWAL_RESPONSES)
             .set(WITHDRAWAL_RESPONSES.VERSION, ULong.valueOf(response.version + 1))
             .set(WITHDRAWAL_RESPONSES.IDEMPOTENCY_KEY, response.idempotencyKey)
-            .set(WITHDRAWAL_RESPONSES.WITHDRAWAL_TOKEN, response.withdrawalToken.toString())
+            .set(WITHDRAWAL_RESPONSES.WITHDRAWAL_TOKEN, response.requestId.toString())
             .set(
                 WITHDRAWAL_RESPONSES.RESPONSE_SNAPSHOT,
                 responseJsonString?.let {
@@ -103,13 +104,13 @@ class JooqResponseOperations(
                 }
             )
             .where(WITHDRAWAL_RESPONSES.IDEMPOTENCY_KEY.eq(idempotencyKey))
-            .and(WITHDRAWAL_RESPONSES.WITHDRAWAL_TOKEN.eq(response.withdrawalToken.toString()))
+            .and(WITHDRAWAL_RESPONSES.WITHDRAWAL_TOKEN.eq(response.requestId.toString()))
 
         val updatedRows = updateStep.execute()
-        val refreshed = findResponse(idempotencyKey, response.withdrawalToken).bind()
+        val refreshed = findResponse(idempotencyKey, response.requestId).bind()
             ?: raise(ResponseNotPresent(idempotencyKey))
         when (updatedRows) {
-            0 -> raise(ResponseVersionMismatch(response))
+            0 -> raise(ResponseVersionMismatch(response.version, response.requestId.toString()))
             else -> refreshed
         }
     }
@@ -117,7 +118,7 @@ class JooqResponseOperations(
     private fun toResponseModel(record: Record): Result<Response> = result {
         Response(
             idempotencyKey = record.get(WITHDRAWAL_RESPONSES.IDEMPOTENCY_KEY)!!,
-            withdrawalToken = WithdrawalToken.parse(
+            requestId = WithdrawalToken.parse(
                 record.get(WITHDRAWAL_RESPONSES.WITHDRAWAL_TOKEN)!!
             ).bind(),
             version = record.get(WITHDRAWAL_RESPONSES.VERSION)!!.toLong(),
@@ -163,15 +164,3 @@ class JooqResponseOperations(
         )
     }
 }
-
-sealed class ResponseStoreError(message: String) :
-    Exception(message),
-    InfoOnly
-
-data class ResponseVersionMismatch(val withdrawalResponse: Response) :
-    ResponseStoreError("Response not at expected version ${withdrawalResponse.version}" +
-            ": ${withdrawalResponse.withdrawalToken}"
-    )
-
-data class ResponseNotPresent(val idempotencyKey: String) :
-    ResponseStoreError("Response not present $idempotencyKey")

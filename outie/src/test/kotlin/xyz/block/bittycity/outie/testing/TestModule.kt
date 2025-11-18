@@ -9,7 +9,7 @@ import xyz.block.bittycity.outie.client.BitcoinAccountClient
 import xyz.block.bittycity.outie.client.CurrencyDisplayPreferenceClient
 import xyz.block.bittycity.outie.client.EligibilityClient
 import xyz.block.bittycity.outie.client.EventClient
-import xyz.block.bittycity.outie.client.ExchangeRateClient
+import xyz.block.bittycity.common.client.ExchangeRateClient
 import xyz.block.bittycity.outie.client.FeeQuoteClient
 import xyz.block.bittycity.outie.client.LedgerClient
 import xyz.block.bittycity.outie.client.LimitClient

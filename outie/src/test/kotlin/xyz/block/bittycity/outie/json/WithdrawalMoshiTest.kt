@@ -5,6 +5,7 @@ import xyz.block.bittycity.common.models.Bitcoins
 import xyz.block.bittycity.common.utils.CurrencyConversionUtils
 import xyz.block.bittycity.outie.models.CurrencyDisplayPreference
 import xyz.block.bittycity.outie.models.CurrencyDisplayUnits
+import xyz.block.bittycity.common.idempotency.IdempotentInputs
 import xyz.block.bittycity.common.models.FlatFee
 import xyz.block.bittycity.outie.models.Inputs
 import xyz.block.bittycity.outie.models.RequirementId
@@ -46,7 +47,12 @@ class WithdrawalMoshiTest {
 
     val id = WithdrawalToken.parse(UUID.randomUUID().toString()).getOrThrow()
     val inputs = Inputs(id, 1, hurdleResponses)
-    val inputsAdapter = moshi.adapter(Inputs::class.java)
+    val inputsType = Types.newParameterizedType(
+      IdempotentInputs::class.java,
+      WithdrawalToken::class.java,
+      RequirementId::class.java
+    )
+    val inputsAdapter = moshi.adapter<Inputs>(inputsType)
     val serialised = inputsAdapter.toJson(inputs)
     val deserialised = inputsAdapter.fromJson(serialised)
 
