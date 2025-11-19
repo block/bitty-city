@@ -2,7 +2,6 @@ package xyz.block.bittycity.innie.api
 
 import app.cash.quiver.extensions.failure
 import app.cash.quiver.extensions.success
-import arrow.core.flatMap
 import arrow.core.getOrElse
 import arrow.core.raise.result
 import jakarta.inject.Inject
@@ -53,21 +52,20 @@ class OnChainDepositDomainApi @Inject constructor(
       CurrencyUnit.USD
     ).bind()
     val deposit = transactor.transact("insert deposit $id") {
-      findByToken(id).flatMap { existingDeposit ->
-        existingDeposit?.success() ?: insertDeposit(
-          Deposit(
-            id = id,
-            state = mapPaymentState(initialRequest.paymentState),
-            customerId = customerId,
-            amount = initialRequest.amount,
-            exchangeRate = exchangeRateQuote.exchangeRate,
-            targetWalletAddress = initialRequest.targetWalletAddress,
-            blockchainTransactionId = initialRequest.blockchainTransactionId,
-            blockchainTransactionOutputIndex = initialRequest.blockchainTransactionOutputIndex,
-            paymentToken = initialRequest.paymentToken
-          )
+      val existingDeposit = findByToken(id).bind()
+      existingDeposit?.success() ?: insertDeposit(
+        Deposit(
+          id = id,
+          state = mapPaymentState(initialRequest.paymentState),
+          customerId = customerId,
+          amount = initialRequest.amount,
+          exchangeRate = exchangeRateQuote.exchangeRate,
+          targetWalletAddress = initialRequest.targetWalletAddress,
+          blockchainTransactionId = initialRequest.blockchainTransactionId,
+          blockchainTransactionOutputIndex = initialRequest.blockchainTransactionOutputIndex,
+          paymentToken = initialRequest.paymentToken
         )
-      }
+      )
     }.bind()
     domainController.execute(deposit, emptyList(), Operation.CREATE).bind()
   }
@@ -79,9 +77,9 @@ class OnChainDepositDomainApi @Inject constructor(
   ): Result<ExecuteResponse<DepositToken, RequirementId>> = result {
     val deposit = transactor.transactReadOnly("get deposit") { getByToken(id) }.bind()
     idempotencyHandler.handle(
-      id,
-      0, // always zero - we can't go back
-      hurdleResponses
+      id = id,
+      backCounter = 0, // always zero - we can't go back
+      hurdleResponses = hurdleResponses
     ).bind().getOrElse { hash ->
       val result = domainController.execute(
         deposit,
