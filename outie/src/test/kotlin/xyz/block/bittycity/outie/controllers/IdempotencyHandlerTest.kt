@@ -2,8 +2,12 @@ package xyz.block.bittycity.outie.controllers
 
 import app.cash.quiver.extensions.success
 import xyz.block.bittycity.common.idempotency.CachedError
+import xyz.block.bittycity.common.idempotency.IdempotentResumeInputs
 import xyz.block.bittycity.outie.models.Inputs
+import xyz.block.bittycity.outie.models.ObservedInMempool
 import xyz.block.bittycity.outie.models.RequirementId
+import xyz.block.bittycity.outie.models.SanctionsHeldDecision
+import xyz.block.bittycity.outie.models.SanctionsReviewDecision
 import xyz.block.bittycity.outie.models.WithdrawalHurdleResponse
 import xyz.block.bittycity.outie.models.WithdrawalToken
 import xyz.block.bittycity.outie.testing.Arbitrary
@@ -457,5 +461,127 @@ class IdempotencyHandlerTest : BittyCityTestCase() {
       updatedResponse.version shouldBe 3L
       updatedResponse.result shouldBe executeResponse2
     }
+  }
+
+  @Test
+  fun `handleResume returns left with idempotency key when no cached response exists`() = runTest {
+    val withdrawalToken = Arbitrary.withdrawalToken.next()
+    val resumeResult = SanctionsHeldDecision(SanctionsReviewDecision.APPROVE)
+
+    idempotencyHandler.handleResume(withdrawalToken, resumeResult).getOrThrow()
+      .shouldBeLeft()
+  }
+
+  @Test
+  fun `handleResume returns cached response when one exists`() = runTest {
+    val withdrawalToken = Arbitrary.withdrawalToken.next()
+    val resumeResult = SanctionsHeldDecision(SanctionsReviewDecision.APPROVE)
+    val cachedResponse = ExecuteResponse<WithdrawalToken, RequirementId>(
+      id = withdrawalToken,
+      interactions = emptyList(),
+      nextEndpoint = null
+    )
+
+    // First call creates the idempotency key
+    val firstResult = idempotencyHandler.handleResume(withdrawalToken, resumeResult)
+    val idempotencyKey = firstResult.getOrThrow().shouldBeLeft()
+
+    // Update the cached response with the actual result
+    idempotencyHandler.updateCachedResponse(
+      idempotencyKey = idempotencyKey,
+      id = withdrawalToken,
+      response = cachedResponse.success(),
+    ).getOrThrow()
+
+    // Second call should return the cached response
+    idempotencyHandler.handleResume(withdrawalToken, resumeResult)
+      .getOrThrow().shouldBeRight(cachedResponse)
+  }
+
+  @Test
+  fun `handleResume returns cached error when one exists`() = runTest {
+    val withdrawalToken = Arbitrary.withdrawalToken.next()
+    val resumeResult = SanctionsHeldDecision(SanctionsReviewDecision.APPROVE)
+    val error = RuntimeException("Test resume error")
+
+    // First call creates the idempotency key
+    val firstResult = idempotencyHandler.handleResume(withdrawalToken, resumeResult)
+    val idempotencyKey = firstResult.getOrThrow().shouldBeLeft()
+    idempotencyHandler.updateCachedResponse(
+      idempotencyKey,
+      withdrawalToken,
+      Result.failure(error)
+    ).getOrThrow()
+
+    // Second call should return the cached error
+    val secondResult = idempotencyHandler.handleResume(withdrawalToken, resumeResult)
+    secondResult.shouldBeFailure(CachedError("[java.lang.RuntimeException] Test resume error"))
+  }
+
+  @Test
+  fun `handleResume returns AlreadyProcessing when response exists but is incomplete`() = runTest {
+    val withdrawalToken = Arbitrary.withdrawalToken.next()
+    val resumeResult = SanctionsHeldDecision(SanctionsReviewDecision.APPROVE)
+
+    // First call creates the idempotency key but doesn't update it
+    idempotencyHandler.handleResume(withdrawalToken, resumeResult)
+      .getOrThrow().shouldBeLeft()
+
+    // Second call should return AlreadyProcessing since the response is incomplete
+    idempotencyHandler.handleResume(withdrawalToken, resumeResult)
+      .shouldBeFailure(DomainApiError.AlreadyProcessing(withdrawalToken.toString()))
+  }
+
+  @Test
+  fun `serialiseResumeInputs correctly serializes inputs to JSON`() = runTest {
+    val withdrawalToken = Arbitrary.withdrawalToken.next()
+    val resumeResult = SanctionsHeldDecision(SanctionsReviewDecision.APPROVE)
+    val inputs = IdempotentResumeInputs(withdrawalToken, resumeResult)
+
+    val json = idempotencyHandler.serialiseResumeInputs(inputs)
+    json shouldContain withdrawalToken.toString()
+    json shouldContain "resumeResult"
+    json shouldContain "SANCTIONS_HELD"
+  }
+
+  @Test
+  fun `hashResumeParameters generates different hash for different withdrawal tokens`() = runTest {
+    val withdrawalToken1 = Arbitrary.withdrawalToken.next()
+    val withdrawalToken2 = Arbitrary.withdrawalToken.next()
+    val resumeResult = SanctionsHeldDecision(SanctionsReviewDecision.APPROVE)
+
+    val result1 = idempotencyHandler.handleResume(withdrawalToken1, resumeResult)
+    val result2 = idempotencyHandler.handleResume(withdrawalToken2, resumeResult)
+
+    result1.getOrThrow() shouldNotBe result2.getOrThrow()
+  }
+
+  @Test
+  fun `hashResumeParameters generates different hash for different resume results`() = runTest {
+    val withdrawalToken = Arbitrary.withdrawalToken.next()
+    val resumeResult1 = SanctionsHeldDecision(SanctionsReviewDecision.APPROVE)
+    val resumeResult2 = ObservedInMempool(
+      blockchainTransactionId = "txid123",
+      blockchainTransactionOutputIndex = 0
+    )
+
+    val result1 = idempotencyHandler.handleResume(withdrawalToken, resumeResult1)
+    val result2 = idempotencyHandler.handleResume(withdrawalToken, resumeResult2)
+
+    result1.getOrThrow() shouldNotBe result2.getOrThrow()
+  }
+
+  @Test
+  fun `handleResume and handle generate different hashes for same withdrawal token`() = runTest {
+    val withdrawalToken = Arbitrary.withdrawalToken.next()
+    val backCounter = 1
+    val hurdleResponses = listOf<Input.HurdleResponse<RequirementId>>()
+    val resumeResult = SanctionsHeldDecision(SanctionsReviewDecision.APPROVE)
+
+    val executeResult = idempotencyHandler.handle(withdrawalToken, backCounter, hurdleResponses)
+    val resumeResultHash = idempotencyHandler.handleResume(withdrawalToken, resumeResult)
+
+    // The hashes should be different because they use different input structures
+    executeResult.getOrThrow() shouldNotBe resumeResultHash.getOrThrow()
   }
 }

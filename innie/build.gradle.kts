@@ -30,6 +30,8 @@ dependencies {
   implementation(libs.kfsm)
   implementation(libs.kotlinLogging)
   implementation(libs.kotlinReflect)
+  implementation(libs.moshi)
+  implementation(libs.moshiKotlin)
   implementation(libs.quiverLib)
   implementation(libs.slf4jApi)
   implementation(libs.slf4jNop)

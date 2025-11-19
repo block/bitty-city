@@ -5,6 +5,7 @@ import com.google.inject.Provides
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.Types.newParameterizedType
 import xyz.block.bittycity.common.idempotency.IdempotentInputs
+import xyz.block.bittycity.common.idempotency.IdempotentResumeInputs
 import xyz.block.bittycity.common.store.Transactor
 import xyz.block.bittycity.outie.models.CheckingEligibility
 import xyz.block.bittycity.outie.models.CheckingRisk
@@ -96,6 +97,15 @@ object DomainControllerModule : AbstractModule() {
         m.adapter(
           newParameterizedType(
             IdempotentInputs::class.java,
+            WithdrawalToken::class.java,
+            RequirementId::class.java
+          )
+        )
+      },
+      resumeInputsAdapter = { m ->
+        m.adapter(
+          newParameterizedType(
+            IdempotentResumeInputs::class.java,
             WithdrawalToken::class.java,
             RequirementId::class.java
           )

@@ -258,7 +258,7 @@ class ResponseOperationsTest : BittyCityTestCase() {
   }
 
   @Test
-  fun `update does not fail with version mismatch when response version is different`() = runTest {
+  fun `update fails with version mismatch when response version is different`() = runTest {
     val idempotencyKey = "test-version-mismatch-key"
     val requestId = Arbitrary.withdrawalToken.next()
     val originalResponse = ExecuteResponse<WithdrawalToken, RequirementId>(
@@ -267,7 +267,7 @@ class ResponseOperationsTest : BittyCityTestCase() {
       nextEndpoint = null
     )
 
-    // Insert original response
+    // Insert original response (version will be 1 after insert)
     val original = Response(
       idempotencyKey = idempotencyKey,
       requestId = requestId,
@@ -277,16 +277,17 @@ class ResponseOperationsTest : BittyCityTestCase() {
 
     transactor.transact("insert") { insertResponse(original) }.getOrThrow()
 
-    // Try to update with wrong version
+    // Try to update with wrong version - this should fail with optimistic locking
     val updated = Response(
       idempotencyKey = idempotencyKey,
       requestId = requestId,
-      version = 5L, // Wrong version
+      version = 5L, // Wrong version (actual version is 1)
       result = originalResponse
     )
 
-    transactor.transact("update") { updateResponse(idempotencyKey, updated) }.getOrThrow()
-      .version shouldBe 6L
+    val result = transactor.transact("update") { updateResponse(idempotencyKey, updated) }
+    result.shouldBeFailure()
+      .cause?.message shouldContain "Response not at expected version 5"
   }
 
   @Test

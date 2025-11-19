@@ -98,7 +98,19 @@ class OnChainDepositDomainApi @Inject constructor(
     resumeResult: Input.ResumeResult<RequirementId>
   ): Result<Unit> = result {
     val deposit = transactor.transactReadOnly("get deposit") { getByToken(id) }.bind()
-    domainController.execute(deposit, listOf(resumeResult), Operation.RESUME).bind()
+    idempotencyHandler.handleResume(
+      id,
+      resumeResult
+    ).bind().getOrElse { hash ->
+      val result = domainController.execute(
+        deposit,
+        listOf(resumeResult),
+        Operation.RESUME
+      )
+
+      idempotencyHandler.updateCachedResponse(hash, id, result).bind()
+      result.bind()
+    }
   }
 
   override fun update(

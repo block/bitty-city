@@ -13,7 +13,7 @@ import xyz.block.domainapi.InfoOnly
 @Singleton
 class ValidationService @Inject constructor(
   private val ledgerClient: LedgerClient,
-  @Named("withdrawal.amounts.minimum") val minAmount: Long
+  @param:Named("withdrawal.amounts.minimum") val minAmount: Long
 ) {
   fun validateAmount(
     customerId: CustomerId,

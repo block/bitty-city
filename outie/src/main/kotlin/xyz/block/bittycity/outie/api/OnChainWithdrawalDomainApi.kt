@@ -213,7 +213,20 @@ class OnChainWithdrawalDomainApi @Inject constructor(
     val withdrawal = transactor.transactReadOnly("Get withdrawal") {
       getByToken(id)
     }.bind()
-    domainController.execute(withdrawal, listOf(resumeResult), Operation.RESUME).bind()
+    idempotencyHandler.handleResume(
+      id,
+      resumeResult
+    ).bind().getOrElse { hash ->
+      val result = domainController.execute(
+        withdrawal,
+        listOf(resumeResult),
+        Operation.RESUME
+      )
+
+      // Errors at the API level are never retryable for withdrawals so we can save error responses
+      idempotencyHandler.updateCachedResponse(hash, id, result).bind()
+      result.bind()
+    }
   }
 
   fun requiresSecureEndpoint(hurdleResponses: List<Input.HurdleResponse<RequirementId>>): Boolean =

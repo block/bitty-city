@@ -241,7 +241,7 @@ class AmountHandler @Inject constructor(
   private val limitClient: LimitClient,
   private val validationService: ValidationService,
   private val withdrawalStore: WithdrawalStore,
-  @Named("withdrawal.amounts.minimum") private val minAmount: Long
+  @param:Named("withdrawal.amounts.minimum") private val minAmount: Long
 ) {
   fun getHurdle(value: Withdrawal, currentBalance: Bitcoins) = result {
     val bitcoinAccount = getBitcoinAccount(value.customerId, value.sourceBalanceToken).bind()
@@ -347,8 +347,8 @@ class SpeedHandler @Inject constructor(
   private val currencyDisplayPreferenceClient: CurrencyDisplayPreferenceClient,
   private val feeQuoteClient: FeeQuoteClient,
   private val withdrawalStore: WithdrawalStore,
-  @Named("withdrawal.amounts.minimum") val minimum: Long,
-  @Named("withdrawal.amounts.free_tier_minimum") val amountFreeTierMin: Long,
+  @param:Named("withdrawal.amounts.minimum") val minimum: Long,
+  @param:Named("withdrawal.amounts.free_tier_minimum") val amountFreeTierMin: Long,
 ) {
   fun getHurdles(value: Withdrawal, currentBalance: Bitcoins) = result {
     val exchangeRate =

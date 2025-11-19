@@ -19,7 +19,7 @@ class FailStuckWithdrawalsJob @Inject constructor(
   override val stateMachine: StateMachine<WithdrawalToken, Withdrawal, WithdrawalState>,
   private val withdrawalStore: WithdrawalStore,
   private val metricsClient: MetricsClient,
-  @Named("withdrawal.stuck_after_minutes") private val stuckAfterMinutes: Long,
+  @param:Named("withdrawal.stuck_after_minutes") private val stuckAfterMinutes: Long,
 ) : WithdrawalTransitioner {
 
   override val logger: KLogger = KotlinLogging.logger {}

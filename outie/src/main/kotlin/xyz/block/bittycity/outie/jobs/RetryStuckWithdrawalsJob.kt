@@ -19,7 +19,7 @@ class RetryStuckWithdrawalsJob @Inject constructor(
   override val stateMachine: StateMachine<WithdrawalToken, Withdrawal, WithdrawalState>,
   private val withdrawalStore: WithdrawalStore,
   private val domainController: WithdrawalDomainController,
-  @Named("withdrawal.retryable_stuck_after_minutes") private val stuckAfterMinutes: Long,
+  @param:Named("withdrawal.retryable_stuck_after_minutes") private val stuckAfterMinutes: Long,
 ) : WithdrawalTransitioner {
 
   override val logger: KLogger = KotlinLogging.logger {}
