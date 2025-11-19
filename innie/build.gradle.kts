@@ -31,6 +31,8 @@ dependencies {
   implementation(libs.kotlinLogging)
   implementation(libs.kotlinReflect)
   implementation(libs.quiverLib)
+  implementation(libs.slf4jApi)
+  implementation(libs.slf4jNop)
 
   testImplementation(testFixtures(project(":common")))
   testImplementation(libs.kotestProperty)
