@@ -13,7 +13,7 @@ import xyz.block.domainapi.Input
 import java.util.zip.CRC32
 
 /**
- * Generic idempotency handler for Domain API execute calls.
+ * Generic idempotency handler for Domain API execute and resume calls.
  *
  * This handler manages idempotent execution of Domain API requests by:
  * - Hashing request parameters to create an idempotency key
@@ -26,11 +26,13 @@ import java.util.zip.CRC32
  * @param moshi The Moshi instance for JSON serialization.
  * @param transactor The transactor for database operations.
  * @param inputsAdapter A function to create a Moshi adapter for IdempotentInputs.
+ * @param resumeInputsAdapter A function to create a Moshi adapter for IdempotentResumeInputs.
  */
 class IdempotencyHandler<ID, REQ>(
   private val moshi: Moshi,
   private val transactor: Transactor<IdempotencyOperations<ID, REQ>>,
-  private val inputsAdapter: (Moshi) -> com.squareup.moshi.JsonAdapter<IdempotentInputs<ID, REQ>>
+  private val inputsAdapter: (Moshi) -> com.squareup.moshi.JsonAdapter<IdempotentInputs<ID, REQ>>,
+  private val resumeInputsAdapter: (Moshi) -> com.squareup.moshi.JsonAdapter<IdempotentResumeInputs<ID, REQ>>
 ) {
   /**
    * Handles an idempotent execute request.
@@ -47,6 +49,36 @@ class IdempotencyHandler<ID, REQ>(
   ): Result<Either<String, ExecuteResponse<ID, REQ>>> = result {
     val hash = hashExecuteParameters(id, backCounter, hurdleResponses)
     transactor.transact("Handle idempotency") {
+      val cachedResponse = findResponse(hash, id).bind()
+      if (cachedResponse == null) {
+        insertResponse(IdempotentResponse(hash, id, 0))
+          .recover { error ->
+            when (error) {
+              // This means another call inserted the response first so we bail and return an already processing error
+              is AlreadyProcessingException -> raise(DomainApiError.AlreadyProcessing(id.toString()))
+              else -> raise(error)
+            }
+          }
+        hash.left()
+      } else {
+        processCachedResponse(cachedResponse, id).bind().right()
+      }.success()
+    }.bind()
+  }
+
+  /**
+   * Handles an idempotent resume request.
+   *
+   * @param id The request identifier.
+   * @param resumeResult The resume result from the client.
+   * @return Either a new idempotency key (Left) if this is a new request, or the cached response (Right).
+   */
+  fun handleResume(
+    id: ID,
+    resumeResult: Input.ResumeResult<REQ>
+  ): Result<Either<String, ExecuteResponse<ID, REQ>>> = result {
+    val hash = hashResumeParameters(id, resumeResult)
+    transactor.transact("Handle resume idempotency") {
       val cachedResponse = findResponse(hash, id).bind()
       if (cachedResponse == null) {
         insertResponse(IdempotentResponse(hash, id, 0))
@@ -103,6 +135,11 @@ class IdempotencyHandler<ID, REQ>(
    * Computes a hash value based on the id of the request and the hurdle responses. This identifies an
    * identical call to the execute endpoint. The CRC32 algorithm is used to compute the hash value.
    *
+   * CRC32 produces a 32-bit hash which is acceptable here because:
+   * - Hash collisions are scoped per request ID (which is a UUID)
+   * - For a single request, the collision probability is negligible even with 100s of calls
+   * - CRC32 is ~10x faster than cryptographic hashes like SHA-256
+   *
    * @param id The id of the request.
    * @param backCounter The back counter.
    * @param hurdleResponses The responses to the hurdles sent by the client.
@@ -118,13 +155,42 @@ class IdempotencyHandler<ID, REQ>(
     crc32.update(data)
     val hash = crc32.value
 
-    // Convert 64-bit hash to a single 16-character hex string
+    // CRC32 produces a 32-bit hash, formatted as a 16-character hex string with leading zeros
     return "%016x".format(hash)
   }
 
   fun serialiseInputs(inputs: IdempotentInputs<ID, REQ>): String {
     return inputsAdapter(moshi).toJson(inputs)
   }
+
+  /**
+   * Computes a hash value based on the id of the request and the resume result. This identifies an
+   * identical call to the resume endpoint. The CRC32 algorithm is used to compute the hash value.
+   *
+   * CRC32 produces a 32-bit hash which is acceptable here because:
+   * - Hash collisions are scoped per request ID (which is a UUID)
+   * - For a single request, the collision probability is negligible even with 100s of calls
+   * - CRC32 is ~10x faster than cryptographic hashes like SHA-256
+   *
+   * @param id The id of the request.
+   * @param resumeResult The resume result from the client.
+   */
+  private fun hashResumeParameters(
+    id: ID,
+    resumeResult: Input.ResumeResult<REQ>
+  ): String {
+    val json = serialiseResumeInputs(IdempotentResumeInputs(id, resumeResult))
+    val data = json.toByteArray(Charsets.UTF_8)
+    val crc32 = CRC32()
+    crc32.update(data)
+    val hash = crc32.value
+
+    // CRC32 produces a 32-bit hash, formatted as a 16-character hex string with leading zeros
+    return "%016x".format(hash)
+  }
+
+  fun serialiseResumeInputs(inputs: IdempotentResumeInputs<ID, REQ>): String =
+    resumeInputsAdapter(moshi).toJson(inputs)
 
   /**
    * Looks at a cached result and returns it if complete or raises an AlreadyProcessing error if it is not.

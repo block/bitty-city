@@ -105,6 +105,7 @@ class JooqResponseOperations(
             )
             .where(WITHDRAWAL_RESPONSES.IDEMPOTENCY_KEY.eq(idempotencyKey))
             .and(WITHDRAWAL_RESPONSES.WITHDRAWAL_TOKEN.eq(response.requestId.toString()))
+            .and(WITHDRAWAL_RESPONSES.VERSION.eq(ULong.valueOf(response.version)))
 
         val updatedRows = updateStep.execute()
         val refreshed = findResponse(idempotencyKey, response.requestId).bind()

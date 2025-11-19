@@ -33,9 +33,9 @@ import xyz.block.domainapi.ExecuteResponse
 import xyz.block.domainapi.Input
 
 class TestApp @Inject constructor(
-  @Named(DATASOURCE) val dslContext: DSLContext,
-  @Named("withdrawal.amounts.minimum") val minAmount: Long,
-  @Named("withdrawal.amounts.free_tier_minimum") val minAmountFreeTier: Long,
+  @param:Named(DATASOURCE) val dslContext: DSLContext,
+  @param:Named("withdrawal.amounts.minimum") val minAmount: Long,
+  @param:Named("withdrawal.amounts.free_tier_minimum") val minAmountFreeTier: Long,
 ) {
 
   @Inject lateinit var data: TestRunData
