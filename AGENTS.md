@@ -78,6 +78,10 @@ This project uses [Hermit](https://cashapp.github.io/hermit/) for consistent too
 - **Null Safety**: Leverage Kotlin's null safety features
 - **Functional Style**: Use Arrow for functional programming patterns
 - **Type Safety**: Prefer type-safe solutions (e.g., jOOQ for SQL)
+- **Expression Syntax**: Prefer expression syntax wherever possible (e.g., `when` expressions, `if` expressions)
+- **Error Handling**: Never use `try/catch` - use `Result.catch` instead
+- **Early Returns**: Avoid early return statements - prefer expression-based control flow
+- **Elvis Operator**: Prefer elvis operators (`?:`) over `if (x == null)` expressions
 
 ### Testing
 
