@@ -1,6 +1,6 @@
 package xyz.block.bittycity.outie.models
 
-import arrow.core.test.laws.shouldBeFailure
+import io.kotest.matchers.result.shouldBeFailure
 import io.kotest.matchers.shouldBe
 import org.junit.jupiter.api.Test
 
