@@ -42,12 +42,14 @@ sealed class WithdrawalState(
     }
 
     // For backwards compatibility when parsing, here's a list of deprecated states
-    private val aliasedStatesMap: Map<String, WithdrawalState> = mapOf(
-      "COLLECTING_SPEED_SELECTION" to CollectingInfo,
-      "COLLECTING_USER_CONFIRMATION" to CollectingInfo,
-      "PERFORMING_STEP_UP_AUTHENTICATION" to CollectingInfo,
-      "RESERVING_FUNDS" to CollectingInfo,
-    )
+    private val aliasedStatesMap: Map<String, WithdrawalState> by lazy {
+      mapOf(
+        "COLLECTING_SPEED_SELECTION" to CollectingInfo,
+        "COLLECTING_USER_CONFIRMATION" to CollectingInfo,
+        "PERFORMING_STEP_UP_AUTHENTICATION" to CollectingInfo,
+        "RESERVING_FUNDS" to CollectingInfo,
+      )
+    }
 
     fun byName(name: String): Result<WithdrawalState> = result {
       allStatesMap[name]
