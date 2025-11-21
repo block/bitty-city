@@ -52,7 +52,7 @@ sealed class WithdrawalState(
     fun byName(name: String): Result<WithdrawalState> = result {
       allStatesMap[name]
         ?: aliasedStatesMap[name]
-        ?: raise(IllegalStateException("Unknown withdrawal state: $name"))
+        ?: raise(IllegalStateException("Unknown withdrawal state:「$name」"))
     }
 
     val allStates: Set<WithdrawalState> by lazy { allStatesMap.values.toSet() }
