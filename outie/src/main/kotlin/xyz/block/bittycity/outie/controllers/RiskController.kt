@@ -2,9 +2,11 @@ package xyz.block.bittycity.outie.controllers
 
 import app.cash.kfsm.StateMachine
 import arrow.core.raise.result
+import jakarta.inject.Inject
+import xyz.block.bittycity.common.client.RiskBlocked
+import xyz.block.bittycity.common.client.RiskClient
+import xyz.block.bittycity.common.client.RiskEvaluation
 import xyz.block.bittycity.outie.client.MetricsClient
-import xyz.block.bittycity.outie.client.RiskClient
-import xyz.block.bittycity.outie.client.RiskEvaluation
 import xyz.block.bittycity.outie.models.CheckingRisk
 import xyz.block.bittycity.outie.models.CheckingTravelRule
 import xyz.block.bittycity.outie.models.CollectingScamWarningDecision
@@ -14,7 +16,6 @@ import xyz.block.bittycity.outie.models.Withdrawal
 import xyz.block.bittycity.outie.models.WithdrawalState
 import xyz.block.bittycity.outie.models.WithdrawalToken
 import xyz.block.bittycity.outie.store.WithdrawalStore
-import jakarta.inject.Inject
 import xyz.block.domainapi.Input
 import xyz.block.domainapi.ProcessingState
 import xyz.block.domainapi.util.Operation
@@ -22,7 +23,7 @@ import xyz.block.domainapi.util.Operation
 class RiskController @Inject constructor(
   stateMachine: StateMachine<WithdrawalToken, Withdrawal, WithdrawalState>,
   withdrawalStore: WithdrawalStore,
-  private val riskClient: RiskClient,
+  private val riskClient: RiskClient<WithdrawalToken>,
   private val metricsClient: MetricsClient,
 ) : WithdrawalController(stateMachine, metricsClient, withdrawalStore) {
 

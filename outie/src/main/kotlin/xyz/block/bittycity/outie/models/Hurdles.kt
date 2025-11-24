@@ -18,6 +18,7 @@ import org.bitcoinj.base.Address
 import org.joda.money.Money
 import xyz.block.bittycity.common.models.BitcoinDisplayUnits
 import xyz.block.bittycity.common.models.Bitcoins
+import xyz.block.bittycity.common.models.CurrencyDisplayPreference
 import xyz.block.domainapi.Input
 import xyz.block.domainapi.Input.HurdleResponse
 import xyz.block.domainapi.ResultCode

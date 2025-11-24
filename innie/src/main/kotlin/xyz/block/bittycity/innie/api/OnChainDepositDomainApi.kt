@@ -15,7 +15,7 @@ import xyz.block.bittycity.innie.controllers.DomainController
 import xyz.block.bittycity.innie.controllers.IdempotencyHandler
 import xyz.block.bittycity.innie.models.Deposit
 import xyz.block.bittycity.innie.models.DepositState
-import xyz.block.bittycity.innie.models.WaitingForDepositPendingConfirmationStatus
+import xyz.block.bittycity.innie.models.CheckingEligibility
 import xyz.block.bittycity.innie.models.DepositToken
 import xyz.block.bittycity.innie.models.RequirementId
 import xyz.block.bittycity.innie.models.WaitingForDepositConfirmedOnChainStatus
@@ -53,7 +53,7 @@ class OnChainDepositDomainApi @Inject constructor(
     ).bind()
     val deposit = transactor.transact("insert deposit $id") {
       val existingDeposit = findByToken(id).bind()
-      existingDeposit?.success() ?: insertDeposit(
+      existingDeposit?.success() ?: insert(
         Deposit(
           id = id,
           state = mapPaymentState(initialRequest.paymentState),
@@ -138,8 +138,8 @@ class OnChainDepositDomainApi @Inject constructor(
 
   companion object {
     fun mapPaymentState(state: PaymentState): DepositState = when (state) {
-      PaymentState.AWAITING_CONFIRMATION -> WaitingForDepositPendingConfirmationStatus
-      PaymentState.COMPLETED_CONFIRMED -> WaitingForDepositConfirmedOnChainStatus
+      PaymentState.AWAITING_CONFIRMATION -> WaitingForDepositConfirmedOnChainStatus
+      PaymentState.COMPLETED_CONFIRMED -> CheckingEligibility
     }
   }
 }

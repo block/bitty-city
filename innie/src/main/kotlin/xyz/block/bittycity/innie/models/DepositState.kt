@@ -46,12 +46,8 @@ sealed class DepositState(
   }
 }
 
-data object WaitingForDepositPendingConfirmationStatus : DepositState(
-  to = { setOf(WaitingForDepositConfirmedOnChainStatus, ExpiredPending, Voided) }
-)
-
 data object WaitingForDepositConfirmedOnChainStatus : DepositState(
-  to = { setOf(CheckingEligibility, Voided) }
+  to = { setOf(CheckingEligibility, ExpiredPending, Voided) }
 )
 
 data object ExpiredPending : DepositState(

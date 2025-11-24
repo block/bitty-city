@@ -2,7 +2,7 @@ package xyz.block.bittycity.outie.controllers
 
 import app.cash.kfsm.StateMachine
 import arrow.core.raise.result
-import xyz.block.bittycity.outie.client.CurrencyDisplayPreferenceClient
+import xyz.block.bittycity.common.client.CurrencyDisplayPreferenceClient
 import xyz.block.bittycity.outie.client.LimitClient
 import xyz.block.bittycity.outie.client.LimitResponse
 import xyz.block.bittycity.outie.client.LimitViolation

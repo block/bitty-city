@@ -6,8 +6,8 @@ import com.google.inject.Scopes
 import com.google.inject.name.Names
 import xyz.block.bittycity.common.client.PreFlightClient
 import xyz.block.bittycity.outie.client.BitcoinAccountClient
-import xyz.block.bittycity.outie.client.CurrencyDisplayPreferenceClient
-import xyz.block.bittycity.outie.client.EligibilityClient
+import xyz.block.bittycity.common.client.CurrencyDisplayPreferenceClient
+import xyz.block.bittycity.common.client.EligibilityClient
 import xyz.block.bittycity.outie.client.EventClient
 import xyz.block.bittycity.common.client.ExchangeRateClient
 import xyz.block.bittycity.outie.client.FeeQuoteClient
@@ -15,7 +15,7 @@ import xyz.block.bittycity.outie.client.LedgerClient
 import xyz.block.bittycity.outie.client.LimitClient
 import xyz.block.bittycity.outie.client.MetricsClient
 import xyz.block.bittycity.outie.client.OnChainClient
-import xyz.block.bittycity.outie.client.RiskClient
+import xyz.block.bittycity.common.client.RiskClient
 import xyz.block.bittycity.outie.client.SanctionsClient
 import xyz.block.bittycity.outie.client.TravelRuleClient
 import xyz.block.bittycity.outie.json.WithdrawalMoshi
@@ -40,7 +40,10 @@ class TestModule : AbstractModule() {
     bindSingletonFake<LedgerClient, FakeLedgerClient>()
     bindSingletonFake<LimitClient, FakeLimitClient>()
     bindSingletonFake<OnChainClient, FakeOnChainClient>()
-    bindSingletonFake<RiskClient, FakeRiskClient>()
+    bind(FakeRiskClient::class.java).`in`(Scopes.SINGLETON)
+    bind(object : com.google.inject.TypeLiteral<RiskClient<xyz.block.bittycity.outie.models.WithdrawalToken>>() {})
+      .to(FakeRiskClient::class.java)
+      .`in`(Scopes.SINGLETON)
     bindSingletonFake<SanctionsClient, FakeSanctionsClient>()
     bindSingletonFake<TravelRuleClient, FakeTravelRuleClient>()
     bindSingletonFake<EligibilityClient, FakeEligibilityClient>()

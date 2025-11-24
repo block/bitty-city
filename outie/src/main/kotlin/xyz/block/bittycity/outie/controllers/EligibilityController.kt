@@ -2,8 +2,8 @@ package xyz.block.bittycity.outie.controllers
 
 import app.cash.kfsm.StateMachine
 import arrow.core.raise.result
-import xyz.block.bittycity.outie.client.Eligibility
-import xyz.block.bittycity.outie.client.EligibilityClient
+import xyz.block.bittycity.common.client.Eligibility
+import xyz.block.bittycity.common.client.EligibilityClient
 import xyz.block.bittycity.outie.client.MetricsClient
 import xyz.block.bittycity.outie.models.CheckingEligibility
 import xyz.block.bittycity.outie.models.FailureReason.CUSTOMER_IS_INELIGIBLE

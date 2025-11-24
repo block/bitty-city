@@ -1,4 +1,4 @@
-package xyz.block.bittycity.outie.testing
+package xyz.block.bittycity.innie.testing
 
 import xyz.block.bittycity.common.testing.TestFake
 

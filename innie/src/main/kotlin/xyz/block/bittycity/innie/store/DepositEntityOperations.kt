@@ -6,13 +6,13 @@ import xyz.block.bittycity.innie.models.DepositToken
 
 interface DepositEntityOperations {
 
-  fun insertDeposit(deposit: Deposit): Result<Deposit>
+  fun insert(deposit: Deposit): Result<Deposit>
 
   fun getByToken(token: DepositToken): Result<Deposit>
 
   fun findByToken(token: DepositToken): Result<Deposit?>
 
-  fun updateDeposit(deposit: Deposit): Result<Deposit>
+  fun update(deposit: Deposit): Result<Deposit>
 
   fun addReversal(id: DepositToken, reversal: DepositReversal): Result<DepositReversal>
 

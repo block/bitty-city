@@ -15,7 +15,6 @@ import xyz.block.bittycity.innie.models.Sanctioned
 import xyz.block.bittycity.innie.models.Settled
 import xyz.block.bittycity.innie.models.Voided
 import xyz.block.bittycity.innie.models.WaitingForDepositConfirmedOnChainStatus
-import xyz.block.bittycity.innie.models.WaitingForDepositPendingConfirmationStatus
 import xyz.block.bittycity.innie.models.WaitingForReversal
 import xyz.block.bittycity.innie.models.WaitingForReversalConfirmedOnChainStatus
 import xyz.block.bittycity.innie.models.WaitingForReversalPendingConfirmationStatus
@@ -25,8 +24,8 @@ class StateMachineTest {
 
   @Test
   fun `state machine happy path`() {
-    StateMachineUtilities.verify(WaitingForDepositPendingConfirmationStatus) shouldBeSuccess setOf(
-      WaitingForDepositPendingConfirmationStatus, WaitingForDepositConfirmedOnChainStatus, CheckingEligibility,
+    StateMachineUtilities.verify(WaitingForDepositConfirmedOnChainStatus) shouldBeSuccess setOf(
+      WaitingForDepositConfirmedOnChainStatus, CheckingEligibility,
       CheckingDepositRisk, Settled, WaitingForReversal, CollectingInfo, CheckingSanctions, CollectingSanctionsInfo,
       WaitingForSanctionsHeldDecision, Sanctioned, WaitingForReversalPendingConfirmationStatus,
       WaitingForReversalConfirmedOnChainStatus, ReversalConfirmedComplete, CheckingReversalRisk, ExpiredPending, Voided

@@ -1,6 +1,6 @@
 ```mermaid
 stateDiagram-v2
-    [*] --> WaitingForDepositPendingConfirmationStatus
+    [*] --> WaitingForDepositConfirmedOnChainStatus
     CheckingDepositRisk --> Settled
     CheckingDepositRisk --> WaitingForReversal
     CheckingEligibility --> CheckingDepositRisk
@@ -18,10 +18,8 @@ stateDiagram-v2
     ExpiredPending --> CheckingEligibility
     ExpiredPending --> Voided
     WaitingForDepositConfirmedOnChainStatus --> CheckingEligibility
+    WaitingForDepositConfirmedOnChainStatus --> ExpiredPending
     WaitingForDepositConfirmedOnChainStatus --> Voided
-    WaitingForDepositPendingConfirmationStatus --> ExpiredPending
-    WaitingForDepositPendingConfirmationStatus --> Voided
-    WaitingForDepositPendingConfirmationStatus --> WaitingForDepositConfirmedOnChainStatus
     WaitingForReversal --> CollectingInfo
     WaitingForReversalConfirmedOnChainStatus --> ReversalConfirmedComplete
     WaitingForReversalConfirmedOnChainStatus --> WaitingForReversal

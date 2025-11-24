@@ -1,4 +1,4 @@
-package xyz.block.bittycity.outie.client
+package xyz.block.bittycity.common.client
 
 import xyz.block.domainapi.InfoOnly
 
@@ -35,7 +35,5 @@ sealed class Eligibility {
    */
   data class Eligible(val allowReasons: List<String>) : Eligibility()
 }
-
-
 
 class IneligibleCustomer(val violations: List<String>) : Exception(), InfoOnly

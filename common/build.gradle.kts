@@ -27,6 +27,8 @@ dependencies {
     implementation(libs.kfsm)
     implementation(libs.moshi)
     implementation(libs.quiverLib)
+    implementation(libs.resilience4jKotlin)
+    implementation(libs.resilience4jRetry)
 
     testImplementation(libs.kotestAssertions)
     testImplementation(libs.kotestJunitRunnerJvm)
