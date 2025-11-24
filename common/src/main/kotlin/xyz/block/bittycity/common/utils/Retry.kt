@@ -1,4 +1,4 @@
-package xyz.block.bittycity.outie.utils
+package xyz.block.bittycity.common.utils
 
 import java.time.Duration
 import java.util.UUID

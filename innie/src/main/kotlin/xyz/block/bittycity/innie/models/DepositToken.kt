@@ -1,27 +1,17 @@
 package xyz.block.bittycity.innie.models
 
-import app.cash.quiver.extensions.catch
-import app.cash.quiver.extensions.mapFailure
-import arrow.core.raise.result
-import java.util.UUID
-
-class DepositToken(val uuid: UUID) {
-  override fun toString(): String = "$PREFIX$uuid"
+class DepositToken(val token: String) {
+  override fun toString(): String = "$PREFIX$token"
+  fun outputToken(): String = this.token.removePrefix(PREFIX)
 
   companion object {
     const val PREFIX = "BTCD_"
 
-    fun parse(token: String): Result<DepositToken> = result {
-      val uuidString = token.removePrefix(PREFIX)
-      val uuid = Result.catch { UUID.fromString(uuidString) }
-        .mapFailure { IllegalArgumentException("Invalid UUID:「$token」", it) }
-        .bind()
-      DepositToken(uuid)
+    fun create(token: String): DepositToken {
+      return DepositToken(PREFIX + token)
     }
 
-    fun isValidTokenFormat(token: String): Boolean = Result.catch {
-      token.startsWith(PREFIX) &&
-              UUID.fromString(token.removePrefix(PREFIX)) != null
-    }.getOrDefault(false)
+    fun isValidTokenFormat(token: String): Boolean =
+      token.startsWith(PREFIX) && token.removePrefix(PREFIX).isNotEmpty()
   }
 }

@@ -24,7 +24,6 @@ import xyz.block.bittycity.innie.models.Sanctioned
 import xyz.block.bittycity.innie.models.Settled
 import xyz.block.bittycity.innie.models.Voided
 import xyz.block.bittycity.innie.models.WaitingForDepositConfirmedOnChainStatus
-import xyz.block.bittycity.innie.models.WaitingForDepositPendingConfirmationStatus
 import xyz.block.bittycity.innie.models.WaitingForReversal
 import xyz.block.bittycity.innie.models.WaitingForReversalConfirmedOnChainStatus
 import xyz.block.bittycity.innie.models.WaitingForReversalPendingConfirmationStatus
@@ -50,12 +49,8 @@ object StateMachineModule  : AbstractModule() {
       }
 
     return fsm<DepositToken, Deposit, DepositState>(transitioner) {
-      WaitingForDepositPendingConfirmationStatus becomes {
-        WaitingForDepositConfirmedOnChainStatus via logOnly()
-        ExpiredPending via logOnly()
-        Voided via logOnly()
-      }
       WaitingForDepositConfirmedOnChainStatus becomes {
+        ExpiredPending via logOnly()
         CheckingEligibility via logOnly()
         Voided via logOnly()
       }

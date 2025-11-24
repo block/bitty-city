@@ -9,7 +9,7 @@ import xyz.block.bittycity.common.fsm.StateMachineDiagramGenerator
 import xyz.block.bittycity.innie.models.Deposit
 import xyz.block.bittycity.innie.models.DepositState
 import xyz.block.bittycity.innie.models.DepositToken
-import xyz.block.bittycity.innie.models.WaitingForDepositPendingConfirmationStatus
+import xyz.block.bittycity.innie.models.WaitingForDepositConfirmedOnChainStatus
 import xyz.block.bittycity.innie.testing.TestModule
 import java.io.File
 
@@ -34,5 +34,5 @@ fun main(args: Array<String>) {
   )
 
   // Use the generic diagram generator from the common module
-  StateMachineDiagramGenerator.generateDiagram(stateMachine, WaitingForDepositPendingConfirmationStatus, outputFile)
+  StateMachineDiagramGenerator.generateDiagram(stateMachine, WaitingForDepositConfirmedOnChainStatus, outputFile)
 }

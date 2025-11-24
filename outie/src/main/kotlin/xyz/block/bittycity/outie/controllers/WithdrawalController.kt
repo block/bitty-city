@@ -12,7 +12,7 @@ import xyz.block.bittycity.outie.models.Withdrawal
 import xyz.block.bittycity.outie.models.WithdrawalState
 import xyz.block.bittycity.outie.models.WithdrawalToken
 import xyz.block.bittycity.outie.store.WithdrawalStore
-import xyz.block.bittycity.outie.utils.retry
+import xyz.block.bittycity.common.utils.retry
 import xyz.block.domainapi.Input
 import xyz.block.domainapi.util.Controller
 import java.util.concurrent.CompletableFuture.supplyAsync

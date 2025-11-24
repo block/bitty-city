@@ -3,8 +3,8 @@ package xyz.block.bittycity.outie.json
 import xyz.block.bittycity.common.models.BitcoinDisplayUnits
 import xyz.block.bittycity.common.models.Bitcoins
 import xyz.block.bittycity.common.utils.CurrencyConversionUtils
-import xyz.block.bittycity.outie.models.CurrencyDisplayPreference
-import xyz.block.bittycity.outie.models.CurrencyDisplayUnits
+import xyz.block.bittycity.common.models.CurrencyDisplayPreference
+import xyz.block.bittycity.common.models.CurrencyDisplayUnits
 import xyz.block.bittycity.common.idempotency.IdempotentInputs
 import xyz.block.bittycity.common.models.FlatFee
 import xyz.block.bittycity.outie.models.Inputs

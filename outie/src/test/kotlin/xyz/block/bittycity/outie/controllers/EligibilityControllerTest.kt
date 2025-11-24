@@ -1,7 +1,7 @@
 package xyz.block.bittycity.outie.controllers
 
 import app.cash.quiver.extensions.success
-import xyz.block.bittycity.outie.client.Eligibility
+import xyz.block.bittycity.common.client.Eligibility
 import xyz.block.bittycity.outie.models.CheckingEligibility
 import xyz.block.bittycity.outie.models.Failed
 import xyz.block.bittycity.outie.models.FailureReason.CUSTOMER_IS_INELIGIBLE

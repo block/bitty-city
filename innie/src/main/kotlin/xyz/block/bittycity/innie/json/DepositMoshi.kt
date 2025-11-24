@@ -55,7 +55,7 @@ object DepositMoshi {
     fun toJson(token: DepositToken): String = token.toString()
 
     @FromJson
-    fun fromJson(token: String): DepositToken = DepositToken.parse(token).getOrThrow()
+    fun fromJson(token: String): DepositToken = DepositToken.create(token)
   }
 
   object RequirementIdJsonAdapter : JsonAdapter<xyz.block.bittycity.innie.models.RequirementId>() {

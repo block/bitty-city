@@ -1,6 +1,4 @@
-package xyz.block.bittycity.outie.models
-
-import xyz.block.bittycity.common.models.BitcoinDisplayUnits
+package xyz.block.bittycity.common.models
 
 data class CurrencyDisplayPreference(
   val currencyDisplayUnits: CurrencyDisplayUnits,

@@ -11,12 +11,12 @@ class DepositReversalToken(val uuid: UUID) {
   companion object {
     const val PREFIX = "BTCDR_"
 
-    fun parse(token: String): Result<DepositToken> = result {
+    fun parse(token: String): Result<DepositReversalToken> = result {
       val uuidString = token.removePrefix(PREFIX)
       val uuid = Result.catch { UUID.fromString(uuidString) }
         .mapFailure { IllegalArgumentException("Invalid UUID:「$token」", it) }
         .bind()
-      DepositToken(uuid)
+      DepositReversalToken(uuid)
     }
 
     fun isValidTokenFormat(token: String): Boolean = Result.catch {

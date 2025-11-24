@@ -1,5 +1,6 @@
 package xyz.block.bittycity.outie.models
 
+import xyz.block.bittycity.common.models.CurrencyDisplayPreference
 import xyz.block.bittycity.common.models.CustomerId
 
 data class BitcoinAccount(

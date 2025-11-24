@@ -3,6 +3,7 @@ package xyz.block.bittycity.outie.controllers
 import app.cash.kfsm.StateMachine
 import app.cash.quiver.extensions.mapFailure
 import arrow.core.raise.result
+import xyz.block.bittycity.common.client.RiskBlocked
 import xyz.block.bittycity.outie.client.Evaluation
 import xyz.block.bittycity.outie.client.MetricsClient
 import xyz.block.bittycity.outie.client.SanctionsClient
@@ -124,7 +125,6 @@ class SanctionsController @Inject constructor(
   }
 }
 
-data object RiskBlocked : Exception(), InfoOnly
 data class UnexpectedErrorAfterSanctionsHoldResult(
   override val cause: Throwable?
 ) : Exception(cause), WarnOnly

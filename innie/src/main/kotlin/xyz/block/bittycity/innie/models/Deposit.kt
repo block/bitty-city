@@ -3,10 +3,12 @@ package xyz.block.bittycity.innie.models
 import app.cash.kfsm.Value
 import org.bitcoinj.base.Address
 import org.joda.money.Money
+import xyz.block.bittycity.common.models.BitcoinDisplayUnits
 import xyz.block.bittycity.common.models.Bitcoins
 import xyz.block.bittycity.common.models.CustomerId
 import xyz.block.bittycity.common.models.LedgerTransactionId
 import xyz.block.bittycity.common.utils.CurrencyConversionUtils.bitcoinsToUsd
+import xyz.block.domainapi.ProcessingState
 import java.time.Instant
 
 data class Deposit(
@@ -58,4 +60,8 @@ data class Deposit(
   override fun update(newState: DepositState): Deposit = this.copy(state = newState)
 
   val fiatEquivalentAmount: Money = bitcoinsToUsd(amount, exchangeRate)
+
+  fun asProcessingState(
+    bitcoinDisplayUnits: BitcoinDisplayUnits? = null,
+  ): ProcessingState<Deposit, RequirementId> = state.processingState(this, bitcoinDisplayUnits)
 }

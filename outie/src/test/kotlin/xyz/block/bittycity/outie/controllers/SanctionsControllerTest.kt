@@ -9,6 +9,7 @@ import io.kotest.matchers.types.shouldBeInstanceOf
 import io.kotest.property.arbitrary.next
 import jakarta.inject.Inject
 import org.junit.jupiter.api.Test
+import xyz.block.bittycity.common.client.RiskBlocked
 import xyz.block.bittycity.outie.client.Evaluation
 import xyz.block.bittycity.outie.models.CheckingRisk
 import xyz.block.bittycity.outie.models.CheckingSanctions

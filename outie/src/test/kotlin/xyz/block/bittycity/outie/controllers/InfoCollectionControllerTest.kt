@@ -8,8 +8,8 @@ import xyz.block.bittycity.common.utils.CurrencyConversionUtils
 import xyz.block.bittycity.common.models.BitcoinDisplayUnits.BITCOIN
 import xyz.block.bittycity.common.models.Bitcoins
 import xyz.block.bittycity.outie.models.CollectingInfo
-import xyz.block.bittycity.outie.models.CurrencyDisplayPreference
-import xyz.block.bittycity.outie.models.CurrencyDisplayUnits.USD
+import xyz.block.bittycity.common.models.CurrencyDisplayPreference
+import xyz.block.bittycity.common.models.CurrencyDisplayUnits.USD
 import xyz.block.bittycity.common.models.FlatFee
 import xyz.block.bittycity.outie.models.Withdrawal
 import xyz.block.bittycity.outie.models.WithdrawalHurdle

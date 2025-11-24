@@ -8,11 +8,28 @@ import jakarta.inject.Singleton
 import xyz.block.bittycity.common.idempotency.IdempotentInputs
 import xyz.block.bittycity.common.idempotency.IdempotentResumeInputs
 import xyz.block.bittycity.common.store.Transactor
+import xyz.block.bittycity.innie.models.Deposit
+import xyz.block.bittycity.innie.models.DepositState
 import xyz.block.bittycity.innie.models.DepositToken
 import xyz.block.bittycity.innie.models.RequirementId
+import xyz.block.bittycity.innie.models.WaitingForDepositConfirmedOnChainStatus
 import xyz.block.bittycity.innie.store.ResponseOperations
+import xyz.block.domainapi.util.Controller
 
 object DomainControllerModule : AbstractModule() {
+  @Provides
+  @Singleton
+  fun provideDomainController(
+    onChainController: OnChainController
+  ): DomainController<DepositToken, DepositState, Deposit, RequirementId> {
+    val stateToController:
+      Map<DepositState, Controller<DepositToken, DepositState, Deposit, RequirementId>> = mapOf(
+        WaitingForDepositConfirmedOnChainStatus to onChainController
+      ).mapValues { (_, controller) ->
+        controller as Controller<DepositToken, DepositState, Deposit, RequirementId>
+    }
+    return DomainController(stateToController)
+  }
 
   @Provides
   @Singleton
