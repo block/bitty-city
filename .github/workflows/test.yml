@@ -29,7 +29,7 @@ jobs:
 
       - name: Publish Test Report
         if: ${{ always() }}
-        uses: mikepenz/action-junit-report@8d56002d1c263bbb981b3347b6fa8c2bc55d0a0f
+        uses: mikepenz/action-junit-report@f882a85cb6364b0d8a320ca4e1f35e06b73de61b
         with:
           check_name: Test Report - ${{ matrix.cmd }}
           report_paths: '**/build/test-results/test/TEST-*.xml'
