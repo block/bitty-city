@@ -3,22 +3,16 @@ package xyz.block.bittycity.outie.fsm
 import app.cash.quiver.extensions.catch
 import app.cash.quiver.extensions.mapFailure
 import arrow.core.raise.result
-import xyz.block.bittycity.outie.client.EventClient
-import xyz.block.bittycity.outie.client.LedgerClient
-import xyz.block.bittycity.outie.client.OnChainClient
-import xyz.block.bittycity.outie.client.WithdrawRequest.Companion.toWithdrawalRequest
-import xyz.block.bittycity.outie.client.WithdrawalEvent
-import xyz.block.bittycity.outie.models.Failed
-import xyz.block.bittycity.outie.models.Sanctioned
-import xyz.block.bittycity.outie.models.WaitingForPendingConfirmationStatus
-import xyz.block.bittycity.outie.models.Withdrawal
-import xyz.block.bittycity.outie.models.WithdrawalTransitionEvent
-import xyz.block.bittycity.common.store.Transactor
-import xyz.block.bittycity.outie.store.WithdrawalOperations
 import com.squareup.moshi.Moshi
 import io.github.oshai.kotlinlogging.KLogger
 import io.github.oshai.kotlinlogging.KotlinLogging
 import jakarta.inject.Inject
+import xyz.block.bittycity.common.store.Transactor
+import xyz.block.bittycity.outie.client.EventClient
+import xyz.block.bittycity.outie.client.WithdrawalEvent
+import xyz.block.bittycity.outie.models.Withdrawal
+import xyz.block.bittycity.outie.models.WithdrawalTransitionEvent
+import xyz.block.bittycity.outie.store.WithdrawalOperations
 
 /**
  * Open class for processing withdrawal transition events.
@@ -28,11 +22,8 @@ import jakarta.inject.Inject
 open class WithdrawalEventProcessor @Inject constructor(
   private val withdrawalTransactor: Transactor<WithdrawalOperations>,
   private val eventClient: EventClient,
-  private val onChainClient: OnChainClient,
-  private val ledgerClient: LedgerClient,
   private val moshi: Moshi
 ) {
-
   private val logger: KLogger = KotlinLogging.logger {}
 
   /**
@@ -70,45 +61,7 @@ open class WithdrawalEventProcessor @Inject constructor(
   open fun additionalHandling(
     withdrawal: Withdrawal?,
     event: WithdrawalTransitionEvent
-  ): Result<Unit> = result {
-    withdrawal?.let {
-      when (event.to) {
-        Failed -> {
-          logger.info {
-            "Failing withdrawal. " +
-              "[token=${withdrawal.id}]" +
-              "[reason=${withdrawal.failureReason}]" +
-              "[ledgerTransaction=${withdrawal.ledgerTransactionId}]"
-          }
-          withdrawal.ledgerTransactionId?.let {
-            ledgerClient.voidTransaction(
-              customerId = withdrawal.customerId,
-              balanceId = withdrawal.sourceBalanceToken,
-              ledgerTransactionId = it
-            ).bind()
-          }
-        }
-
-        Sanctioned -> {
-          logger.info {
-            "Freezing funds for withdrawal. " +
-              "[token=${withdrawal.id}]" +
-              "[ledgerTransaction=${withdrawal.ledgerTransactionId}]"
-          }
-          ledgerClient.freezeFunds(withdrawal = withdrawal).bind()
-        }
-
-        WaitingForPendingConfirmationStatus -> {
-          val request = withdrawal.toWithdrawalRequest().bind()
-          onChainClient.submitWithdrawal(request).bind()
-        }
-
-        else -> {
-          // Nothing to do
-        }
-      }
-    }
-  }
+  ): Result<Unit> = result { }
 
   private fun publishEvent(
     withdrawal: Withdrawal?,
