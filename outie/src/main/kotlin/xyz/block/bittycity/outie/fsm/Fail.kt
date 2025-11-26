@@ -1,7 +1,11 @@
 package xyz.block.bittycity.outie.fsm
 
+import app.cash.kfsm.DeferrableEffect
+import app.cash.kfsm.EffectPayload
 import app.cash.kfsm.States
+import app.cash.kfsm.annotations.ExperimentalLibraryApi
 import arrow.core.raise.result
+import com.squareup.moshi.Moshi
 import xyz.block.bittycity.outie.models.CheckingEligibility
 import xyz.block.bittycity.outie.models.CheckingRisk
 import xyz.block.bittycity.outie.models.CheckingSanctions
@@ -16,14 +20,22 @@ import xyz.block.bittycity.outie.models.WaitingForConfirmedOnChainStatus
 import xyz.block.bittycity.outie.models.WaitingForPendingConfirmationStatus
 import xyz.block.bittycity.outie.models.WaitingForSanctionsHeldDecision
 import xyz.block.bittycity.outie.models.Withdrawal
+import xyz.block.bittycity.outie.models.WithdrawalToken
 import io.github.oshai.kotlinlogging.KLogger
 import io.github.oshai.kotlinlogging.KotlinLogging
+import jakarta.inject.Inject
+import xyz.block.bittycity.outie.client.LedgerClient
+import xyz.block.bittycity.outie.models.WithdrawalState
 
 /**
  * Fails the withdrawal. Any prior funds reservation is voided.
  */
 
-class Fail :
+@OptIn(ExperimentalLibraryApi::class)
+class Fail @Inject constructor(
+  private val ledgerClient: LedgerClient,
+  private val moshi: Moshi
+) :
   WithdrawalTransition(
     from = States(
       CollectingInfo,
@@ -40,14 +52,32 @@ class Fail :
       WaitingForConfirmedOnChainStatus
     ),
     to = Failed,
-  ) {
+  ), DeferrableEffect<WithdrawalToken, Withdrawal, WithdrawalState> {
   val logger: KLogger = KotlinLogging.logger {}
 
+  override val effectType: String = "fail"
+
+  override fun serialize(value: Withdrawal): Result<EffectPayload> = result {
+    val adapter = moshi.adapter(Withdrawal::class.java)
+    EffectPayload(
+      effectType = effectType,
+      data = adapter.toJson(value)
+    )
+  }
+
   override fun effect(value: Withdrawal): Result<Withdrawal> = result {
-    // Only log here - the effect is executed in the event processor
-    logger.info { "Withdrawal will be failed. [token=${value.id}]" }
+    logger.info {
+      "Failing withdrawal. " +
+              "[token=${value.id}]" +
+              "[reason=${value.failureReason}]" +
+              "[ledgerTransaction=${value.ledgerTransactionId}]"
+    }
     value.ledgerTransactionId?.let {
-      logger.info { "Ledger transaction will be voided. [ledgerTransaction=$it]" }
+      ledgerClient.voidTransaction(
+        customerId = value.customerId,
+        balanceId = value.sourceBalanceToken,
+        ledgerTransactionId = it
+      ).bind()
     }
     value
   }

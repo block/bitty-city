@@ -74,7 +74,7 @@ class WithdrawalEventProcessorTest : BittyCityTestCase() {
   }
 
   @Test
-  fun `does not process event if previous event failed`() = runTest {
+  fun `processes event even if side effect fails in outbox`() = runTest {
     val withdrawal = data.seedWithdrawal(
       state = SubmittingOnChain,
       walletAddress = data.targetWalletAddress,
@@ -99,12 +99,12 @@ class WithdrawalEventProcessorTest : BittyCityTestCase() {
     onChainService.failNextCall = true
     processWithdrawalEvents()
 
-    // So only two will be published because processing the second one fails when trying to submit
+    // All 3 events should be published because outbox decouples side effects
     eventClient.published should { events ->
-      events.size shouldBe 2
+      events.size shouldBe 3
     }
 
-    // We check that the ledger is not called (would happen if the third event gets processed)
+    // We check that the ledger is not called because seedWithdrawal didn't provide ledger token
     ledgerClient.voidCalls.shouldBeEmpty()
   }
 }
