@@ -20,7 +20,7 @@ import io.github.oshai.kotlinlogging.KotlinLogging
 @OptIn(ExperimentalLibraryApi::class)
 class FreezeFunds @Inject constructor(
   private val ledgerClient: LedgerClient,
-  private val moshi: Moshi
+  moshi: Moshi
 ) :
   WithdrawalTransition(
     from = States(CollectingSanctionsInfo, WaitingForSanctionsHeldDecision),
@@ -28,10 +28,12 @@ class FreezeFunds @Inject constructor(
   ), DeferrableEffect<WithdrawalToken, Withdrawal, WithdrawalState> {
   val logger: KLogger = KotlinLogging.logger {}
 
+  private val adapter = moshi.adapter(Withdrawal::class.java)
+
   override val effectType: String = "freeze_funds"
 
   override fun serialize(value: Withdrawal): Result<EffectPayload> = result {
-    val adapter = moshi.adapter(Withdrawal::class.java)
+
     EffectPayload(
       effectType = effectType,
       data = adapter.toJson(value)

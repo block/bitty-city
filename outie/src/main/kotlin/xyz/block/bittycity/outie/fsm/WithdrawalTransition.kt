@@ -9,7 +9,7 @@ import xyz.block.bittycity.outie.models.WithdrawalToken
 /**
  * Base class representing all possible transitions for a withdrawal.
  */
-abstract class WithdrawalTransition(
+sealed class WithdrawalTransition(
   from: States<WithdrawalToken, Withdrawal, WithdrawalState>,
   to: WithdrawalState
 ) : Transition<WithdrawalToken, Withdrawal, WithdrawalState>(from, to) {

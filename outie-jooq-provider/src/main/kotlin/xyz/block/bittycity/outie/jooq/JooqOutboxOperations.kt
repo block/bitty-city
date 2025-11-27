@@ -73,4 +73,26 @@ class JooqOutboxOperations(
       .execute()
     Unit
   }
+
+  @OptIn(ExperimentalLibraryApi::class)
+  override fun fetchPreviousOutboxMessage(message: OutboxMessage<String>): Result<OutboxMessage<String>?> = result {
+    dsl.selectFrom(OUTBOX)
+      .where(OUTBOX.VALUE_ID.eq(message.valueId))
+      .and(OUTBOX.CREATED_AT.lt(message.createdAt))
+      .orderBy(OUTBOX.CREATED_AT.desc())
+      .limit(1)
+      .fetchOne { record ->
+        val effectPayload = effectPayloadAdapter.fromJson(record.effectPayload.data())!!
+        OutboxMessage(
+          id = record.id,
+          valueId = record.valueId,
+          effectPayload = effectPayload,
+          createdAt = record.createdAt,
+          processedAt = record.processedAt,
+          status = OutboxStatus.valueOf(record.status),
+          attemptCount = record.attemptCount ?: 0,
+          lastError = record.lastError
+        )
+      }
+  }
 }

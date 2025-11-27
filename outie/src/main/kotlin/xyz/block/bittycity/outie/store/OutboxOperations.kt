@@ -13,4 +13,7 @@ interface OutboxOperations {
   fun markAsProcessed(id: String): Result<Unit>
   
   fun markAsFailed(id: String, error: String?): Result<Unit>
+
+  @OptIn(ExperimentalLibraryApi::class)
+  fun fetchPreviousOutboxMessage(message: OutboxMessage<String>): Result<OutboxMessage<String>?>
 }
