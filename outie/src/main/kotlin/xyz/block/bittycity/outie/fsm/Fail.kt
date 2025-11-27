@@ -34,7 +34,7 @@ import xyz.block.bittycity.outie.models.WithdrawalState
 @OptIn(ExperimentalLibraryApi::class)
 class Fail @Inject constructor(
   private val ledgerClient: LedgerClient,
-  private val moshi: Moshi
+  moshi: Moshi
 ) :
   WithdrawalTransition(
     from = States(
@@ -57,8 +57,9 @@ class Fail @Inject constructor(
 
   override val effectType: String = "fail"
 
+  private val adapter = moshi.adapter(Withdrawal::class.java)
+
   override fun serialize(value: Withdrawal): Result<EffectPayload> = result {
-    val adapter = moshi.adapter(Withdrawal::class.java)
     EffectPayload(
       effectType = effectType,
       data = adapter.toJson(value)

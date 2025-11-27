@@ -1,8 +1,11 @@
 package xyz.block.bittycity.outie.fsm
 
 import app.cash.kfsm.OutboxMessage
+import app.cash.kfsm.OutboxStatus
+import app.cash.kfsm.DeferrableEffect
 import app.cash.kfsm.annotations.ExperimentalLibraryApi
 import arrow.core.raise.result
+import com.google.inject.Injector
 import xyz.block.bittycity.common.store.Transactor
 import xyz.block.bittycity.outie.models.Withdrawal
 import xyz.block.bittycity.outie.store.WithdrawalOperations
@@ -13,13 +16,17 @@ import jakarta.inject.Inject
 
 class OutboxProcessor @Inject constructor(
   private val transactor: Transactor<WithdrawalOperations>,
-  private val fail: Fail,
-  private val freezeFunds: FreezeFunds,
-  private val submittedOnChain: SubmittedOnChain,
+  private val injector: Injector,
   moshi: Moshi
 ) {
   private val logger: KLogger = KotlinLogging.logger {}
   private val adapter = moshi.adapter(Withdrawal::class.java)
+
+  @OptIn(ExperimentalLibraryApi::class)
+  private val deferredTransitions: Map<String, WithdrawalTransition> = WithdrawalTransition::class.sealedSubclasses
+    .map { injector.getInstance(it.java) }
+    .filter { it is DeferrableEffect<*, *, *> }
+    .associateBy { (it as DeferrableEffect<*, *, *>).effectType }
 
   fun processBatches(): Result<Unit> = processBatchesRecursive()
 
@@ -45,19 +52,31 @@ class OutboxProcessor @Inject constructor(
 
   @OptIn(ExperimentalLibraryApi::class)
   private fun processMessage(message: OutboxMessage<String>): Result<Unit> = result {
-    val withdrawal = adapter.fromJson(message.effectPayload.data)
-      ?: raise(IllegalStateException("Failed to deserialize withdrawal"))
-
-    when (message.effectPayload.effectType) {
-      fail.effectType -> fail.effect(withdrawal).bind()
-      freezeFunds.effectType -> freezeFunds.effect(withdrawal).bind()
-      submittedOnChain.effectType -> submittedOnChain.effect(withdrawal).bind()
-      else -> logger.warn { "Unknown effect type: ${message.effectPayload.effectType}" }
-    }
-
-    transactor.transact("mark outbox processed") {
-      markAsProcessed(message.id)
+    val previousMessage = transactor.transactReadOnly("fetch prior outbox message") {
+      fetchPreviousOutboxMessage(message)
     }.bind()
+
+    if (previousMessage == null || previousMessage.status == OutboxStatus.COMPLETED) {
+      val withdrawal = adapter.fromJson(message.effectPayload.data)
+        ?: raise(IllegalStateException("Failed to deserialize withdrawal"))
+
+      val transition = deferredTransitions[message.effectPayload.effectType]
+
+      if (transition != null) {
+        transition.effect(withdrawal).bind()
+      } else {
+        raise(IllegalStateException("Unknown effect type: ${message.effectPayload.effectType}"))
+      }
+
+      transactor.transact("mark outbox processed") {
+        markAsProcessed(message.id)
+      }.bind()
+    } else {
+      logger.warn {
+        "Did not process message ${message.id} because the previous message " +
+                "(${previousMessage.id}) was not processed (status=${previousMessage.status})"
+      }
+    }
   }
 
   companion object {

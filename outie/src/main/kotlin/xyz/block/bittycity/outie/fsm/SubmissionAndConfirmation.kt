@@ -22,7 +22,7 @@ import jakarta.inject.Inject
 @OptIn(ExperimentalLibraryApi::class)
 class SubmittedOnChain @Inject constructor(
   private val onChainClient: OnChainClient,
-  private val moshi: Moshi
+  moshi: Moshi
 ) :
   WithdrawalTransition(
     from = States(SubmittingOnChain),
@@ -30,9 +30,10 @@ class SubmittedOnChain @Inject constructor(
   ), DeferrableEffect<WithdrawalToken, Withdrawal, WithdrawalState> {
  
   override val effectType = "submitted_on_chain"
+
+  private val adapter = moshi.adapter(Withdrawal::class.java)
  
   override fun serialize(value: Withdrawal): Result<EffectPayload> = result {
-    val adapter = moshi.adapter(Withdrawal::class.java)
     EffectPayload(
       effectType = effectType,
       data = adapter.toJson(value)
