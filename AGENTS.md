@@ -82,6 +82,7 @@ This project uses [Hermit](https://cashapp.github.io/hermit/) for consistent too
 - **Error Handling**: Never use `try/catch` - use `Result.catch` instead
 - **Early Returns**: Avoid early return statements - prefer expression-based control flow
 - **Elvis Operator**: Prefer elvis operators (`?:`) over `if (x == null)` expressions
+- **Collections**: Prefer immutable collections over mutable collections (e.g., use `associate`, `associateWith`, `map` instead of `mutableMapOf`, `mutableListOf`)
 
 ### Testing
 
