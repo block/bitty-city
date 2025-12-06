@@ -184,18 +184,13 @@ class JooqWithdrawalEntityOperations(
         .where(WITHDRAWALS.TOKEN.`in`(tokenStrings))
         .fetch()
 
-      val results = mutableMapOf<WithdrawalToken, Withdrawal?>()
-      for (token in tokens) {
-        results[token] = null
-      }
-
-      records.forEach { record ->
+      val withdrawalsByToken = records.associate { record ->
         val tokenString = record.get(WITHDRAWALS.TOKEN)
         val token = WithdrawalToken.parse(tokenString!!).bind()
-        results[token] = recordToModel(record)
+        token to recordToModel(record)
       }
 
-      results
+      tokens.associateWith { withdrawalsByToken[it] }
     }
 
   private fun containsSpeedOptionRecord(record: Record): Boolean = record.fields().filter {
