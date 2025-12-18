@@ -25,7 +25,7 @@ quiver = "1.0.2"
 reflections = "0.10.2"
 resilience4j = "2.3.0"
 slf4j = "2.0.17"
-testContainersMySql = "1.21.3"
+testContainers = "2.0.3"
 versionCatalogUpdateGradlePlugin = "0.8.5"
 versionsGradlePlugin = "0.53.0"
 
@@ -65,8 +65,9 @@ resilience4jKotlin = { module = "io.github.resilience4j:resilience4j-kotlin", ve
 resilience4jRetry = { module = "io.github.resilience4j:resilience4j-retry", version.ref = "resilience4j" }
 slf4jApi = { module = "org.slf4j:slf4j-api", version.ref = "slf4j" }
 slf4jNop = { module = "org.slf4j:slf4j-nop", version.ref = "slf4j" }
-testContainers = { module = "org.testcontainers:testcontainers", version.ref = "testContainersMySql" }
-testContainersMySql = { module = "org.testcontainers:mysql", version.ref = "testContainersMySql" }
+testContainersBom = { module = "org.testcontainers:testcontainers-bom", version.ref = "testContainers" }
+testContainers = { module = "org.testcontainers:testcontainers" }
+testContainersMySql = { module = "org.testcontainers:testcontainers-mysql" }
 
 [bundles]
 kotest = [

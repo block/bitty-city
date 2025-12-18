@@ -7,7 +7,7 @@ import org.flywaydb.core.Flyway
 import org.jooq.DSLContext
 import org.jooq.SQLDialect
 import org.jooq.impl.DSL
-import org.testcontainers.containers.MySQLContainer
+import org.testcontainers.mysql.MySQLContainer
 
 /**
  * Test database management using Testcontainers.
@@ -18,7 +18,7 @@ object TestDatabase {
   /**
    * Testcontainers MySQL container that will be started once and reused.
    */
-  val container: MySQLContainer<*> by lazy {
+  val container: MySQLContainer by lazy {
     MySQLContainer("mysql:8.0")
       .withDatabaseName("app")
       .withUsername("test")
@@ -30,10 +30,10 @@ object TestDatabase {
 
   val datasource: HikariDataSource by lazy {
     HikariDataSource(HikariConfig().apply {
-      jdbcUrl = container.jdbcUrl
-      username = container.username
-      password = container.password
-      driverClassName = container.driverClassName
+      jdbcUrl = container.getJdbcUrl()
+      username = container.getUsername()
+      password = container.getPassword()
+      driverClassName = container.getDriverClassName()
       maximumPoolSize = 10
     }).also(::runMigrations)
   }
@@ -65,7 +65,7 @@ object TestDatabase {
       val tables = mutableListOf<String>()
       val rs = statement.executeQuery(
         "SELECT table_name FROM information_schema.tables " +
-          "WHERE table_schema = '${container.databaseName}' " +
+          "WHERE table_schema = '${container.getDatabaseName()}' " +
           "AND table_type = 'BASE TABLE'"
       )
       while (rs.next()) {
@@ -88,6 +88,6 @@ object TestDatabase {
    */
   fun shutdown() {
     datasource.close()
-    container.stop()
+    container.close()
   }
 }
