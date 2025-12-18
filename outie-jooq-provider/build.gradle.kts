@@ -1,7 +1,7 @@
 import org.flywaydb.core.Flyway
 import org.jooq.codegen.GenerationTool
 import org.jooq.meta.jaxb.*
-import org.testcontainers.containers.MySQLContainer
+import org.testcontainers.mysql.MySQLContainer
 import org.testcontainers.utility.DockerImageName
 
 plugins {
@@ -23,6 +23,7 @@ buildscript {
     classpath(libs.jooqCodegen)
     classpath(libs.jooqKotlin)
     classpath(libs.mysqlConnectorJava)
+    classpath(platform(libs.testContainersBom))
     classpath(libs.testContainers)
     classpath(libs.testContainersMySql)
   }

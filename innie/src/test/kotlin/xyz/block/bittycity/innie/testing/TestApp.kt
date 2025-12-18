@@ -1,5 +1,6 @@
 package xyz.block.bittycity.innie.testing
 
+import io.kotest.property.arbitrary.next
 import jakarta.inject.Inject
 import org.bitcoinj.base.Address
 import org.joda.money.Money
@@ -17,12 +18,15 @@ class TestApp {
 
   @Inject private lateinit var depositStore: DepositStore
 
-  fun resetFakes() {
+  // Fakes
+  @Inject lateinit var eligibilityClient: FakeEligibilityClient
 
+  fun resetFakes() {
+    eligibilityClient.reset()
   }
 
   fun TestRunData.seedDeposit(
-    id: DepositToken = newDeposit.id,
+    id: DepositToken = Arbitrary.depositToken.next(),
     state: DepositState = newDeposit.state,
     updatedAt: Instant? = null,
     customerId: CustomerId,
@@ -58,4 +62,5 @@ class TestApp {
     }
   }
 
+  fun depositWithToken(token: DepositToken): Deposit = depositStore.getDepositByToken(token).getOrThrow()
 }

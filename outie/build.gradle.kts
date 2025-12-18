@@ -38,6 +38,7 @@ dependencies {
     implementation(libs.slf4jNop)
 
     testImplementation(testFixtures(project(":common")))
+    testImplementation(platform(libs.testContainersBom))
     testImplementation(libs.flyway)
     testImplementation(libs.flywayMySql)
     testImplementation(libs.kotestProperty)
@@ -51,6 +52,7 @@ dependencies {
     testImplementation(libs.mysqlConnectorJava)
     testImplementation(libs.junit4)
     testImplementation(libs.junitPlatformRunner)
+    testImplementation(libs.testContainers)
     testImplementation(libs.testContainersMySql)
     testImplementation(project(":outie-jooq-provider"))
 }

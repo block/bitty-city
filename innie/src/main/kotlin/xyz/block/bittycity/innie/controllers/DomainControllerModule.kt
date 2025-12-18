@@ -8,6 +8,8 @@ import jakarta.inject.Singleton
 import xyz.block.bittycity.common.idempotency.IdempotentInputs
 import xyz.block.bittycity.common.idempotency.IdempotentResumeInputs
 import xyz.block.bittycity.common.store.Transactor
+import xyz.block.bittycity.innie.models.CheckingDepositRisk
+import xyz.block.bittycity.innie.models.CheckingEligibility
 import xyz.block.bittycity.innie.models.Deposit
 import xyz.block.bittycity.innie.models.DepositState
 import xyz.block.bittycity.innie.models.DepositToken
@@ -20,11 +22,15 @@ object DomainControllerModule : AbstractModule() {
   @Provides
   @Singleton
   fun provideDomainController(
-    onChainController: OnChainController
+    onChainController: OnChainController,
+    eligibilityController: EligibilityController,
+    depositRiskController: DepositRiskController
   ): DomainController<DepositToken, DepositState, Deposit, RequirementId> {
     val stateToController:
       Map<DepositState, Controller<DepositToken, DepositState, Deposit, RequirementId>> = mapOf(
-        WaitingForDepositConfirmedOnChainStatus to onChainController
+        WaitingForDepositConfirmedOnChainStatus to onChainController,
+        CheckingEligibility to eligibilityController,
+      CheckingDepositRisk to depositRiskController
       ).mapValues { (_, controller) ->
         controller as Controller<DepositToken, DepositState, Deposit, RequirementId>
     }
