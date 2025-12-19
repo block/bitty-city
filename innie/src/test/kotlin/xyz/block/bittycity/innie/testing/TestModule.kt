@@ -9,6 +9,7 @@ import io.kotest.property.arbitrary.next
 import jakarta.inject.Singleton
 import xyz.block.bittycity.common.client.CurrencyDisplayPreferenceClient
 import xyz.block.bittycity.common.client.EligibilityClient
+import xyz.block.bittycity.common.client.RiskClient
 import xyz.block.bittycity.common.idempotency.IdempotencyOperations
 import xyz.block.bittycity.common.store.Transactor
 import xyz.block.bittycity.innie.client.MetricsClient
@@ -31,6 +32,10 @@ class TestModule : AbstractModule() {
       .to(FakeResponseOperations::class.java)
       .`in`(Scopes.SINGLETON)
     bind(FakeResponseOperations::class.java).`in`(Scopes.SINGLETON)
+    bind(FakeRiskClient::class.java).`in`(Scopes.SINGLETON)
+    bind(object : TypeLiteral<RiskClient<DepositToken>>() {})
+      .to(FakeRiskClient::class.java)
+      .`in`(Scopes.SINGLETON)
 
     // Bind fake clients
     bindSingletonFake<CurrencyDisplayPreferenceClient, FakeCurrencyDisplayPreferenceClient>()

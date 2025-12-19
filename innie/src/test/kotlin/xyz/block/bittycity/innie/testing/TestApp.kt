@@ -20,9 +20,11 @@ class TestApp {
 
   // Fakes
   @Inject lateinit var eligibilityClient: FakeEligibilityClient
+  @Inject lateinit var riskClient: FakeRiskClient
 
   fun resetFakes() {
     eligibilityClient.reset()
+    riskClient.reset()
   }
 
   fun TestRunData.seedDeposit(
