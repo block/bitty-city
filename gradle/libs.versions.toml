@@ -2,7 +2,7 @@
 arrow = "2.2.0"
 bitcoinj = "0.17"
 domainApi = "0.1.1"
-flyway = "11.18.0"
+flyway = "11.20.0"
 guice = "7.0.0"
 hikari = "7.0.2"
 jodaMoney = "2.0.2"
