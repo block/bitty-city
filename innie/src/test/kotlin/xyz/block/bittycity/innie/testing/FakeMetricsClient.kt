@@ -5,6 +5,7 @@ import app.cash.quiver.extensions.success
 import xyz.block.bittycity.innie.client.MetricsClient
 import xyz.block.bittycity.innie.models.Deposit
 import xyz.block.bittycity.innie.models.DepositFailureReason
+import xyz.block.bittycity.innie.models.DepositReversalFailureReason
 import xyz.block.bittycity.innie.models.DepositState
 
 class FakeMetricsClient : TestFake(), MetricsClient {
@@ -16,6 +17,8 @@ class FakeMetricsClient : TestFake(), MetricsClient {
   ): Result<Unit> = Unit.success()
 
   override fun failureReason(reason: DepositFailureReason): Result<Unit> = Unit.success()
+
+  override fun reversalFailureReason(reason: DepositReversalFailureReason): Result<Unit> = Unit.success()
 
   override fun depositSuccessAmount(deposit: Deposit): Result<Unit> = Unit.success()
 }

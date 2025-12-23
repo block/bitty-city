@@ -1,6 +1,7 @@
 package xyz.block.bittycity.innie.models
 
 import app.cash.kfsm.Value
+import arrow.core.raise.result
 import org.bitcoinj.base.Address
 import org.joda.money.Money
 import xyz.block.bittycity.common.models.BitcoinDisplayUnits
@@ -58,6 +59,14 @@ data class Deposit(
   val reversals: List<DepositReversal> = emptyList(),
 ) : Value<DepositToken, Deposit, DepositState> {
   override fun update(newState: DepositState): Deposit = this.copy(state = newState)
+
+  val currentReversal: DepositReversal? get() = reversals.lastOrNull()
+
+  fun updateCurrentReversal(transform: (DepositReversal) -> DepositReversal): Result<Deposit> = result {
+    val currentReversal = currentReversal
+      ?: raise(IllegalArgumentException("Tried to update current reversal but there are no reversals"))
+    copy(reversals = reversals.dropLast(1) + transform(currentReversal))
+  }
 
   val fiatEquivalentAmount: Money = bitcoinsToUsd(amount, exchangeRate)
 

@@ -15,7 +15,7 @@ import xyz.block.bittycity.outie.store.ResponseOperations
 import xyz.block.bittycity.outie.store.TestPersistenceModule.Companion.DATASOURCE
 import xyz.block.bittycity.common.store.Transactor
 import xyz.block.bittycity.outie.store.WithdrawalOperations
-import xyz.block.bittycity.outie.validation.WalletAddressParser
+import xyz.block.bittycity.common.utils.WalletAddressParser
 
 object BittyCityTestModule : OutieModule() {
 

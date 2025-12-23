@@ -2,6 +2,7 @@ package xyz.block.bittycity.innie.client
 
 import xyz.block.bittycity.innie.models.Deposit
 import xyz.block.bittycity.innie.models.DepositFailureReason
+import xyz.block.bittycity.innie.models.DepositReversalFailureReason
 import xyz.block.bittycity.innie.models.DepositState
 
 interface MetricsClient {
@@ -24,6 +25,13 @@ interface MetricsClient {
    */
   fun failureReason(
     reason: DepositFailureReason
+  ): Result<Unit>
+
+  /**
+   * Emits a metric used to count the number of different failure reasons for deposit reversals.
+   */
+  fun reversalFailureReason(
+    reason: DepositReversalFailureReason
   ): Result<Unit>
 
   /**

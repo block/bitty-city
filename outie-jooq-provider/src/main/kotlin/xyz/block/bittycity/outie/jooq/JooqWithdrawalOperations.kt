@@ -5,7 +5,7 @@ import org.jooq.DSLContext
 import xyz.block.bittycity.outie.store.WithdrawalEntityOperations
 import xyz.block.bittycity.outie.store.WithdrawalEventOperations
 import xyz.block.bittycity.outie.store.WithdrawalOperations
-import xyz.block.bittycity.outie.validation.WalletAddressParser
+import xyz.block.bittycity.common.utils.WalletAddressParser
 import java.time.Clock
 
 class JooqWithdrawalOperations(

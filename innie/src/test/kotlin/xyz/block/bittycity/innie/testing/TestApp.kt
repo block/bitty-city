@@ -7,6 +7,7 @@ import org.joda.money.Money
 import xyz.block.bittycity.common.models.Bitcoins
 import xyz.block.bittycity.common.models.CustomerId
 import xyz.block.bittycity.innie.models.Deposit
+import xyz.block.bittycity.innie.models.DepositReversal
 import xyz.block.bittycity.innie.models.DepositState
 import xyz.block.bittycity.innie.models.DepositToken
 import xyz.block.bittycity.innie.store.DepositStore
@@ -38,6 +39,7 @@ class TestApp {
     blockchainTransactionId: String,
     blockchainTransactionOutputIndex: Int,
     paymentToken: String,
+    reversals: List<DepositReversal> = emptyList(),
     modifier: (Deposit) -> Deposit = { it },
   ): Deposit {
     val inserted = depositStore.insertDeposit(
@@ -51,7 +53,8 @@ class TestApp {
         targetWalletAddress = targetWalletAddress,
         blockchainTransactionId = blockchainTransactionId,
         blockchainTransactionOutputIndex = blockchainTransactionOutputIndex,
-        paymentToken = paymentToken
+        paymentToken = paymentToken,
+        reversals = reversals
       )
     ).getOrThrow()
 
