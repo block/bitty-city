@@ -47,7 +47,7 @@ import xyz.block.bittycity.outie.validation.InvalidBlockTarget
 import xyz.block.bittycity.outie.validation.ParameterIsRequired
 import xyz.block.bittycity.outie.validation.ValidationService
 import xyz.block.bittycity.outie.validation.ValidationService.Companion.MAX_NOTE_LENGTH
-import xyz.block.bittycity.outie.validation.WalletAddressParser
+import xyz.block.bittycity.common.utils.WalletAddressParser
 import jakarta.inject.Inject
 import jakarta.inject.Named
 import org.joda.money.Money

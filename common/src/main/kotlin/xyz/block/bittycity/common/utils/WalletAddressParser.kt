@@ -1,4 +1,4 @@
-package xyz.block.bittycity.outie.validation
+package xyz.block.bittycity.common.utils
 
 import app.cash.quiver.extensions.catch
 import jakarta.inject.Inject

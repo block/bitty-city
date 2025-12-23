@@ -96,13 +96,15 @@ data object CollectingSanctionsInfo : DepositState(
 )
 
 data object WaitingForSanctionsHeldDecision : DepositState(
-  to = { setOf(Sanctioned, WaitingForReversalPendingConfirmationStatus, WaitingForReversal) }
+  to = { setOf(Sanctioned, WaitingForReversalPendingConfirmationStatus, WaitingForReversal) },
+  processingState = { deposit, displayPref -> Waiting(deposit) }
 )
 
 data object Sanctioned : DepositState()
 
 data object WaitingForReversalPendingConfirmationStatus : DepositState(
-  to = { setOf(WaitingForReversalConfirmedOnChainStatus, WaitingForReversal) }
+  to = { setOf(WaitingForReversalConfirmedOnChainStatus, WaitingForReversal) },
+  processingState = { deposit, displayPref -> Waiting(deposit) }
 )
 
 data object WaitingForReversalConfirmedOnChainStatus : DepositState(

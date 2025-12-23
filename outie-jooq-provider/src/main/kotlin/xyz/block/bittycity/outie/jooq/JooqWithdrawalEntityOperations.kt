@@ -29,7 +29,7 @@ import xyz.block.bittycity.outie.models.WithdrawalSpeedOption
 import xyz.block.bittycity.outie.models.WithdrawalState
 import xyz.block.bittycity.outie.models.WithdrawalToken
 import xyz.block.bittycity.outie.store.WithdrawalEntityOperations
-import xyz.block.bittycity.outie.validation.WalletAddressParser
+import xyz.block.bittycity.common.utils.WalletAddressParser
 import xyz.block.domainapi.InfoOnly
 import java.time.Clock
 import java.time.Instant

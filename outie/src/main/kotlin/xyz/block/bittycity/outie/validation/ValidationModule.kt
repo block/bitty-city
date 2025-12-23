@@ -5,6 +5,7 @@ import com.google.inject.Provides
 import com.google.inject.Scopes
 import jakarta.inject.Singleton
 import org.bitcoinj.base.BitcoinNetwork
+import xyz.block.bittycity.common.utils.WalletAddressParser
 
 object ValidationModule : AbstractModule() {
   @Provides

@@ -22,7 +22,9 @@ mavenPublishing {
 
 dependencies {
     implementation(libs.arrowCore)
+    implementation(libs.bitcoinj)
     implementation(libs.domainApi)
+    implementation(libs.guice)
     implementation(libs.jodaMoney)
     implementation(libs.kfsm)
     implementation(libs.moshi)

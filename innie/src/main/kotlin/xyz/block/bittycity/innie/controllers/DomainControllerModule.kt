@@ -10,11 +10,15 @@ import xyz.block.bittycity.common.idempotency.IdempotentResumeInputs
 import xyz.block.bittycity.common.store.Transactor
 import xyz.block.bittycity.innie.models.CheckingDepositRisk
 import xyz.block.bittycity.innie.models.CheckingEligibility
+import xyz.block.bittycity.innie.models.CheckingReversalRisk
+import xyz.block.bittycity.innie.models.CheckingSanctions
+import xyz.block.bittycity.innie.models.CollectingInfo
 import xyz.block.bittycity.innie.models.Deposit
 import xyz.block.bittycity.innie.models.DepositState
 import xyz.block.bittycity.innie.models.DepositToken
 import xyz.block.bittycity.innie.models.RequirementId
 import xyz.block.bittycity.innie.models.WaitingForDepositConfirmedOnChainStatus
+import xyz.block.bittycity.innie.models.WaitingForReversal
 import xyz.block.bittycity.innie.store.ResponseOperations
 import xyz.block.domainapi.util.Controller
 
@@ -24,13 +28,21 @@ object DomainControllerModule : AbstractModule() {
   fun provideDomainController(
     onChainController: OnChainController,
     eligibilityController: EligibilityController,
-    depositRiskController: DepositRiskController
+    depositRiskController: DepositRiskController,
+    depositReversalController: DepositReversalController,
+    infoCollectionController: InfoCollectionController,
+    sanctionsController: SanctionsController,
+    depositReversalRiskController: DepositReversalRiskController
   ): DomainController<DepositToken, DepositState, Deposit, RequirementId> {
     val stateToController:
       Map<DepositState, Controller<DepositToken, DepositState, Deposit, RequirementId>> = mapOf(
         WaitingForDepositConfirmedOnChainStatus to onChainController,
         CheckingEligibility to eligibilityController,
-      CheckingDepositRisk to depositRiskController
+        CheckingDepositRisk to depositRiskController,
+        WaitingForReversal to depositReversalController,
+        CollectingInfo to infoCollectionController,
+        CheckingSanctions to sanctionsController,
+        CheckingReversalRisk to depositReversalRiskController
       ).mapValues { (_, controller) ->
         controller as Controller<DepositToken, DepositState, Deposit, RequirementId>
     }

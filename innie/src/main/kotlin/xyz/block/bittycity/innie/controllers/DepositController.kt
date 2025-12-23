@@ -8,6 +8,7 @@ import xyz.block.bittycity.common.utils.retry
 import xyz.block.bittycity.innie.client.MetricsClient
 import xyz.block.bittycity.innie.models.Deposit
 import xyz.block.bittycity.innie.models.DepositFailureReason
+import xyz.block.bittycity.innie.models.DepositReversalFailureReason
 import xyz.block.bittycity.innie.models.DepositState
 import xyz.block.bittycity.innie.models.DepositToken
 import xyz.block.bittycity.innie.models.RequirementId
@@ -27,8 +28,18 @@ abstract class DepositController(
   protected fun failDeposit(failure: Throwable, value: Deposit): Result<Deposit> = result {
     val valueFromDb = depositStore.getDepositByToken(value.id).bind()
     if (valueFromDb.state != WaitingForReversal) {
-      logger.warn(failure) { "Failing deposit ${valueFromDb.id}" }
+      logger.info(failure) { "Failing deposit ${valueFromDb.id}" }
       valueFromDb.fail(failure.toFailureReason(), metricsClient).bind()
+    } else {
+      raise(failure)
+    }
+  }
+
+  protected fun failReversal(failure: Throwable, value: Deposit): Result<Deposit> = result {
+    val valueFromDb = depositStore.getDepositByToken(value.id).bind()
+    if (valueFromDb.state != WaitingForReversal) {
+      logger.info(failure) { "Failing deposit ${valueFromDb.id}" }
+      valueFromDb.failReversal(failure.toReversalFailureReason(), metricsClient).bind()
     } else {
       raise(failure)
     }
@@ -55,6 +66,20 @@ interface DepositStateHelpers {
       supplyAsync {
         retry {
           metricsClient.failureReason(reason)
+            .recover { logger.warn(it) { "Failure to publish metrics" } }
+        }
+      }
+    }.bind()
+  }
+
+  fun Deposit.failReversal(reason: DepositReversalFailureReason, metricsClient: MetricsClient): Result<Deposit> = result {
+    stateMachine.transitionTo(
+      value = updateCurrentReversal { it.copy(failureReason = reason) }.bind(),
+      targetState = WaitingForReversal
+    ).onSuccess {
+      supplyAsync {
+        retry {
+          metricsClient.reversalFailureReason(reason)
             .recover { logger.warn(it) { "Failure to publish metrics" } }
         }
       }
