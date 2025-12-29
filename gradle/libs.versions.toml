@@ -26,7 +26,7 @@ reflections = "0.10.2"
 resilience4j = "2.3.0"
 slf4j = "2.0.17"
 testContainers = "2.0.3"
-versionCatalogUpdateGradlePlugin = "0.8.5"
+versionCatalogUpdateGradlePlugin = "1.0.1"
 versionsGradlePlugin = "0.53.0"
 
 [libraries]
