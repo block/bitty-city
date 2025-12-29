@@ -1,5 +1,5 @@
 [versions]
-arrow = "2.2.0"
+arrow = "2.2.1"
 bitcoinj = "0.17"
 domainApi = "0.1.1"
 flyway = "11.20.0"
