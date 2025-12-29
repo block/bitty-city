@@ -12,11 +12,18 @@ import xyz.block.bittycity.innie.models.CheckingReversalRisk
 import xyz.block.bittycity.innie.models.CheckingSanctions
 import xyz.block.bittycity.innie.models.CollectingSanctionsInfo
 import xyz.block.bittycity.innie.models.Deposit
+import xyz.block.bittycity.innie.models.DepositReversalFailureReason.SANCTIONS_DECLINED
 import xyz.block.bittycity.innie.models.DepositReversalFailureReason.SANCTIONS_FAILED
 import xyz.block.bittycity.innie.models.DepositReversalToken
 import xyz.block.bittycity.innie.models.DepositState
 import xyz.block.bittycity.innie.models.DepositToken
 import xyz.block.bittycity.innie.models.RequirementId
+import xyz.block.bittycity.innie.models.Sanctioned
+import xyz.block.bittycity.innie.models.SanctionsHeldDecision
+import xyz.block.bittycity.innie.models.SanctionsReviewDecision.APPROVE
+import xyz.block.bittycity.innie.models.SanctionsReviewDecision.DECLINE
+import xyz.block.bittycity.innie.models.SanctionsReviewDecision.FREEZE
+import xyz.block.bittycity.innie.models.WaitingForReversalPendingConfirmationStatus
 import xyz.block.bittycity.innie.models.WaitingForSanctionsHeldDecision
 import xyz.block.bittycity.innie.store.DepositStore
 import xyz.block.bittycity.innie.validation.ParameterIsRequired
@@ -66,8 +73,29 @@ class ReversalSanctionsController @Inject constructor(
           }
         }.bind()
       }
+      WaitingForSanctionsHeldDecision, CollectingSanctionsInfo -> {
+        processInputs(value, inputs, metricsClient).bind()
+      }
       else -> raise(mismatchedState(value))
     }.asProcessingState()
+  }
+
+  fun processInputs(
+    value: Deposit,
+    inputs: List<Input<RequirementId>>,
+    metricsClient: MetricsClient
+  ): Result<Deposit> = result {
+    if (inputs.all { it is Input.ResumeResult }) {
+      inputs.filterIsInstance<SanctionsHeldDecision>().firstOrNull()?.let {
+        when (it.decision) {
+          APPROVE -> value.transitionTo(WaitingForReversalPendingConfirmationStatus, metricsClient)
+          DECLINE -> value.failReversal(SANCTIONS_DECLINED, metricsClient)
+          FREEZE -> value.transitionTo(Sanctioned, metricsClient)
+        }.bind()
+      } ?: raise(IllegalArgumentException("No decision found for ${value.customerId}"))
+    } else {
+      raise(IllegalArgumentException("Inputs should be resume results"))
+    }
   }
 
   override fun handleFailure(

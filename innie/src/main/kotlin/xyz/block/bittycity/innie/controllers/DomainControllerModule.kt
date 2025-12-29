@@ -13,6 +13,7 @@ import xyz.block.bittycity.innie.models.CheckingEligibility
 import xyz.block.bittycity.innie.models.CheckingReversalRisk
 import xyz.block.bittycity.innie.models.CheckingSanctions
 import xyz.block.bittycity.innie.models.CollectingInfo
+import xyz.block.bittycity.innie.models.CollectingSanctionsInfo
 import xyz.block.bittycity.innie.models.Deposit
 import xyz.block.bittycity.innie.models.DepositState
 import xyz.block.bittycity.innie.models.DepositToken
@@ -32,6 +33,7 @@ object DomainControllerModule : AbstractModule() {
     depositReversalController: ReversalController,
     infoCollectionController: ReversalInfoCollectionController,
     sanctionsController: ReversalSanctionsController,
+    sanctionsInfoCollectionController: ReversalSanctionsInfoCollectionController,
     depositReversalRiskController: ReversalRiskController
   ): DomainController<DepositToken, DepositState, Deposit, RequirementId> {
     val stateToController:
@@ -42,6 +44,7 @@ object DomainControllerModule : AbstractModule() {
         WaitingForReversal to depositReversalController,
         CollectingInfo to infoCollectionController,
         CheckingSanctions to sanctionsController,
+        CollectingSanctionsInfo to sanctionsInfoCollectionController,
         CheckingReversalRisk to depositReversalRiskController
       ).mapValues { (_, controller) ->
         controller as Controller<DepositToken, DepositState, Deposit, RequirementId>
