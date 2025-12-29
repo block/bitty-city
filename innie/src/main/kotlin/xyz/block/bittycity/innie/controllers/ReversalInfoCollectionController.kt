@@ -74,7 +74,7 @@ class ReversalInfoCollectionController @Inject constructor(
   override fun transition(value: Deposit): Result<Deposit> = result {
     when (value.state) {
       is CollectingInfo -> {
-        stateMachine.transitionTo(value, CheckingSanctions).bind()
+        value.transitionTo(CheckingSanctions, metricsClient).bind()
       }
       else -> raise(IllegalStateException("Unexpected state ${value.state}"))
     }
