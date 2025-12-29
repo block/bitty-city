@@ -1,7 +1,15 @@
-@file:Suppress("DEPRECATION")
-
 package xyz.block.bittycity.outie.fsm
 
+import io.kotest.assertions.withClue
+import io.kotest.matchers.collections.shouldBeEmpty
+import io.kotest.matchers.collections.shouldContainExactly
+import io.kotest.matchers.shouldBe
+import io.kotest.matchers.types.shouldBeInstanceOf
+import io.kotest.property.Arb
+import io.kotest.property.arbitrary.element
+import io.kotest.property.checkAll
+import kotlinx.coroutines.test.runTest
+import org.junit.jupiter.api.Test
 import xyz.block.bittycity.outie.models.CheckingEligibility
 import xyz.block.bittycity.outie.models.CheckingRisk
 import xyz.block.bittycity.outie.models.CheckingSanctions
@@ -19,20 +27,7 @@ import xyz.block.bittycity.outie.models.WaitingForSanctionsHeldDecision
 import xyz.block.bittycity.outie.models.WithdrawalState
 import xyz.block.bittycity.outie.models.WithdrawalState.Companion.countsTowardsLimits
 import xyz.block.bittycity.outie.testing.Arbitrary.withdrawalState
-import io.kotest.assertions.withClue
-import io.kotest.matchers.collections.shouldBeEmpty
-import io.kotest.matchers.collections.shouldContainExactly
-import io.kotest.matchers.shouldBe
-import io.kotest.matchers.types.shouldBeInstanceOf
-import io.kotest.property.Arb
-import io.kotest.property.arbitrary.element
-import io.kotest.property.checkAll
-import kotlinx.coroutines.test.runTest
-import org.junit.jupiter.api.Test
-import org.junit.platform.runner.JUnitPlatform
-import org.junit.runner.RunWith
 
-@RunWith(JUnitPlatform::class)
 class WithdrawalStateTest {
 
   @Test

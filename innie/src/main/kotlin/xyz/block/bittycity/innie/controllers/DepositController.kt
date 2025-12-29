@@ -35,16 +35,19 @@ abstract class DepositController(
     }
   }
 
-  protected fun failReversal(failure: Throwable, value: Deposit): Result<Deposit> = result {
+  protected fun failReversal(failure: Throwable, value: Deposit): Result<Deposit> =
+    failReversal(failure.toReversalFailureReason(),  value)
+
+  protected fun failReversal(failureReason: DepositReversalFailureReason, value: Deposit): Result<Deposit> = result {
     val valueFromDb = depositStore.getDepositByToken(value.id).bind()
     if (valueFromDb.state != WaitingForReversal) {
-      logger.info(failure) { "Failing deposit ${valueFromDb.id}" }
-      valueFromDb.failReversal(failure.toReversalFailureReason(), metricsClient).bind()
+      logger.info { "Failing deposit ${valueFromDb.id}" }
+      valueFromDb.failReversal(failureReason, metricsClient).bind()
     } else {
-      raise(failure)
+      logger.info { "No deposit reversal to fail for deposit: ${valueFromDb.id}" }
+      valueFromDb
     }
   }
-
 }
 
 interface DepositStateHelpers {

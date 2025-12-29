@@ -3,10 +3,11 @@ package xyz.block.bittycity.outie.controllers
 import app.cash.kfsm.StateMachine
 import app.cash.quiver.extensions.mapFailure
 import arrow.core.raise.result
+import jakarta.inject.Inject
+import xyz.block.bittycity.common.client.Evaluation
 import xyz.block.bittycity.common.client.RiskBlocked
-import xyz.block.bittycity.outie.client.Evaluation
+import xyz.block.bittycity.common.client.SanctionsClient
 import xyz.block.bittycity.outie.client.MetricsClient
-import xyz.block.bittycity.outie.client.SanctionsClient
 import xyz.block.bittycity.outie.models.CheckingEligibility
 import xyz.block.bittycity.outie.models.CheckingRisk
 import xyz.block.bittycity.outie.models.CheckingSanctions
@@ -22,8 +23,6 @@ import xyz.block.bittycity.outie.models.Withdrawal
 import xyz.block.bittycity.outie.models.WithdrawalState
 import xyz.block.bittycity.outie.models.WithdrawalToken
 import xyz.block.bittycity.outie.store.WithdrawalStore
-import jakarta.inject.Inject
-import xyz.block.domainapi.InfoOnly
 import xyz.block.domainapi.Input
 import xyz.block.domainapi.ProcessingState
 import xyz.block.domainapi.WarnOnly
@@ -32,7 +31,7 @@ import xyz.block.domainapi.util.Operation
 class SanctionsController @Inject constructor(
   stateMachine: StateMachine<WithdrawalToken, Withdrawal, WithdrawalState>,
   withdrawalStore: WithdrawalStore,
-  private val sanctionsClient: SanctionsClient,
+  private val sanctionsClient: SanctionsClient<WithdrawalToken>,
   private val metricsClient: MetricsClient,
 ) : WithdrawalController(stateMachine, metricsClient, withdrawalStore) {
 
@@ -48,9 +47,9 @@ class SanctionsController @Inject constructor(
 
         val sanctionsResult = sanctionsClient.evaluateSanctions(
           customerId = value.customerId.id,
-          withdrawalToken = value.id,
+          transactionToken = value.id,
           targetWalletAddress = targetWalletAddress,
-          value.amount
+          amount = value.amount
         ).bind()
 
         // If we get a successful sanctions response that is HOLD, we shouldn't fail the withdrawal

@@ -37,6 +37,7 @@ dependencies {
   implementation(libs.slf4jNop)
 
   testImplementation(testFixtures(project(":common")))
+  testImplementation(libs.junitJupiter)
   testImplementation(libs.kotestProperty)
   testImplementation(libs.kotestAssertions)
   testImplementation(libs.kotestJunitRunnerJvm)

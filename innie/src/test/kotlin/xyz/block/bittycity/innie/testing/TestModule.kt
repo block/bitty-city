@@ -10,6 +10,8 @@ import jakarta.inject.Singleton
 import xyz.block.bittycity.common.client.CurrencyDisplayPreferenceClient
 import xyz.block.bittycity.common.client.EligibilityClient
 import xyz.block.bittycity.common.client.RiskClient
+import xyz.block.bittycity.common.client.SanctionsClient
+import xyz.block.bittycity.innie.models.DepositReversalToken
 import xyz.block.bittycity.common.idempotency.IdempotencyOperations
 import xyz.block.bittycity.common.store.Transactor
 import xyz.block.bittycity.innie.client.MetricsClient
@@ -35,6 +37,10 @@ class TestModule : AbstractModule() {
     bind(FakeRiskClient::class.java).`in`(Scopes.SINGLETON)
     bind(object : TypeLiteral<RiskClient<DepositToken>>() {})
       .to(FakeRiskClient::class.java)
+      .`in`(Scopes.SINGLETON)
+    bind(FakeSanctionsClient::class.java).`in`(Scopes.SINGLETON)
+    bind(object : TypeLiteral<SanctionsClient<DepositReversalToken>>() {})
+      .to(FakeSanctionsClient::class.java)
       .`in`(Scopes.SINGLETON)
 
     // Bind fake clients

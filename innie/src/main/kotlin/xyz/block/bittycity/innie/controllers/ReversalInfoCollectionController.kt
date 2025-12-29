@@ -23,7 +23,7 @@ import xyz.block.domainapi.Input
 import xyz.block.domainapi.ResultCode
 import xyz.block.domainapi.UserInteraction
 
-class InfoCollectionController @Inject constructor(
+class ReversalInfoCollectionController @Inject constructor(
   stateMachine: StateMachine<DepositToken, Deposit, DepositState>,
   depositStore: DepositStore,
   metricsClient: MetricsClient,

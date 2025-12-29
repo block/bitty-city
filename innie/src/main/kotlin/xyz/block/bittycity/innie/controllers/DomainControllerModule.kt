@@ -29,10 +29,10 @@ object DomainControllerModule : AbstractModule() {
     onChainController: OnChainController,
     eligibilityController: EligibilityController,
     depositRiskController: DepositRiskController,
-    depositReversalController: DepositReversalController,
-    infoCollectionController: InfoCollectionController,
-    sanctionsController: SanctionsController,
-    depositReversalRiskController: DepositReversalRiskController
+    depositReversalController: ReversalController,
+    infoCollectionController: ReversalInfoCollectionController,
+    sanctionsController: ReversalSanctionsController,
+    depositReversalRiskController: ReversalRiskController
   ): DomainController<DepositToken, DepositState, Deposit, RequirementId> {
     val stateToController:
       Map<DepositState, Controller<DepositToken, DepositState, Deposit, RequirementId>> = mapOf(
