@@ -44,6 +44,7 @@ jooqCodegen = { module = "org.jooq:jooq-codegen", version.ref = "jooq" }
 jooqKotlin = { module = "org.jooq:jooq-kotlin", version.ref = "jooq" }
 jooqKotlinCoroutines = { module = "org.jooq:jooq-kotlin-coroutines", version.ref = "jooq" }
 junit4 = { module = "junit:junit", version.ref = "junit4" }
+junitJupiter = { module = "org.junit.jupiter:junit-jupiter", version = "5.14.1" }
 junitPlatformRunner = { module = "org.junit.platform:junit-platform-runner", version.ref = "junitPlatformRunner" }
 kfsm = { module = "app.cash.kfsm:kfsm", version.ref = "kfsm" }
 kotestAssertions = { module = "io.kotest:kotest-assertions-core", version.ref = "kotest" }

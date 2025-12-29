@@ -16,7 +16,7 @@ import xyz.block.bittycity.outie.client.LimitClient
 import xyz.block.bittycity.outie.client.MetricsClient
 import xyz.block.bittycity.outie.client.OnChainClient
 import xyz.block.bittycity.common.client.RiskClient
-import xyz.block.bittycity.outie.client.SanctionsClient
+import xyz.block.bittycity.common.client.SanctionsClient
 import xyz.block.bittycity.outie.client.TravelRuleClient
 import xyz.block.bittycity.outie.json.WithdrawalMoshi
 import com.squareup.moshi.Moshi
@@ -44,7 +44,10 @@ class TestModule : AbstractModule() {
     bind(object : com.google.inject.TypeLiteral<RiskClient<xyz.block.bittycity.outie.models.WithdrawalToken>>() {})
       .to(FakeRiskClient::class.java)
       .`in`(Scopes.SINGLETON)
-    bindSingletonFake<SanctionsClient, FakeSanctionsClient>()
+    bind(FakeSanctionsClient::class.java).`in`(Scopes.SINGLETON)
+    bind(object : com.google.inject.TypeLiteral<SanctionsClient<xyz.block.bittycity.outie.models.WithdrawalToken>>() {})
+      .to(FakeSanctionsClient::class.java)
+      .`in`(Scopes.SINGLETON)
     bindSingletonFake<TravelRuleClient, FakeTravelRuleClient>()
     bindSingletonFake<EligibilityClient, FakeEligibilityClient>()
     bind(FakePreFlightClient::class.java).`in`(Scopes.SINGLETON)
