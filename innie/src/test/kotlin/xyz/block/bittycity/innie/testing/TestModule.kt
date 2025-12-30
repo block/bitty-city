@@ -42,6 +42,10 @@ class TestModule : AbstractModule() {
     bind(object : TypeLiteral<SanctionsClient<DepositReversalToken>>() {})
       .to(FakeSanctionsClient::class.java)
       .`in`(Scopes.SINGLETON)
+    bind(FakeReversalRiskClient::class.java).`in`(Scopes.SINGLETON)
+    bind(object : TypeLiteral<RiskClient<DepositReversalToken>>() {})
+      .to(FakeReversalRiskClient::class.java)
+      .`in`(Scopes.SINGLETON)
 
     // Bind fake clients
     bindSingletonFake<CurrencyDisplayPreferenceClient, FakeCurrencyDisplayPreferenceClient>()
