@@ -40,7 +40,7 @@ class DepositRiskController @Inject constructor(
         when (riskResult) {
           is RiskEvaluation.ActiveScamWarning -> {
             logger.warn { "Unexpected scam result: $riskResult" }
-            value.transitionTo(Settled, metricsClient)
+            value.fail(DepositFailureReason.UNEXPECTED_RISK_RESULT, metricsClient)
           }
           RiskEvaluation.Checked -> value.transitionTo(Settled, metricsClient)
           is RiskEvaluation.Blocked -> value.fail(DepositFailureReason.RISK_BLOCKED, metricsClient)
