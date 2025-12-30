@@ -11,6 +11,7 @@ import xyz.block.bittycity.common.client.RiskEvaluation
 import xyz.block.bittycity.innie.api.DepositDomainController
 import xyz.block.bittycity.innie.models.CheckingDepositRisk
 import xyz.block.bittycity.innie.models.DepositFailureReason.RISK_BLOCKED
+import xyz.block.bittycity.innie.models.DepositFailureReason.UNEXPECTED_RISK_RESULT
 import xyz.block.bittycity.innie.models.Settled
 import xyz.block.bittycity.innie.models.WaitingForReversal
 import xyz.block.bittycity.innie.testing.Arbitrary.amount
@@ -46,6 +47,29 @@ class DepositRiskControllerTest : BittyCityTestCase() {
     depositWithToken(deposit.id) should {
       it.state shouldBe WaitingForReversal
       it.failureReason shouldBe RISK_BLOCKED
+    }
+  }
+
+  @Test
+  fun `Fail with unexpected risk result`() = runTest {
+    val deposit = data.seedDeposit(
+      state = CheckingDepositRisk,
+      customerId = customerId.next(),
+      amount = amount.next(),
+      exchangeRate = exchangeRate.next(),
+      targetWalletAddress = walletAddress.next(),
+      blockchainTransactionId = stringToken.next(),
+      blockchainTransactionOutputIndex = outputIndex.next(),
+      paymentToken = stringToken.next(),
+    )
+
+    riskClient.nextRiskResult = RiskEvaluation.ActiveScamWarning().success()
+
+    subject.execute(deposit, emptyList(), Operation.EXECUTE).shouldBeSuccess()
+
+    depositWithToken(deposit.id) should {
+      it.state shouldBe WaitingForReversal
+      it.failureReason shouldBe UNEXPECTED_RISK_RESULT
     }
   }
 
