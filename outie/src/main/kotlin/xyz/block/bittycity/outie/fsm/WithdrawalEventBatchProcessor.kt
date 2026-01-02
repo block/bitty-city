@@ -24,20 +24,25 @@ class WithdrawalEventBatchProcessor @Inject constructor(
    * Fetches batches of up to DEFAULT_BATCH_SIZE unprocessed events and processes each one
    * individually. After successful processing, marks each event as processed. If the processed
    * batch size equals the requested size, immediately fetches another batch. Returns when
-   * the processed batch size is less than the requested size or an error occurs.
+   * the processed batch size is less than the requested size or an infrastructure error occurs.
+   *
+   * Infrastructure errors (fetch/DB failures) are propagated. Event-level processing failures
+   * are logged and batch processing continues.
    *
    * @return Result indicating success or failure of the batch processing operation
    */
-  fun processBatches(): Result<Unit> = processBatchesRecursive()
+  fun processBatches(): Result<Unit> = result {
+    var hadNonFatalErrors = false
 
-  private tailrec fun processBatchesRecursive(): Result<Unit> = result {
-    val events = withdrawalTransactor.transactReadOnly("fetch withdrawal events") {
-      fetchUnprocessedEvents(DEFAULT_BATCH_SIZE)
-    }.bind()
+    while (true) {
+      val events = withdrawalTransactor.transactReadOnly("fetch withdrawal events") {
+        fetchUnprocessedEvents(DEFAULT_BATCH_SIZE)
+      }.bind()
 
-    if (events.isNotEmpty()) {
+      if (events.isEmpty()) break
+
       logger.info { "Fetched a batch of ${events.size} withdrawal events" }
-      // Process each event individually
+
       events.forEach { event ->
         result {
           eventProcessor.processEvent(event).bind()
@@ -45,14 +50,16 @@ class WithdrawalEventBatchProcessor @Inject constructor(
             markEventAsProcessed(event.id)
           }.bind()
         }.onFailure {
+          hadNonFatalErrors = true
           logger.error(it) { "Failed to process event: ${event.id}" }
         }
       }
 
-      // Continue recursively if we processed a full batch
-      if (events.size == DEFAULT_BATCH_SIZE) {
-        return processBatchesRecursive()
-      }
+      if (events.size < DEFAULT_BATCH_SIZE) break
+    }
+
+    if (hadNonFatalErrors) {
+      logger.warn { "Completed batches with non-fatal event errors" }
     }
   }
 
