@@ -3,6 +3,7 @@ package xyz.block.bittycity.outie.controllers
 import app.cash.quiver.extensions.success
 import xyz.block.bittycity.common.idempotency.CachedError
 import xyz.block.bittycity.common.idempotency.IdempotentResumeInputs
+import xyz.block.bittycity.common.idempotency.SerializableError
 import xyz.block.bittycity.outie.models.Inputs
 import xyz.block.bittycity.outie.models.ObservedInMempool
 import xyz.block.bittycity.outie.models.RequirementId
@@ -90,7 +91,11 @@ class IdempotencyHandlerTest : BittyCityTestCase() {
 
     // Second call should return the cached error
     val secondResult = idempotencyHandler.handle(withdrawalToken, backCounter, hurdleResponses)
-    secondResult.shouldBeFailure(CachedError("[java.lang.RuntimeException] Test error"))
+    val expectedError = SerializableError(
+      message = "Test error",
+      type = "java.lang.RuntimeException"
+    )
+    secondResult.shouldBeFailure(CachedError("[java.lang.RuntimeException] Test error", expectedError))
   }
 
   @Test
@@ -515,7 +520,11 @@ class IdempotencyHandlerTest : BittyCityTestCase() {
 
     // Second call should return the cached error
     val secondResult = idempotencyHandler.handleResume(withdrawalToken, resumeResult)
-    secondResult.shouldBeFailure(CachedError("[java.lang.RuntimeException] Test resume error"))
+    val expectedResumeError = SerializableError(
+      message = "Test resume error",
+      type = "java.lang.RuntimeException"
+    )
+    secondResult.shouldBeFailure(CachedError("[java.lang.RuntimeException] Test resume error", expectedResumeError))
   }
 
   @Test
