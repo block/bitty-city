@@ -5,7 +5,7 @@ data class SerializableError(
   val type: String
 ) {
 
-  fun asCachedError(): CachedError = CachedError("[$type] $message")
+  fun asCachedError(): CachedError = CachedError("[$type] $message", this)
 
   companion object {
     fun from(t: Throwable): SerializableError = SerializableError(
@@ -15,4 +15,7 @@ data class SerializableError(
   }
 }
 
-data class CachedError(override val message: String?) : Throwable(message)
+data class CachedError(
+  override val message: String?,
+  val serializableError: SerializableError
+) : Throwable(message)
