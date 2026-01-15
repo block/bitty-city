@@ -9,7 +9,7 @@ plugins {
   id("org.jetbrains.kotlin.jvm")
   id("base") // Provides standard task grouping
   id("nu.studer.jooq") version "9.0"
-  id("org.flywaydb.flyway") version "11.20.0"
+  id("org.flywaydb.flyway") version "11.20.2"
   id("com.vanniktech.maven.publish")
 }
 
