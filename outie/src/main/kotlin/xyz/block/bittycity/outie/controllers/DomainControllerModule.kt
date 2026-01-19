@@ -25,6 +25,7 @@ import xyz.block.bittycity.outie.models.Withdrawal
 import xyz.block.bittycity.outie.models.WithdrawalState
 import xyz.block.bittycity.outie.models.WithdrawalToken
 import jakarta.inject.Singleton
+import xyz.block.bittycity.outie.models.Failed
 import xyz.block.domainapi.util.Controller
 
 object DomainControllerModule : AbstractModule() {
@@ -42,6 +43,7 @@ object DomainControllerModule : AbstractModule() {
     scamWarningController: ScamWarningController,
     travelRuleController: TravelRuleController,
     onChainController: OnChainController,
+    failedController: FailedController,
   ): DomainController<WithdrawalToken, WithdrawalState, Withdrawal, RequirementId> {
     val stateToController:
       Map<WithdrawalState, Controller<WithdrawalToken, WithdrawalState, Withdrawal, RequirementId>> =
@@ -76,6 +78,7 @@ object DomainControllerModule : AbstractModule() {
         SubmittingOnChain to onChainController,
         WaitingForPendingConfirmationStatus to onChainController,
         WaitingForConfirmedOnChainStatus to onChainController,
+        Failed to failedController,
       ).mapValues { (_, controller) ->
         @Suppress("UNCHECKED_CAST")
         controller as Controller<WithdrawalToken, WithdrawalState, Withdrawal, RequirementId>
