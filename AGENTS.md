@@ -8,7 +8,7 @@ Bitty-City is a Bitcoin custodial product experience library for on-chain operat
 
 - **Language**: Kotlin (JVM)
 - **Build System**: Gradle with Kotlin DSL
-- **Java Version**: JVM 21
+- **Java Version**: JVM 11
 - **Test Framework**: JUnit 5 (Jupiter) + Kotest
 - **Database**: MySQL with jOOQ for type-safe SQL and Flyway for migrations
 - **Key Dependencies**:
