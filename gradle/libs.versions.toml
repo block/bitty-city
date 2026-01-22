@@ -1,14 +1,9 @@
 [versions]
 arrow = "2.2.1"
 bitcoinj = "0.17"
-domainApi = "0.3.0"
-flyway = "11.20.2"
+domainApi = "0.4.0"
 guice = "7.0.0"
-hikari = "7.0.2"
-jodaMoney = "2.0.3"
-jooq = "3.20.10"
-junit4 = "4.13.2"
-junitPlatformRunner = "1.14.1"
+jodaMoney = "1.0.7"
 kfsm = "0.12.0"
 kotest = "5.9.1"
 kotestArrow = "2.0.0"
@@ -19,13 +14,9 @@ kotlinLogging = "7.0.13"
 mavenPublish = "0.35.0"
 mockk = "1.14.7"
 moshi = "1.15.2"
-mysql = "3.5.7"
-mysqlConnector = "9.5.0"
 quiver = "1.0.2"
-reflections = "0.10.2"
-resilience4j = "2.3.0"
+resilience4j = "1.7.1"
 slf4j = "2.0.17"
-testContainers = "2.0.3"
 versionCatalogUpdateGradlePlugin = "1.0.1"
 versionsGradlePlugin = "0.53.0"
 
@@ -33,19 +24,10 @@ versionsGradlePlugin = "0.53.0"
 arrowCore = { module = "io.arrow-kt:arrow-core", version.ref = "arrow" }
 bitcoinj = { module = "org.bitcoinj:bitcoinj-core", version.ref = "bitcoinj" }
 domainApi = { module = "xyz.block.domainapi:domain-api", version.ref = "domainApi" }
-flyway = { module = "org.flywaydb:flyway-core", version.ref = "flyway" }
-flywayMySql = { module = "org.flywaydb:flyway-mysql", version.ref = "flyway" }
 guice = { module = "com.google.inject:guice", version.ref = "guice" }
 guiceAssistedInject = { module = "com.google.inject.extensions:guice-assistedinject", version.ref = "guice" }
-hikari = { module = "com.zaxxer:HikariCP", version.ref = "hikari" }
 jodaMoney = { module = "org.joda:joda-money", version.ref = "jodaMoney" }
-jooq = { module = "org.jooq:jooq", version.ref = "jooq" }
-jooqCodegen = { module = "org.jooq:jooq-codegen", version.ref = "jooq" }
-jooqKotlin = { module = "org.jooq:jooq-kotlin", version.ref = "jooq" }
-jooqKotlinCoroutines = { module = "org.jooq:jooq-kotlin-coroutines", version.ref = "jooq" }
-junit4 = { module = "junit:junit", version.ref = "junit4" }
 junitJupiter = { module = "org.junit.jupiter:junit-jupiter", version = "5.14.1" }
-junitPlatformRunner = { module = "org.junit.platform:junit-platform-runner", version.ref = "junitPlatformRunner" }
 kfsm = { module = "app.cash.kfsm:kfsm", version.ref = "kfsm" }
 kotestAssertions = { module = "io.kotest:kotest-assertions-core", version.ref = "kotest" }
 kotestAssertionsArrow = { module = "io.kotest.extensions:kotest-assertions-arrow", version.ref = "kotestArrow" }
@@ -58,17 +40,11 @@ mavenPublishGradlePlugin = { module = "com.vanniktech:gradle-maven-publish-plugi
 mockk = { module = "io.mockk:mockk", version.ref = "mockk" }
 moshi = { module = "com.squareup.moshi:moshi", version.ref = "moshi" }
 moshiKotlin = { module = "com.squareup.moshi:moshi-kotlin", version.ref = "moshi" }
-mySql = { module = "org.mariadb.jdbc:mariadb-java-client", version.ref = "mysql" }
-mysqlConnectorJava = { module = "com.mysql:mysql-connector-j", version.ref = "mysqlConnector" }
 quiverLib = { module = "app.cash.quiver:lib", version.ref = "quiver" }
-reflections = { module = "org.reflections:reflections", version.ref = "reflections" }
 resilience4jKotlin = { module = "io.github.resilience4j:resilience4j-kotlin", version.ref = "resilience4j" }
 resilience4jRetry = { module = "io.github.resilience4j:resilience4j-retry", version.ref = "resilience4j" }
 slf4jApi = { module = "org.slf4j:slf4j-api", version.ref = "slf4j" }
 slf4jNop = { module = "org.slf4j:slf4j-nop", version.ref = "slf4j" }
-testContainersBom = { module = "org.testcontainers:testcontainers-bom", version.ref = "testContainers" }
-testContainers = { module = "org.testcontainers:testcontainers" }
-testContainersMySql = { module = "org.testcontainers:testcontainers-mysql" }
 
 [bundles]
 kotest = [
