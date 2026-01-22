@@ -59,7 +59,6 @@ tasks.register("publishToMavenCentral") {
   group = "publishing"
   dependsOn(
     ":innie:publishToMavenCentral",
-    ":outie:publishToMavenCentral",
-    ":outie-jooq-provider:publishToMavenCentral"
+    ":outie:publishToMavenCentral"
   )
 }

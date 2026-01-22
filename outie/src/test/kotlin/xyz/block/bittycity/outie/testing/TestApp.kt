@@ -9,7 +9,6 @@ import kotlin.time.Duration.Companion.minutes
 import org.bitcoinj.base.Address
 import org.joda.money.CurrencyUnit
 import org.joda.money.Money
-import org.jooq.DSLContext
 import xyz.block.bittycity.common.models.Bitcoins
 import xyz.block.bittycity.common.models.CustomerId
 import xyz.block.bittycity.common.models.FlatFee
@@ -25,15 +24,15 @@ import xyz.block.bittycity.outie.models.WithdrawalSpeed.STANDARD
 import xyz.block.bittycity.outie.models.WithdrawalSpeedOption
 import xyz.block.bittycity.outie.models.WithdrawalState
 import xyz.block.bittycity.outie.models.WithdrawalToken
-import xyz.block.bittycity.outie.store.TestPersistenceModule.Companion.DATASOURCE
 import xyz.block.bittycity.common.store.Transactor
 import xyz.block.bittycity.outie.store.WithdrawalOperations
 import xyz.block.bittycity.outie.store.WithdrawalStore
+import xyz.block.bittycity.outie.testing.fakes.FakeResponseOperations
+import xyz.block.bittycity.outie.testing.fakes.FakeWithdrawalOperations
 import xyz.block.domainapi.ExecuteResponse
 import xyz.block.domainapi.Input
 
 class TestApp @Inject constructor(
-  @param:Named(DATASOURCE) val dslContext: DSLContext,
   @param:Named("withdrawal.amounts.minimum") val minAmount: Long,
   @param:Named("withdrawal.amounts.free_tier_minimum") val minAmountFreeTier: Long,
 ) {
@@ -46,6 +45,8 @@ class TestApp @Inject constructor(
   @Inject lateinit var eligibilityClient: FakeEligibilityClient
   @Inject lateinit var eventClient: FakeEventClient
   @Inject lateinit var exchangeRateClient: FakeExchangeRateClient
+  @Inject lateinit var fakeWithdrawalOperations: FakeWithdrawalOperations
+  @Inject lateinit var fakeResponseOperations: FakeResponseOperations
   @Inject lateinit var feeQuoteClient: FakeFeeQuoteClient
   @Inject lateinit var ledgerClient: FakeLedgerClient
   @Inject lateinit var limitClient: FakeLimitClient
@@ -69,6 +70,8 @@ class TestApp @Inject constructor(
     eligibilityClient.reset()
     eventClient.reset()
     exchangeRateClient.reset()
+    fakeWithdrawalOperations.reset()
+    fakeResponseOperations.reset()
     feeQuoteClient.reset()
     ledgerClient.reset()
     limitClient.reset()

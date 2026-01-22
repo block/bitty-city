@@ -9,7 +9,7 @@ import java.time.ZoneId
  * A test implementation of java.time.Clock that allows manual control of time.
  * Replaces misk-testing's FakeClock with a simple mutable clock.
  */
-class TestClock(private var currentInstant: Instant = Instant.now()) : Clock() {
+class TestClock(private var currentInstant: Instant = Instant.now().truncatedTo(java.time.temporal.ChronoUnit.MILLIS)) : Clock() {
 
   override fun getZone(): ZoneId = ZoneId.systemDefault()
 
@@ -39,9 +39,9 @@ class TestClock(private var currentInstant: Instant = Instant.now()) : Clock() {
   }
 
   /**
-   * Reset the clock to the current system time.
+   * Reset the clock to the current system time (truncated to milliseconds for JSON round-trip compatibility).
    */
   fun reset() {
-    currentInstant = Instant.now()
+    currentInstant = Instant.now().truncatedTo(java.time.temporal.ChronoUnit.MILLIS)
   }
 }

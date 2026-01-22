@@ -13,7 +13,6 @@ Each module maintains its own version in its `gradle.properties` file:
 | common | `common/gradle.properties` |
 | innie | `innie/gradle.properties` |
 | outie | `outie/gradle.properties` |
-| outie-jooq-provider | `outie-jooq-provider/gradle.properties` |
 
 ## Prerequisites
 
@@ -109,7 +108,6 @@ When releasing modules with dependencies, publish in order:
 
 1. `common` (no dependencies)
 2. `innie` and `outie` (depend on `common`)
-3. `outie-jooq-provider` (depends on `common` and `outie`)
 
 If you've made changes to `common`, release it first before releasing dependent modules.
 

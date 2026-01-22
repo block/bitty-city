@@ -22,31 +22,17 @@ bin/gradle build
 
 ## Project Structure
 
+- `common/` - Shared models and utilities
 - `outie/` - Withdrawals module
-- `outie-jooq-provider` - jOOQ bindings for the `outie` module
 - `innie/` - Deposits module (WIP)
 
 ## Modules
+
+### Common
+Shared models and utilities used across modules.
 
 ### Innie
 Handles bitcoin deposit operations and related custodial product experience.
 
 ### Outie
 Handles bitcoin withdrawal operations and related custodial product experience. See the [state machine diagram](outie/docs/state-machine.md) for details on the withdrawal flow.
-
-### Outie-jOOQ-Provider
-jOOQ bindings for the `outie` module.
-
-#### Database Migrations
-
-This module uses Flyway for database migrations. Migrations are located in the `outie-jooq-provider/src/main/resources/migrations` directory.
-
-#### Migration File Naming Convention
-
-Migration files must follow the Flyway naming convention:
-- Format: `V{version}__{description}.sql`
-- Example: `V20250414.1414__create_withdrawals_table.sql`
-- The version must start with an uppercase 'V'
-- Use periods (not underscores) in the version number
-- Double underscores between version and description
-- Description uses underscores for spaces
