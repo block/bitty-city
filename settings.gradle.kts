@@ -10,4 +10,3 @@ rootProject.name = "bitty-city"
 include(":common")
 include(":innie")
 include(":outie")
-include(":outie-jooq-provider")

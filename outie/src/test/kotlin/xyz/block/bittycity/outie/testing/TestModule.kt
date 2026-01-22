@@ -19,6 +19,8 @@ import xyz.block.bittycity.common.client.RiskClient
 import xyz.block.bittycity.common.client.SanctionsClient
 import xyz.block.bittycity.outie.client.TravelRuleClient
 import xyz.block.bittycity.outie.json.WithdrawalMoshi
+import xyz.block.bittycity.outie.testing.fakes.FakeResponseOperations
+import xyz.block.bittycity.outie.testing.fakes.FakeWithdrawalOperations
 import com.squareup.moshi.Moshi
 import io.kotest.property.arbitrary.next
 import jakarta.inject.Named
@@ -30,7 +32,16 @@ class TestModule : AbstractModule() {
     install(BittyCityTestModule)
     bind(TestApp::class.java).`in`(Scopes.SINGLETON)
     bind(TestRunData::class.java).toInstance(Arbitrary.testRunData.next())
-    bind(Clock::class.java).toInstance(TestClock())
+
+    val testClock = TestClock()
+    bind(Clock::class.java).toInstance(testClock)
+    bind(TestClock::class.java).toInstance(testClock)
+
+    val fakeWithdrawalOps = FakeWithdrawalOperations(testClock)
+    bind(FakeWithdrawalOperations::class.java).toInstance(fakeWithdrawalOps)
+
+    val fakeResponseOps = FakeResponseOperations()
+    bind(FakeResponseOperations::class.java).toInstance(fakeResponseOps)
 
     bindSingletonFake<BitcoinAccountClient, FakeBitcoinAccountClient>()
     bindSingletonFake<CurrencyDisplayPreferenceClient, FakeCurrencyDisplayPreferenceClient>()

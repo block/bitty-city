@@ -2,20 +2,15 @@ package xyz.block.bittycity.outie.testing
 
 import com.google.inject.Provides
 import com.google.inject.Scopes
-import com.squareup.moshi.Moshi
-import jakarta.inject.Named
 import org.bitcoinj.base.BitcoinNetwork
-import java.time.Clock
-import org.jooq.DSLContext
 import xyz.block.bittycity.outie.OutieModule
-import xyz.block.bittycity.outie.jooq.JooqResponseOperations
-import xyz.block.bittycity.outie.jooq.JooqTransactor
-import xyz.block.bittycity.outie.jooq.JooqWithdrawalOperations
 import xyz.block.bittycity.outie.store.ResponseOperations
-import xyz.block.bittycity.outie.store.TestPersistenceModule.Companion.DATASOURCE
 import xyz.block.bittycity.common.store.Transactor
 import xyz.block.bittycity.outie.store.WithdrawalOperations
 import xyz.block.bittycity.common.utils.WalletAddressParser
+import xyz.block.bittycity.outie.testing.fakes.FakeResponseOperations
+import xyz.block.bittycity.outie.testing.fakes.FakeTransactor
+import xyz.block.bittycity.outie.testing.fakes.FakeWithdrawalOperations
 
 object BittyCityTestModule : OutieModule() {
 
@@ -26,19 +21,11 @@ object BittyCityTestModule : OutieModule() {
 
   @Provides
   fun provideResponseOperationTransactor(
-    @Named(DATASOURCE) dslContext: DSLContext,
-    moshi: Moshi,
-  ): Transactor<ResponseOperations> = JooqTransactor(dslContext) {
-    JooqResponseOperations(it, moshi)
-  }
+    fakeResponseOperations: FakeResponseOperations
+  ): Transactor<ResponseOperations> = FakeTransactor(fakeResponseOperations)
 
   @Provides
   fun provideWithdrawalOperationTransactor(
-    @Named(DATASOURCE) dslContext: DSLContext,
-    moshi: Moshi,
-    walletAddressParser: WalletAddressParser,
-    clock: Clock,
-  ): Transactor<WithdrawalOperations> = JooqTransactor(dslContext) {
-    JooqWithdrawalOperations(it, walletAddressParser, clock, moshi)
-  }
+    fakeWithdrawalOperations: FakeWithdrawalOperations
+  ): Transactor<WithdrawalOperations> = FakeTransactor(fakeWithdrawalOperations)
 }

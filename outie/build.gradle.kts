@@ -38,22 +38,13 @@ dependencies {
     implementation(libs.slf4jNop)
 
     testImplementation(testFixtures(project(":common")))
-    testImplementation(platform(libs.testContainersBom))
-    testImplementation(libs.flyway)
-    testImplementation(libs.flywayMySql)
     testImplementation(libs.kotestProperty)
     testImplementation(libs.kotestAssertions)
     testImplementation(libs.kotestAssertionsArrow)
     testImplementation(libs.kotestAssertionsArrowJvm)
-    testImplementation(libs.hikari)
     testImplementation(libs.kotestJunitRunnerJvm)
     testImplementation(libs.mockk)
-    testImplementation(libs.mySql)
-    testImplementation(libs.mysqlConnectorJava)
     testImplementation(libs.junitJupiter)
-    testImplementation(libs.testContainers)
-    testImplementation(libs.testContainersMySql)
-    testImplementation(project(":outie-jooq-provider"))
 }
 
 tasks.register<JavaExec>("generateStateMachineDiagram") {

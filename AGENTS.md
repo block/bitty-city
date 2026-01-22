@@ -54,13 +54,11 @@ This project uses [Hermit](https://cashapp.github.io/hermit/) for consistent too
  bitty-city/
  ├── common/             # Shared models and utilities
  ├── innie/              # Deposits module (WIP)
- ├── outie/              # Withdrawals module
- │   ├── docs/           # Documentation including state machine diagrams
- │   └── src/
- │       ├── main/kotlin/
- │       └── test/kotlin/
- └── outie-jooq-provider/ # jOOQ bindings and database layer for outie
-     └── src/main/resources/migrations/  # Flyway migration files
+ └── outie/              # Withdrawals module
+     ├── docs/           # Documentation including state machine diagrams
+     └── src/
+         ├── main/kotlin/
+         └── test/kotlin/
  ```
 
 ## Code Conventions
@@ -170,18 +168,6 @@ Bitty-City follows the **Sociable Unit Testing** approach for comprehensive, res
 7. **Independent tests** - Each test creates its own test data
 8. **Property-based test data** - Use Kotest's `Arb` generators where applicable
 
-### Database Migrations (Flyway)
-
-Migration files must follow strict naming conventions:
-- **Location**: `outie-jooq-provider/src/main/resources/migrations/`
-- **Format**: `V{version}__{description}.sql`
-- **Example**: `V20250414.1414__create_withdrawals_table.sql`
-- **Rules**:
-  - Start with uppercase 'V'
-  - Use periods (not underscores) in version number
-  - Double underscores between version and description
-  - Description uses underscores for spaces
-
 ## Module Responsibilities
 
 ### common/
@@ -192,9 +178,6 @@ Handles Bitcoin withdrawal operations. See `outie/docs/state-machine.md` for the
 
 ### innie/ (Deposits)
 Handles Bitcoin deposit operations (Work in Progress).
-
-### outie-jooq-provider/
-Database layer for the outie module using jOOQ for type-safe SQL operations and Flyway for schema migrations.
 
 ## State Machine Documentation
 

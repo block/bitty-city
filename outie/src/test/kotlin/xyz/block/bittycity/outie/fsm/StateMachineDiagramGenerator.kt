@@ -10,7 +10,6 @@ import xyz.block.bittycity.outie.models.CollectingInfo
 import xyz.block.bittycity.outie.models.Withdrawal
 import xyz.block.bittycity.outie.models.WithdrawalState
 import xyz.block.bittycity.outie.models.WithdrawalToken
-import xyz.block.bittycity.outie.store.TestPersistenceModule
 import xyz.block.bittycity.outie.testing.TestModule
 import java.io.File
 
@@ -27,7 +26,6 @@ fun main(args: Array<String>) {
   val outputFile = File(args[0])
 
   val injector = Guice.createInjector(
-    TestPersistenceModule(),
     TestModule()
   )
 
