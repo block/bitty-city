@@ -1,5 +1,5 @@
 [versions]
-arrow = "2.2.1"
+arrow = "2.2.1.1"
 bitcoinj = "0.17"
 domainApi = "0.4.0"
 guice = "7.0.0"
