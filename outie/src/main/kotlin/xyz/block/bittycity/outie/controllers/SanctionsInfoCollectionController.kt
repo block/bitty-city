@@ -2,13 +2,15 @@ package xyz.block.bittycity.outie.controllers
 
 import app.cash.kfsm.StateMachine
 import arrow.core.raise.result
+import jakarta.inject.Inject
 import xyz.block.bittycity.outie.client.MetricsClient
+import xyz.block.bittycity.outie.fsm.SanctionsInfoComplete
+import xyz.block.bittycity.outie.fsm.WithdrawalEffect
 import xyz.block.bittycity.outie.models.CollectingSanctionsInfo
 import xyz.block.bittycity.outie.models.RequirementId
 import xyz.block.bittycity.outie.models.RequirementId.SANCTIONS_WITHDRAWAL_REASON
 import xyz.block.bittycity.outie.models.WaitingForSanctionsHeldDecision
 import xyz.block.bittycity.outie.models.Withdrawal
-import xyz.block.bittycity.outie.models.WithdrawalHurdle
 import xyz.block.bittycity.outie.models.WithdrawalHurdle.WithdrawalReasonHurdle
 import xyz.block.bittycity.outie.models.WithdrawalHurdleResponse
 import xyz.block.bittycity.outie.models.WithdrawalNotification
@@ -17,9 +19,6 @@ import xyz.block.bittycity.outie.models.WithdrawalToken
 import xyz.block.bittycity.outie.store.WithdrawalStore
 import xyz.block.bittycity.outie.validation.ValidationService
 import xyz.block.bittycity.outie.validation.ValidationService.Companion.MAX_WITHDRAWAL_REASON_LENGTH
-import io.github.oshai.kotlinlogging.KLogger
-import io.github.oshai.kotlinlogging.KotlinLogging
-import jakarta.inject.Inject
 import xyz.block.domainapi.DomainApiError.UnsupportedHurdleResultCode
 import xyz.block.domainapi.Input
 import xyz.block.domainapi.ProcessingState
@@ -29,7 +28,7 @@ import xyz.block.domainapi.UserInteraction.Hurdle
 import xyz.block.domainapi.util.Operation
 
 class SanctionsInfoCollectionController @Inject constructor(
-  stateMachine: StateMachine<WithdrawalToken, Withdrawal, WithdrawalState>,
+  stateMachine: StateMachine<WithdrawalToken, Withdrawal, WithdrawalState, WithdrawalEffect>,
   private val validationService: ValidationService,
   private val sanctionsController: SanctionsController,
   withdrawalStore: WithdrawalStore,
@@ -40,9 +39,6 @@ class SanctionsInfoCollectionController @Inject constructor(
   metricsClient = metricsClient,
   withdrawalStore = withdrawalStore,
 ) {
-
-  override val logger: KLogger = KotlinLogging.logger {}
-
   override fun findMissingRequirements(value: Withdrawal): Result<List<RequirementId>> = result {
     listOf(
       SANCTIONS_WITHDRAWAL_REASON to { value.reasonForWithdrawal == null },
@@ -77,7 +73,7 @@ class SanctionsInfoCollectionController @Inject constructor(
   override fun transition(value: Withdrawal): Result<Withdrawal> = result {
     when (value.state) {
       is CollectingSanctionsInfo -> {
-        stateMachine.transitionTo(value, WaitingForSanctionsHeldDecision).bind()
+        stateMachine.transition(value, SanctionsInfoComplete()).bind()
       }
       else -> raise(IllegalStateException("Unexpected state ${value.state}"))
     }
@@ -110,7 +106,7 @@ class SanctionsInfoCollectionController @Inject constructor(
     requirementResults.find { it.result == ResultCode.CANCELLED }?.let {
       // In this case we don't want to fail the withdrawal if the user bails out because we will
       // still get a decision from interdiction
-      val updatedValue = value.transitionTo(WaitingForSanctionsHeldDecision, metricsClient).bind()
+      val updatedValue = stateMachine.transition(value, SanctionsInfoComplete()).bind()
       ProcessingState.Waiting(updatedValue)
     }
   }
@@ -135,8 +131,10 @@ class SanctionsInfoCollectionController @Inject constructor(
   ): Result<ProcessingState<Withdrawal, RequirementId>?> = result {
     when (operation) {
       Operation.EXECUTE, Operation.CREATE -> null // normal processing
-      // The customer abandoned the flow but the interdiction case had already been created
-      // In this case we continue based on the interdiction decision
+      /*
+       * If the customer abandons the flow but the interdiction case has already been created, the API will get a resume
+       * call. However, the state will still be CollectingSanctionsInfo so we need to deal with it in this controller.
+       */
       Operation.RESUME -> sanctionsController.processInputs(value, inputs, operation).bind()
     }
   }

@@ -8,7 +8,7 @@ import xyz.block.bittycity.outie.models.ConfirmedOnChain
 import xyz.block.bittycity.outie.models.Failed
 import xyz.block.bittycity.outie.models.FailedOnChain
 import xyz.block.bittycity.outie.models.FailureReason
-import xyz.block.bittycity.outie.models.HoldingSubmission
+import xyz.block.bittycity.outie.models.CheckingLimits
 import xyz.block.bittycity.outie.models.LedgerEntryToken
 import xyz.block.bittycity.outie.models.ObservedInMempool
 import xyz.block.bittycity.outie.models.RequirementId
@@ -26,7 +26,6 @@ import xyz.block.bittycity.outie.testing.BittyCityTestCase
 import xyz.block.bittycity.outie.testing.shouldBeWithdrawal
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.result.shouldBeFailure
-import io.kotest.matchers.result.shouldBeSuccess
 import io.kotest.matchers.should
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.types.shouldBeInstanceOf
@@ -163,7 +162,7 @@ class OnChainControllerTest : BittyCityTestCase() {
   @Test
   fun `should fail with LIMITED reason when withdrawal would exceed limits`() = runTest {
     val withdrawal = data.seedWithdrawal(
-      state = HoldingSubmission,
+      state = CheckingLimits,
       withdrawalSpeed = WithdrawalSpeed.RUSH,
       amount = amount.next(),
     )
@@ -240,7 +239,7 @@ class OnChainControllerTest : BittyCityTestCase() {
   @Test
   fun `withdrawal is failed if something fails and it has not been submitted on-chain`() = runTest {
     val withdrawal = data.seedWithdrawal(
-      state = HoldingSubmission,
+      state = CheckingLimits,
     )
 
     // Simulate an error

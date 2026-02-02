@@ -2,41 +2,33 @@ package xyz.block.bittycity.outie.controllers
 
 import app.cash.kfsm.StateMachine
 import arrow.core.raise.result
+import jakarta.inject.Inject
 import xyz.block.bittycity.common.client.CurrencyDisplayPreferenceClient
-import xyz.block.bittycity.outie.client.LimitClient
-import xyz.block.bittycity.outie.client.LimitResponse
-import xyz.block.bittycity.outie.client.LimitViolation
-import xyz.block.bittycity.outie.client.MetricsClient
+import xyz.block.bittycity.outie.fsm.Fail
+import xyz.block.bittycity.outie.fsm.WithdrawalEffect
 import xyz.block.bittycity.outie.models.ConfirmedComplete
 import xyz.block.bittycity.outie.models.ConfirmedOnChain
 import xyz.block.bittycity.outie.models.FailedOnChain
 import xyz.block.bittycity.outie.models.FailureReason
-import xyz.block.bittycity.outie.models.HoldingSubmission
 import xyz.block.bittycity.outie.models.ObservedInMempool
 import xyz.block.bittycity.outie.models.RequirementId
-import xyz.block.bittycity.outie.models.SubmittingOnChain
 import xyz.block.bittycity.outie.models.WaitingForConfirmedOnChainStatus
 import xyz.block.bittycity.outie.models.WaitingForPendingConfirmationStatus
 import xyz.block.bittycity.outie.models.Withdrawal
+import xyz.block.bittycity.outie.models.WithdrawalNotification
 import xyz.block.bittycity.outie.models.WithdrawalState
 import xyz.block.bittycity.outie.models.WithdrawalToken
 import xyz.block.bittycity.outie.store.WithdrawalStore
-import io.github.oshai.kotlinlogging.KLogger
-import io.github.oshai.kotlinlogging.KotlinLogging
-import jakarta.inject.Inject
-import xyz.block.domainapi.InfoOnly
+import xyz.block.domainapi.DomainApi
 import xyz.block.domainapi.Input
 import xyz.block.domainapi.ProcessingState
 import xyz.block.domainapi.util.Operation
 
 class OnChainController @Inject constructor(
-  stateMachine: StateMachine<WithdrawalToken, Withdrawal, WithdrawalState>,
+  stateMachine: StateMachine<WithdrawalToken, Withdrawal, WithdrawalState, WithdrawalEffect>,
   withdrawalStore: WithdrawalStore,
-  private val limitsClient: LimitClient,
-  private val currencyDisplayPreferenceClient: CurrencyDisplayPreferenceClient,
-  private val metricsClient: MetricsClient,
-) : WithdrawalController(stateMachine, metricsClient, withdrawalStore) {
-  override val logger: KLogger = KotlinLogging.logger {}
+  private val currencyDisplayPreferenceClient: CurrencyDisplayPreferenceClient
+) : WithdrawalController(withdrawalStore, stateMachine) {
 
   override fun processInputs(
     value: Withdrawal,
@@ -45,35 +37,33 @@ class OnChainController @Inject constructor(
     hurdleGroupId: String?
   ): Result<ProcessingState<Withdrawal, RequirementId>> = result {
     when (value.state) {
-      HoldingSubmission -> {
-        val limitResult = limitsClient.evaluateLimits(value.customerId, value).bind()
-        when (limitResult) {
-          is LimitResponse.NotLimited -> value.transitionTo(
-            SubmittingOnChain,
-            metricsClient
-          ).bind()
-          is LimitResponse.Limited -> {
-            value.fail(FailureReason.LIMITED, metricsClient).bind()
-            raise(LimitWouldBeExceeded(limitResult.violations))
-          }
-        }
+      WaitingForPendingConfirmationStatus -> {
+        val updatedValue = handleResumeInputs(value, inputs).bind()
+        ProcessingState.UserInteractions(
+          hurdles = listOf(
+            WithdrawalNotification.SubmittedOnChainNotification(
+              updatedValue.amount!!,
+              currencyDisplayPreferenceClient.getCurrencyDisplayPreference(
+                updatedValue.customerId.id
+              ).bind().bitcoinDisplayUnits,
+              updatedValue.fiatEquivalentAmount!!,
+              updatedValue.selectedSpeed?.approximateWaitTime!!,
+              updatedValue.targetWalletAddress!!
+            )
+          ),
+          nextEndpoint = DomainApi.Endpoint.SECURE_EXECUTE
+        )
       }
-      SubmittingOnChain -> value.transitionTo(
-        WaitingForPendingConfirmationStatus,
-        metricsClient
-      ).bind()
-      WaitingForPendingConfirmationStatus,
-      WaitingForConfirmedOnChainStatus -> handleResumeInputs(value, inputs).bind()
+      WaitingForConfirmedOnChainStatus -> {
+        val updatedValue = handleResumeInputs(value, inputs).bind()
+        ProcessingState.Waiting(updatedValue)
+      }
       ConfirmedComplete -> {
         logger.info { "Attempted to process inputs $inputs but withdrawal is already complete." }
-        value
+        ProcessingState.Complete(value)
       }
       else -> raise(mismatchedState(value))
-    }.asProcessingState(
-      bitcoinDisplayUnits = currencyDisplayPreferenceClient.getCurrencyDisplayPreference(
-        value.customerId.id
-      ).bind().bitcoinDisplayUnits
-    )
+    }
   }
 
   private fun handleResumeInputs(
@@ -95,11 +85,13 @@ class OnChainController @Inject constructor(
           }
           value
         } else {
-          value.copy(
-            blockchainTransactionId = resumeResult.blockchainTransactionId,
-            blockchainTransactionOutputIndex = resumeResult.blockchainTransactionOutputIndex
-          )
-            .transitionTo(WaitingForConfirmedOnChainStatus, metricsClient).bind()
+          stateMachine.transition(
+            value.copy(
+              blockchainTransactionId = resumeResult.blockchainTransactionId,
+              blockchainTransactionOutputIndex = resumeResult.blockchainTransactionOutputIndex
+            ),
+            xyz.block.bittycity.outie.fsm.ObservedInMempool()
+          ).bind()
         }
       }
 
@@ -129,19 +121,24 @@ class OnChainController @Inject constructor(
             }
           }
         }
-        value.copy(
-          blockchainTransactionId = resumeResult.blockchainTransactionId,
-          blockchainTransactionOutputIndex = resumeResult.blockchainTransactionOutputIndex
-        )
-          .transitionTo(ConfirmedComplete, metricsClient).bind()
+        stateMachine.transition(
+          value.copy(
+            blockchainTransactionId = resumeResult.blockchainTransactionId,
+            blockchainTransactionOutputIndex = resumeResult.blockchainTransactionOutputIndex
+          ),
+          xyz.block.bittycity.outie.fsm.ConfirmedOnChain()
+        ).bind()
       }
 
       is FailedOnChain -> {
         logger.warn { "Withdrawal submitted on-chain failed [id=${value.id}]" }
-        value.copy(
-          blockchainTransactionId = resumeResult.blockchainTransactionId,
-          blockchainTransactionOutputIndex = resumeResult.blockchainTransactionOutputIndex
-        ).fail(FailureReason.FAILED_ON_CHAIN, metricsClient).bind()
+        stateMachine.transition(
+          value.copy(
+            blockchainTransactionId = resumeResult.blockchainTransactionId,
+            blockchainTransactionOutputIndex = resumeResult.blockchainTransactionOutputIndex
+          ),
+          Fail(FailureReason.FAILED_ON_CHAIN)
+        ).bind()
       }
 
       else -> raise(RuntimeException("Unexpected input $resumeResult"))
@@ -158,19 +155,7 @@ class OnChainController @Inject constructor(
         raise(failure)
       }
 
-      HoldingSubmission, SubmittingOnChain -> {
-        if (value.feeRefunded) {
-          logger.error(failure) {
-            "An unexpected error occurred while holding the withdrawal for submission after it " +
-              "had been held for sanctions review. The withdrawal will not be failed."
-          }
-          raise(failure)
-        } else {
-          failWithdrawal(failure, value).bind()
-        }
-      }
-
-      else -> failWithdrawal(failure, value).bind()
+      else -> failWithdrawal(failure.toFailureReason(), value).bind()
     }
   }
 
@@ -180,8 +165,3 @@ class OnChainController @Inject constructor(
     }
   }
 }
-
-data class LimitWouldBeExceeded(val violations: List<LimitViolation>) :
-  Exception(
-    "Withdrawal limits would be exceeded: $violations"
-  ), InfoOnly

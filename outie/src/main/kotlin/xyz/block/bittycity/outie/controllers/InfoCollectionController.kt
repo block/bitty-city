@@ -11,7 +11,6 @@ import xyz.block.bittycity.outie.client.MetricsClient
 import xyz.block.bittycity.outie.models.BalanceId
 import xyz.block.bittycity.outie.models.BitcoinAccount
 import xyz.block.bittycity.common.models.Bitcoins
-import xyz.block.bittycity.outie.models.CheckingSanctions
 import xyz.block.bittycity.outie.models.CollectingInfo
 import xyz.block.bittycity.common.models.CustomerId
 import xyz.block.bittycity.outie.models.RequirementId
@@ -58,10 +57,12 @@ import xyz.block.domainapi.UserInteraction.Hurdle
 import xyz.block.domainapi.util.HurdleGroup
 import java.math.BigDecimal
 import kotlin.time.Duration.Companion.minutes
+import xyz.block.bittycity.outie.fsm.InfoComplete
+import xyz.block.bittycity.outie.fsm.WithdrawalEffect
 
 @Suppress("LongParameterList")
 class InfoCollectionController @Inject constructor(
-  stateMachine: StateMachine<WithdrawalToken, Withdrawal, WithdrawalState>,
+  stateMachine: StateMachine<WithdrawalToken, Withdrawal, WithdrawalState, WithdrawalEffect>,
   withdrawalStore: WithdrawalStore,
   private val targetWalletAddressHandler: TargetWalletAddressHandler,
   private val amountHandler: AmountHandler,
@@ -163,7 +164,7 @@ class InfoCollectionController @Inject constructor(
   override fun transition(value: Withdrawal): Result<Withdrawal> = result {
     when (value.state) {
       is CollectingInfo -> {
-        stateMachine.transitionTo(value, CheckingSanctions).bind()
+        stateMachine.transition(value, InfoComplete()).bind()
       }
       else -> raise(IllegalStateException("Unexpected state ${value.state}"))
     }
@@ -209,7 +210,7 @@ class InfoCollectionController @Inject constructor(
   }
 
   override fun handleFailure(failure: Throwable, value: Withdrawal): Result<Withdrawal> = result {
-    failWithdrawal(failure, value).bind()
+    failWithdrawal(failure.toFailureReason(), value).bind()
   }
 }
 

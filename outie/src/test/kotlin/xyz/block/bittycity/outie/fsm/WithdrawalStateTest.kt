@@ -18,7 +18,7 @@ import xyz.block.bittycity.outie.models.CollectingSanctionsInfo
 import xyz.block.bittycity.outie.models.CollectingScamWarningDecision
 import xyz.block.bittycity.outie.models.CollectingSelfAttestation
 import xyz.block.bittycity.outie.models.ConfirmedComplete
-import xyz.block.bittycity.outie.models.HoldingSubmission
+import xyz.block.bittycity.outie.models.CheckingLimits
 import xyz.block.bittycity.outie.models.Sanctioned
 import xyz.block.bittycity.outie.models.SubmittingOnChain
 import xyz.block.bittycity.outie.models.WaitingForConfirmedOnChainStatus
@@ -53,7 +53,7 @@ class WithdrawalStateTest {
         CollectingScamWarningDecision,
         CollectingSelfAttestation,
         ConfirmedComplete,
-        HoldingSubmission,
+        CheckingLimits,
         SubmittingOnChain,
         WaitingForConfirmedOnChainStatus,
         WaitingForPendingConfirmationStatus,
@@ -68,7 +68,7 @@ class WithdrawalStateTest {
 
   @Test
   fun `allStates finds no states between disjointed states`() {
-    WithdrawalState.allStates(from = Sanctioned, to = HoldingSubmission).shouldBeEmpty()
+    WithdrawalState.allStates(from = Sanctioned, to = CheckingLimits).shouldBeEmpty()
   }
 
   @Test

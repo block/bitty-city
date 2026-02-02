@@ -3,7 +3,6 @@ package xyz.block.bittycity.outie.jobs
 import app.cash.kfsm.StateMachine
 import arrow.core.raise.result
 import xyz.block.bittycity.outie.api.WithdrawalDomainController
-import xyz.block.bittycity.outie.controllers.WithdrawalTransitioner
 import xyz.block.bittycity.outie.models.Withdrawal
 import xyz.block.bittycity.outie.models.WithdrawalState
 import xyz.block.bittycity.outie.models.WithdrawalToken
@@ -14,15 +13,16 @@ import jakarta.inject.Inject
 import jakarta.inject.Named
 import xyz.block.domainapi.util.Operation
 import kotlin.time.Duration.Companion.minutes
+import xyz.block.bittycity.outie.fsm.WithdrawalEffect
 
 class RetryStuckWithdrawalsJob @Inject constructor(
-  override val stateMachine: StateMachine<WithdrawalToken, Withdrawal, WithdrawalState>,
+  val stateMachine: StateMachine<WithdrawalToken, Withdrawal, WithdrawalState, WithdrawalEffect>,
   private val withdrawalStore: WithdrawalStore,
   private val domainController: WithdrawalDomainController,
   @param:Named("withdrawal.retryable_stuck_after_minutes") private val stuckAfterMinutes: Long,
-) : WithdrawalTransitioner {
+) {
 
-  override val logger: KLogger = KotlinLogging.logger {}
+  val logger: KLogger = KotlinLogging.logger {}
 
   /**
    * Finds and retries any stuck withdrawals.

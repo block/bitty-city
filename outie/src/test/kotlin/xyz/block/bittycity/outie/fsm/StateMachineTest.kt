@@ -11,7 +11,7 @@ import xyz.block.bittycity.outie.models.CollectingScamWarningDecision
 import xyz.block.bittycity.outie.models.CollectingSelfAttestation
 import xyz.block.bittycity.outie.models.ConfirmedComplete
 import xyz.block.bittycity.outie.models.Failed
-import xyz.block.bittycity.outie.models.HoldingSubmission
+import xyz.block.bittycity.outie.models.CheckingLimits
 import xyz.block.bittycity.outie.models.Sanctioned
 import xyz.block.bittycity.outie.models.SubmittingOnChain
 import xyz.block.bittycity.outie.models.WaitingForConfirmedOnChainStatus
@@ -27,7 +27,7 @@ class StateMachineTest : BittyCityTestCase() {
   fun `state machine happy path`() = runTest {
     StateMachineUtilities.verify(CollectingInfo) shouldBeSuccess setOf(
       CollectingInfo, CheckingRisk, CheckingSanctions, CheckingTravelRule,
-      HoldingSubmission, SubmittingOnChain, WaitingForPendingConfirmationStatus,
+      CheckingLimits, SubmittingOnChain, WaitingForPendingConfirmationStatus,
       WaitingForConfirmedOnChainStatus, ConfirmedComplete, Failed, CollectingSelfAttestation,
       WaitingForSanctionsHeldDecision, CollectingScamWarningDecision, CollectingSanctionsInfo,
       Sanctioned, CheckingEligibility

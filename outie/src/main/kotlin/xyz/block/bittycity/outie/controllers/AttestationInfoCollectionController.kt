@@ -3,7 +3,6 @@ package xyz.block.bittycity.outie.controllers
 import app.cash.kfsm.StateMachine
 import arrow.core.raise.result
 import xyz.block.bittycity.outie.client.MetricsClient
-import xyz.block.bittycity.outie.models.CheckingEligibility
 import xyz.block.bittycity.outie.models.CollectingSelfAttestation
 import xyz.block.bittycity.outie.models.RequirementId
 import xyz.block.bittycity.outie.models.RequirementId.SELF_ATTESTATION
@@ -15,13 +14,15 @@ import xyz.block.bittycity.outie.models.WithdrawalToken
 import xyz.block.bittycity.outie.store.WithdrawalStore
 import xyz.block.bittycity.outie.validation.ValidationService
 import jakarta.inject.Inject
+import xyz.block.bittycity.outie.fsm.SelfAttestationComplete
+import xyz.block.bittycity.outie.fsm.WithdrawalEffect
 import xyz.block.domainapi.DomainApiError.UnsupportedHurdleResultCode
 import xyz.block.domainapi.Input
 import xyz.block.domainapi.ResultCode
 import xyz.block.domainapi.UserInteraction.Hurdle
 
 class AttestationInfoCollectionController @Inject constructor(
-  stateMachine: StateMachine<WithdrawalToken, Withdrawal, WithdrawalState>,
+  stateMachine: StateMachine<WithdrawalToken, Withdrawal, WithdrawalState, WithdrawalEffect>,
   private val validationService: ValidationService,
   metricsClient: MetricsClient,
   withdrawalStore: WithdrawalStore
@@ -35,9 +36,8 @@ class AttestationInfoCollectionController @Inject constructor(
   override fun transition(value: Withdrawal): Result<Withdrawal> = result {
     when (value.state) {
       is CollectingSelfAttestation -> {
-        stateMachine.transitionTo(value, CheckingEligibility).bind()
+        stateMachine.transition(value, SelfAttestationComplete()).bind()
       }
-
       else -> raise(mismatchedState(value))
     }
   }
@@ -87,6 +87,6 @@ class AttestationInfoCollectionController @Inject constructor(
   }
 
   override fun handleFailure(failure: Throwable, value: Withdrawal): Result<Withdrawal> = result {
-    failWithdrawal(failure, value).bind()
+    failWithdrawal(failure.toFailureReason(), value).bind()
   }
 }

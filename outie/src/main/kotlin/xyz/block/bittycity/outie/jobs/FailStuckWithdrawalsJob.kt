@@ -3,7 +3,6 @@ package xyz.block.bittycity.outie.jobs
 import app.cash.kfsm.StateMachine
 import arrow.core.raise.result
 import xyz.block.bittycity.outie.client.MetricsClient
-import xyz.block.bittycity.outie.controllers.WithdrawalTransitioner
 import xyz.block.bittycity.outie.models.FailureReason
 import xyz.block.bittycity.outie.models.Withdrawal
 import xyz.block.bittycity.outie.models.WithdrawalState
@@ -14,15 +13,16 @@ import io.github.oshai.kotlinlogging.KotlinLogging
 import jakarta.inject.Inject
 import jakarta.inject.Named
 import kotlin.time.Duration.Companion.minutes
+import xyz.block.bittycity.outie.fsm.WithdrawalEffect
 
 class FailStuckWithdrawalsJob @Inject constructor(
-  override val stateMachine: StateMachine<WithdrawalToken, Withdrawal, WithdrawalState>,
+  override val stateMachine: StateMachine<WithdrawalToken, Withdrawal, WithdrawalState, WithdrawalEffect>,
   private val withdrawalStore: WithdrawalStore,
   private val metricsClient: MetricsClient,
   @param:Named("withdrawal.stuck_after_minutes") private val stuckAfterMinutes: Long,
-) : WithdrawalTransitioner {
+) {
 
-  override val logger: KLogger = KotlinLogging.logger {}
+  val logger: KLogger = KotlinLogging.logger {}
 
   /**
    * Finds and fails any stuck withdrawals.

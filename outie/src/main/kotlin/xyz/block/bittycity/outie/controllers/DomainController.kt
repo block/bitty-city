@@ -5,15 +5,15 @@ import app.cash.kfsm.Value
 import app.cash.quiver.extensions.toResult
 import org.slf4j.LoggerFactory
 import xyz.block.domainapi.util.Controller
-import xyz.block.domainapi.util.ProcessAdvancer
+import xyz.block.domainapi.util.RequestHandler
 
 /**
- * A process advancer that delegates to the appropriate controller based on the state.
+ * A request handler that delegates to the appropriate controller based on the state.
  * This controller is used to route requests to the correct controller based on the current state of the process.
  */
-open class DomainController<ID, S : State<ID, V, S>, V : Value<ID, V, S>, R>(
+open class DomainController<ID, S : State<S>, V : Value<ID, V, S>, R>(
   private val controllerMap: Map<S, Controller<ID, S, V, R>>
-) : ProcessAdvancer<ID, S, V, R>() {
+) : RequestHandler<ID, S, V, R>() {
 
   private val logger = LoggerFactory.getLogger(DomainController::class.java)
 

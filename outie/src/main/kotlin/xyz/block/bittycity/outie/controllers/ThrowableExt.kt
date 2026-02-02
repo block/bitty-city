@@ -1,5 +1,6 @@
 package xyz.block.bittycity.outie.controllers
 
+import xyz.block.bittycity.outie.client.LimitWouldBeExceeded
 import xyz.block.bittycity.outie.models.FailureReason
 import xyz.block.bittycity.outie.validation.InsufficientBalance
 

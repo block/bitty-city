@@ -3,6 +3,7 @@ package xyz.block.bittycity.outie.client
 import xyz.block.bittycity.common.models.CustomerId
 import xyz.block.bittycity.outie.models.Withdrawal
 import xyz.block.bittycity.outie.models.WithdrawalLimitInfo
+import xyz.block.domainapi.InfoOnly
 
 /**
  * Evaluate withdrawal limits.
@@ -41,3 +42,8 @@ enum class LimitViolation {
   DAILY_USD_LIMIT,
   WEEKLY_USD_LIMIT,
 }
+
+data class LimitWouldBeExceeded(val violations: List<LimitViolation>) :
+  Exception(
+    "Withdrawal limits would be exceeded: $violations"
+  ), InfoOnly

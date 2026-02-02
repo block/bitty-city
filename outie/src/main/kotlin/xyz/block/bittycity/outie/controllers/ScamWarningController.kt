@@ -2,8 +2,11 @@ package xyz.block.bittycity.outie.controllers
 
 import app.cash.kfsm.StateMachine
 import arrow.core.raise.result
+import jakarta.inject.Inject
 import xyz.block.bittycity.outie.client.MetricsClient
-import xyz.block.bittycity.outie.models.CheckingTravelRule
+import xyz.block.bittycity.outie.fsm.Fail
+import xyz.block.bittycity.outie.fsm.ScamWarningAcceptRisk
+import xyz.block.bittycity.outie.fsm.WithdrawalEffect
 import xyz.block.bittycity.outie.models.CollectingScamWarningDecision
 import xyz.block.bittycity.outie.models.FailureReason.CUSTOMER_DECLINED_DUE_TO_SCAM_WARNING
 import xyz.block.bittycity.outie.models.RequirementId
@@ -15,7 +18,6 @@ import xyz.block.bittycity.outie.models.WithdrawalNotification
 import xyz.block.bittycity.outie.models.WithdrawalState
 import xyz.block.bittycity.outie.models.WithdrawalToken
 import xyz.block.bittycity.outie.store.WithdrawalStore
-import jakarta.inject.Inject
 import xyz.block.domainapi.DomainApiError.UnsupportedHurdleResultCode
 import xyz.block.domainapi.Input
 import xyz.block.domainapi.ResultCode
@@ -23,7 +25,7 @@ import xyz.block.domainapi.UserInteraction
 import xyz.block.domainapi.UserInteraction.Hurdle
 
 class ScamWarningController @Inject constructor(
-  stateMachine: StateMachine<WithdrawalToken, Withdrawal, WithdrawalState>,
+  stateMachine: StateMachine<WithdrawalToken, Withdrawal, WithdrawalState, WithdrawalEffect>,
   metricsClient: MetricsClient,
   withdrawalStore: WithdrawalStore
 ) : WithdrawalInfoCollectionController(
@@ -55,8 +57,8 @@ class ScamWarningController @Inject constructor(
 
   override fun transition(value: Withdrawal): Result<Withdrawal> = result {
     when (value.userHasAcceptedRisk) {
-      true -> value.transitionTo(CheckingTravelRule, metricsClient).bind()
-      false -> value.fail(CUSTOMER_DECLINED_DUE_TO_SCAM_WARNING, metricsClient).bind()
+      true -> stateMachine.transition(value, ScamWarningAcceptRisk()).bind()
+      false -> stateMachine.transition(value, Fail(CUSTOMER_DECLINED_DUE_TO_SCAM_WARNING)).bind()
       null -> raise(IllegalStateException("userHasAcceptedRisk is null"))
     }
   }
@@ -82,6 +84,6 @@ class ScamWarningController @Inject constructor(
   }
 
   override fun handleFailure(failure: Throwable, value: Withdrawal): Result<Withdrawal> = result {
-    failWithdrawal(failure, value).bind()
+    failWithdrawal(failure.toFailureReason(), value).bind()
   }
 }

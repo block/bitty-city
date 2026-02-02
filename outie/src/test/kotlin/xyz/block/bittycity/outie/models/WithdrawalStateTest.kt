@@ -26,7 +26,7 @@ class WithdrawalStateTest {
     WithdrawalState.byName("CHECKING_TRAVEL_RULE").getOrThrow() shouldBe CheckingTravelRule
     WithdrawalState.byName("COLLECTING_SELF_ATTESTATION").getOrThrow() shouldBe CollectingSelfAttestation
     WithdrawalState.byName("CHECKING_ELIGIBILITY").getOrThrow() shouldBe CheckingEligibility
-    WithdrawalState.byName("HOLDING_SUBMISSION").getOrThrow() shouldBe HoldingSubmission
+    WithdrawalState.byName("HOLDING_SUBMISSION").getOrThrow() shouldBe CheckingLimits
     WithdrawalState.byName("SUBMITTING_ON_CHAIN").getOrThrow() shouldBe SubmittingOnChain
     WithdrawalState.byName("WAITING_FOR_PENDING_CONFIRMATION_STATUS").getOrThrow() shouldBe WaitingForPendingConfirmationStatus
     WithdrawalState.byName("WAITING_FOR_CONFIRMED_ON_CHAIN_STATUS").getOrThrow() shouldBe WaitingForConfirmedOnChainStatus
