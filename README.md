@@ -9,8 +9,7 @@ used currently by [Block](https://block.xyz/) for [Square Bitcoin](https://squar
 
 Bitty City uses CashApp's [Hermit](https://cashapp.github.io/hermit/). Hermit ensures that your team, your contributors,
 and your CI have the same consistent tooling. Here are the [installation instructions](https://cashapp.github.io/hermit/usage/get-started/#installing-hermit).
-
-[Activate Hermit](https://cashapp.github.io/hermit/usage/get-started/#activating-an-environment) either
+d/#activating-an-environment) either
 by [enabling the shell hooks](https://cashapp.github.io/hermit/usage/shell/) (one-time only, recommended) or manually
 sourcing the env with `. ./bin/activate-hermit`.
 
