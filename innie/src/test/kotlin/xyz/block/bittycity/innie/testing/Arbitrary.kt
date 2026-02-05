@@ -30,7 +30,7 @@ object Arbitrary {
   val customerToken: Arb<CustomerId> =
     Arb.stringPattern("[a-z0-9]{12}").map { CustomerId(it) }
   val stringToken: Arb<String> = Arb.stringPattern("[a-z0-9]{12}")
-  val depositToken: Arb<DepositToken> = stringToken.map { DepositToken(it) }
+  val depositToken: Arb<DepositToken> = uuid.map { DepositToken(it) }
   val depositReversalToken : Arb<DepositReversalToken> = uuid.map { DepositReversalToken(it) }
   val walletAddress: Arb<Address> = arbitrary {
     ECKey().toAddress(ScriptType.P2WPKH, BitcoinNetwork.TESTNET)

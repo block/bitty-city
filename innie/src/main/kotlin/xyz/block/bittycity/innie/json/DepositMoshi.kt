@@ -9,7 +9,10 @@ import com.squareup.moshi.ToJson
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import xyz.block.bittycity.common.models.Bitcoins
 import xyz.block.bittycity.common.models.CustomerId
+import xyz.block.bittycity.innie.models.DepositReversalToken
+import xyz.block.bittycity.innie.models.DepositState
 import xyz.block.bittycity.innie.models.DepositToken
+import xyz.block.bittycity.innie.models.WaitingForDepositConfirmedOnChainStatus
 import java.time.Instant
 
 /**
@@ -22,6 +25,8 @@ object DepositMoshi {
     .add(BitcoinsAdapter())
     .add(CustomerIdAdapter())
     .add(DepositTokenAdapter())
+    .add(DepositReversalTokenAdapter())
+    .add(DepositStateAdapter())
     .add(RequirementIdJsonAdapter)
     .addLast(KotlinJsonAdapterFactory())
     .build()
@@ -55,7 +60,24 @@ object DepositMoshi {
     fun toJson(token: DepositToken): String = token.toString()
 
     @FromJson
-    fun fromJson(token: String): DepositToken = DepositToken.create(token)
+    fun fromJson(token: String): DepositToken = DepositToken.parse(token).getOrThrow()
+  }
+
+  class DepositReversalTokenAdapter {
+    @ToJson
+    fun toJson(token: DepositReversalToken): String = token.toString()
+
+    @FromJson
+    fun fromJson(token: String): DepositReversalToken = DepositReversalToken.parse(token).getOrThrow()
+  }
+
+  class DepositStateAdapter {
+    @ToJson
+    fun toJson(state: DepositState): String = state.name
+
+    @FromJson
+    fun fromJson(name: String): DepositState =
+      WaitingForDepositConfirmedOnChainStatus.byName(name).getOrThrow()
   }
 
   object RequirementIdJsonAdapter : JsonAdapter<xyz.block.bittycity.innie.models.RequirementId>() {
