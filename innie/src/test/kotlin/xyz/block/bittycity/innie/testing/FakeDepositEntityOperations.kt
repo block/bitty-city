@@ -30,6 +30,10 @@ class FakeDepositEntityOperations : DepositEntityOperations {
     deposits[token]
   }
 
+  override fun getByTokens(tokens: List<DepositToken>): Result<Map<DepositToken, Deposit?>> = result {
+    tokens.associateWith { deposits[it] }
+  }
+
   override fun update(deposit: Deposit): Result<Deposit> = result {
     val existing = deposits[deposit.id]
       ?: raise(IllegalStateException("Deposit with token ${deposit.id} not found"))

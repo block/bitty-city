@@ -26,6 +26,9 @@ class FakeDepositOperations(
   override fun findByToken(token: DepositToken): Result<Deposit?> =
     entityOps.findByToken(token)
 
+  override fun getByTokens(tokens: List<DepositToken>): Result<Map<DepositToken, Deposit?>> =
+    entityOps.getByTokens(tokens)
+
   override fun update(deposit: Deposit): Result<Deposit> =
     entityOps.update(deposit)
 

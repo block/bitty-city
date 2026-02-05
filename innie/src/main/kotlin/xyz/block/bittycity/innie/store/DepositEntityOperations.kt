@@ -11,6 +11,8 @@ interface DepositEntityOperations {
 
   fun getByToken(token: DepositToken): Result<Deposit>
 
+  fun getByTokens(tokens: List<DepositToken>): Result<Map<DepositToken, Deposit?>>
+
   fun findByToken(token: DepositToken): Result<Deposit?>
 
   fun update(deposit: Deposit): Result<Deposit>

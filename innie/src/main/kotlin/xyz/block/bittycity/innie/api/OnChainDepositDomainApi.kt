@@ -29,6 +29,7 @@ import xyz.block.domainapi.SearchParameter
 import xyz.block.domainapi.SearchResult
 import xyz.block.domainapi.UpdateResponse
 import xyz.block.domainapi.util.Operation
+import java.util.UUID
 
 typealias DepositDomainController =
   DomainController<DepositToken, DepositState, Deposit, RequirementId>
@@ -128,6 +129,20 @@ class OnChainDepositDomainApi @Inject constructor(
       id = deposit.id.toString(),
       updatableAttributes = emptyList(),
       process = deposit
+    )
+  }
+
+  fun getMany(
+    ids: List<DepositToken>
+  ): Result<ProcessInfo<Unit, Map<DepositToken, Deposit?>>> = result {
+    val deposits = transactor.transactReadOnly("get deposits by ids") {
+      getByTokens(ids)
+    }.bind()
+
+    ProcessInfo(
+      id = UUID.randomUUID().toString(),
+      updatableAttributes = emptyList(),
+      process = deposits
     )
   }
 
