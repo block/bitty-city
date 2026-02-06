@@ -3,6 +3,7 @@ package xyz.block.bittycity.outie.models
 import app.cash.kfsm.Value
 import org.bitcoinj.base.Address
 import org.joda.money.Money
+import xyz.block.bittycity.common.models.BalanceId
 import xyz.block.bittycity.common.models.BitcoinDisplayUnits
 import xyz.block.bittycity.common.models.Bitcoins
 import xyz.block.bittycity.common.models.CustomerId

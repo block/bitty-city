@@ -5,7 +5,7 @@ import com.google.inject.Provides
 import com.google.inject.Scopes
 import com.google.inject.name.Names
 import xyz.block.bittycity.common.client.PreFlightClient
-import xyz.block.bittycity.outie.client.BitcoinAccountClient
+import xyz.block.bittycity.common.client.BitcoinAccountClient
 import xyz.block.bittycity.common.client.CurrencyDisplayPreferenceClient
 import xyz.block.bittycity.common.client.EligibilityClient
 import xyz.block.bittycity.outie.client.EventClient

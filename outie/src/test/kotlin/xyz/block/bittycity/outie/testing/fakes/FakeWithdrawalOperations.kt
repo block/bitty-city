@@ -9,7 +9,7 @@ import xyz.block.bittycity.common.models.CustomerId
 import xyz.block.bittycity.common.models.LedgerTransactionId
 import xyz.block.bittycity.common.models.ServiceFee
 import xyz.block.bittycity.outie.json.WithdrawalMoshi
-import xyz.block.bittycity.outie.models.BalanceId
+import xyz.block.bittycity.common.models.BalanceId
 import xyz.block.bittycity.outie.models.Withdrawal
 import xyz.block.bittycity.outie.models.WithdrawalSpeed
 import xyz.block.bittycity.outie.models.WithdrawalSpeedOption

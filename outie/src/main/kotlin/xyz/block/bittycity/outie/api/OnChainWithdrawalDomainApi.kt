@@ -5,14 +5,14 @@ import app.cash.quiver.extensions.success
 import arrow.core.flatMap
 import arrow.core.getOrElse
 import arrow.core.raise.result
-import xyz.block.bittycity.outie.client.BitcoinAccountClient
+import xyz.block.bittycity.common.client.BitcoinAccountClient
 import xyz.block.bittycity.common.client.Eligibility
 import xyz.block.bittycity.common.client.EligibilityClient
 import xyz.block.bittycity.common.client.ExchangeRateClient
 import xyz.block.bittycity.common.client.IneligibleCustomer
 import xyz.block.bittycity.outie.controllers.AdminFailController
 import xyz.block.bittycity.outie.controllers.DomainController
-import xyz.block.bittycity.outie.models.BalanceId
+import xyz.block.bittycity.common.models.BalanceId
 import xyz.block.bittycity.common.models.Bitcoins
 import xyz.block.bittycity.outie.models.CollectingInfo
 import xyz.block.bittycity.common.models.CustomerId

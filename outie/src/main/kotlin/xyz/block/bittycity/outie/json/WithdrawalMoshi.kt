@@ -3,7 +3,7 @@ package xyz.block.bittycity.outie.json
 import app.cash.quiver.extensions.catch
 import app.cash.quiver.extensions.mapFailure
 import arrow.core.raise.result
-import xyz.block.bittycity.outie.models.BalanceId
+import xyz.block.bittycity.common.models.BalanceId
 import xyz.block.bittycity.common.models.Bitcoins
 import xyz.block.bittycity.common.models.CustomerId
 import xyz.block.bittycity.common.models.FlatFee

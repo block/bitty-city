@@ -5,17 +5,21 @@ import app.cash.quiver.extensions.success
 import arrow.core.getOrElse
 import arrow.core.raise.result
 import jakarta.inject.Inject
+import java.util.UUID
 import org.bitcoinj.base.Address
 import org.joda.money.CurrencyUnit
+import xyz.block.bittycity.common.client.BitcoinAccountClient
 import xyz.block.bittycity.common.client.ExchangeRateClient
+import xyz.block.bittycity.common.models.BalanceId
 import xyz.block.bittycity.common.models.Bitcoins
+import xyz.block.bittycity.common.models.CustomerId
 import xyz.block.bittycity.common.store.Transactor
 import xyz.block.bittycity.innie.client.WalletClient
 import xyz.block.bittycity.innie.controllers.DomainController
 import xyz.block.bittycity.innie.controllers.IdempotencyHandler
 import xyz.block.bittycity.innie.models.Deposit
 import xyz.block.bittycity.innie.models.DepositState
-import xyz.block.bittycity.innie.models.CheckingEligibility
+import xyz.block.bittycity.innie.models.CheckingDepositEligibility
 import xyz.block.bittycity.innie.models.DepositToken
 import xyz.block.bittycity.innie.models.RequirementId
 import xyz.block.bittycity.innie.models.WaitingForDepositConfirmedOnChainStatus
@@ -28,8 +32,7 @@ import xyz.block.domainapi.ProcessInfo
 import xyz.block.domainapi.SearchParameter
 import xyz.block.domainapi.SearchResult
 import xyz.block.domainapi.UpdateResponse
-import xyz.block.domainapi.util.Operation
-import java.util.UUID
+import xyz.block.domainapi.kfsm.v2.util.Operation
 
 typealias DepositDomainController =
   DomainController<DepositToken, DepositState, Deposit, RequirementId>
@@ -37,6 +40,7 @@ typealias DepositDomainController =
 class OnChainDepositDomainApi @Inject constructor(
   private val transactor: Transactor<DepositOperations>,
   private val domainController: DepositDomainController,
+  private val bitcoinAccountClient: BitcoinAccountClient,
   private val exchangeRateClient: ExchangeRateClient,
   private val walletClient: WalletClient,
   private val idempotencyHandler: IdempotencyHandler
@@ -64,7 +68,8 @@ class OnChainDepositDomainApi @Inject constructor(
           targetWalletAddress = initialRequest.targetWalletAddress,
           blockchainTransactionId = initialRequest.blockchainTransactionId,
           blockchainTransactionOutputIndex = initialRequest.blockchainTransactionOutputIndex,
-          paymentToken = initialRequest.paymentToken
+          paymentToken = initialRequest.paymentToken,
+          targetBalanceToken = getSourceBalanceToken(customerId).bind()
         )
       )
     }.bind()
@@ -151,10 +156,19 @@ class OnChainDepositDomainApi @Inject constructor(
     limit: Int
   ): Result<SearchResult<Unit, Deposit>> = UnsupportedOperationException().failure()
 
+  private fun getSourceBalanceToken(
+    customerId: CustomerId
+  ): Result<BalanceId> = result {
+    val customerSourceBalanceTokens = bitcoinAccountClient.getBitcoinAccounts(customerId).bind()
+    customerSourceBalanceTokens.firstOrNull()?.balanceId ?: raise(
+      IllegalStateException("No default balance token found")
+    )
+  }
+
   companion object {
     fun mapPaymentState(state: PaymentState): DepositState = when (state) {
       PaymentState.AWAITING_CONFIRMATION -> WaitingForDepositConfirmedOnChainStatus
-      PaymentState.COMPLETED_CONFIRMED -> CheckingEligibility
+      PaymentState.COMPLETED_CONFIRMED -> CheckingDepositEligibility
     }
   }
 }

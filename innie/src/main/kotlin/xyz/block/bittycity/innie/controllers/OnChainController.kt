@@ -1,11 +1,11 @@
 package xyz.block.bittycity.innie.controllers
 
-import app.cash.kfsm.StateMachine
+import app.cash.kfsm.v2.AwaitableStateMachine
+import app.cash.kfsm.v2.StateMachine
 import arrow.core.raise.result
 import jakarta.inject.Inject
-import xyz.block.bittycity.common.client.CurrencyDisplayPreferenceClient
-import xyz.block.bittycity.innie.client.MetricsClient
-import xyz.block.bittycity.innie.models.CheckingEligibility
+import xyz.block.bittycity.innie.fsm.DepositConfirmedOnChain
+import xyz.block.bittycity.innie.fsm.DepositEffect
 import xyz.block.bittycity.innie.models.Deposit
 import xyz.block.bittycity.innie.models.DepositResumeResult.ConfirmedOnChain
 import xyz.block.bittycity.innie.models.DepositState
@@ -15,14 +15,13 @@ import xyz.block.bittycity.innie.models.WaitingForDepositConfirmedOnChainStatus
 import xyz.block.bittycity.innie.store.DepositStore
 import xyz.block.domainapi.Input
 import xyz.block.domainapi.ProcessingState
-import xyz.block.domainapi.util.Operation
+import xyz.block.domainapi.kfsm.v2.util.Operation
 
 class OnChainController @Inject constructor(
-  stateMachine: StateMachine<DepositToken, Deposit, DepositState>,
-  depositStore: DepositStore,
-  private val currencyDisplayPreferenceClient: CurrencyDisplayPreferenceClient,
-  private val metricsClient: MetricsClient,
-) : DepositController(stateMachine, metricsClient, depositStore) {
+  stateMachine: StateMachine<DepositToken, Deposit, DepositState, DepositEffect>,
+  awaitableStateMachine: AwaitableStateMachine<DepositToken, Deposit, DepositState, DepositEffect>,
+  depositStore: DepositStore
+) : DepositController(stateMachine, awaitableStateMachine, depositStore) {
 
   override fun processInputs(
     value: Deposit,
@@ -31,13 +30,12 @@ class OnChainController @Inject constructor(
     hurdleGroupId: String?
   ): Result<ProcessingState<Deposit, RequirementId>> = result {
     when (value.state) {
-      WaitingForDepositConfirmedOnChainStatus -> handleResumeInputs(value, inputs).bind()
+      WaitingForDepositConfirmedOnChainStatus -> {
+        val updatedValue = handleResumeInputs(value, inputs).bind()
+        ProcessingState.Waiting(updatedValue)
+      }
       else -> raise(mismatchedState(value))
-    }.asProcessingState(
-      bitcoinDisplayUnits = currencyDisplayPreferenceClient.getCurrencyDisplayPreference(
-        value.customerId.id
-      ).bind().bitcoinDisplayUnits
-    )
+    }
   }
 
   /**
@@ -78,7 +76,10 @@ class OnChainController @Inject constructor(
             }
           }
         }
-        value.transitionTo(CheckingEligibility, metricsClient).bind()
+        stateMachine.transition(
+          value,
+          DepositConfirmedOnChain()
+        ).bind()
       }
       else ->  raise(RuntimeException("Unexpected input $resumeResult"))
     }

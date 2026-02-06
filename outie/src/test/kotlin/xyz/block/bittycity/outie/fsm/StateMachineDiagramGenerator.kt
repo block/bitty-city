@@ -5,7 +5,7 @@ import com.google.inject.Guice
 import com.google.inject.Key
 import com.google.inject.TypeLiteral
 import kotlin.system.exitProcess
-import xyz.block.bittycity.common.fsm.StateMachineDiagramGenerator
+import xyz.block.bittycity.outie.fsm.StateMachineDiagramGenerator
 import xyz.block.bittycity.outie.models.CollectingInfo
 import xyz.block.bittycity.outie.models.Withdrawal
 import xyz.block.bittycity.outie.models.WithdrawalState

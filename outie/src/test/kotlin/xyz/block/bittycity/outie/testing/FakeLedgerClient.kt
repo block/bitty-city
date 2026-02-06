@@ -5,7 +5,7 @@ import xyz.block.bittycity.common.testing.TestFake
 import app.cash.quiver.extensions.failure
 import app.cash.quiver.extensions.success
 import xyz.block.bittycity.outie.client.LedgerClient
-import xyz.block.bittycity.outie.models.BalanceId
+import xyz.block.bittycity.common.models.BalanceId
 import xyz.block.bittycity.common.models.Bitcoins
 import xyz.block.bittycity.common.models.CustomerId
 import xyz.block.bittycity.common.models.LedgerTransactionId

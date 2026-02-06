@@ -1,6 +1,6 @@
-package xyz.block.bittycity.outie.client
+package xyz.block.bittycity.common.client
 
-import xyz.block.bittycity.outie.models.BitcoinAccount
+import xyz.block.bittycity.common.models.BitcoinAccount
 import xyz.block.bittycity.common.models.CustomerId
 
 interface BitcoinAccountClient {

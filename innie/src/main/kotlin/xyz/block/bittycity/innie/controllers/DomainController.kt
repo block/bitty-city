@@ -1,15 +1,15 @@
 package xyz.block.bittycity.innie.controllers
 
-import app.cash.kfsm.State
-import app.cash.kfsm.Value
+import app.cash.kfsm.v2.State
+import app.cash.kfsm.v2.Value
 import app.cash.quiver.extensions.toResult
 import org.slf4j.LoggerFactory
-import xyz.block.domainapi.util.Controller
-import xyz.block.domainapi.util.ProcessAdvancer
+import xyz.block.domainapi.kfsm.v2.util.Controller
+import xyz.block.domainapi.kfsm.v2.util.RequestHandler
 
-open class DomainController <ID, S : State<ID, V, S>, V : Value<ID, V, S>, R>(
+open class DomainController <ID, S : State<S>, V : Value<ID, V, S>, R>(
   private val controllerMap: Map<S, Controller<ID, S, V, R>>
-) : ProcessAdvancer<ID, S, V, R>() {
+) : RequestHandler<ID, S, V, R>() {
 
   private val logger = LoggerFactory.getLogger(DomainController::class.java)
 

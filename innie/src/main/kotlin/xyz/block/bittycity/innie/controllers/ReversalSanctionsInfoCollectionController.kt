@@ -1,12 +1,14 @@
 package xyz.block.bittycity.innie.controllers
 
-import app.cash.kfsm.StateMachine
+import app.cash.kfsm.v2.AwaitableStateMachine
+import app.cash.kfsm.v2.StateMachine
 import arrow.core.raise.result
 import io.github.oshai.kotlinlogging.KLogger
 import io.github.oshai.kotlinlogging.KotlinLogging
 import jakarta.inject.Inject
-import xyz.block.bittycity.innie.client.MetricsClient
-import xyz.block.bittycity.innie.models.CollectingSanctionsInfo
+import xyz.block.bittycity.innie.fsm.DepositEffect
+import xyz.block.bittycity.innie.fsm.ReversalSanctionsInfoCollectionComplete
+import xyz.block.bittycity.innie.models.CollectingReversalSanctionsInfo
 import xyz.block.bittycity.innie.models.Deposit
 import xyz.block.bittycity.innie.models.DepositReversalHurdle.ReversalReasonHurdle
 import xyz.block.bittycity.innie.models.DepositReversalHurdleResponse
@@ -15,7 +17,7 @@ import xyz.block.bittycity.innie.models.DepositState
 import xyz.block.bittycity.innie.models.DepositToken
 import xyz.block.bittycity.innie.models.RequirementId
 import xyz.block.bittycity.innie.models.RequirementId.REVERSAL_SANCTIONS_REASON
-import xyz.block.bittycity.innie.models.WaitingForSanctionsHeldDecision
+import xyz.block.bittycity.innie.models.WaitingForReversalSanctionsHeldDecision
 import xyz.block.bittycity.innie.store.DepositStore
 import xyz.block.bittycity.innie.validation.ParameterIsRequired
 import xyz.block.bittycity.innie.validation.ValidationService
@@ -27,14 +29,14 @@ import xyz.block.domainapi.ResultCode
 import xyz.block.domainapi.UserInteraction
 
 class ReversalSanctionsInfoCollectionController @Inject constructor(
-  stateMachine: StateMachine<DepositToken, Deposit, DepositState>,
-  depositStore: DepositStore,
-  metricsClient: MetricsClient
-): DepositInfoCollectionController(
-  pendingCollectionState = CollectingSanctionsInfo,
+  stateMachine: StateMachine<DepositToken, Deposit, DepositState, DepositEffect>,
+  awaitableStateMachine: AwaitableStateMachine<DepositToken, Deposit, DepositState, DepositEffect>,
+  depositStore: DepositStore
+) : DepositInfoCollectionController(
+  pendingCollectionState = CollectingReversalSanctionsInfo,
   stateMachine = stateMachine,
-  depositStore = depositStore,
-  metricsClient = metricsClient,
+  awaitableStateMachine = awaitableStateMachine,
+  depositStore = depositStore
 ) {
 
   override val logger: KLogger = KotlinLogging.logger {}
@@ -77,9 +79,7 @@ class ReversalSanctionsInfoCollectionController @Inject constructor(
 
   override fun transition(value: Deposit): Result<Deposit> = result {
     when (value.state) {
-      is CollectingSanctionsInfo -> {
-        value.transitionTo(WaitingForSanctionsHeldDecision, metricsClient).bind()
-      }
+      is CollectingReversalSanctionsInfo -> stateMachine.transition(value, ReversalSanctionsInfoCollectionComplete()).bind()
       else -> raise(IllegalStateException("Unexpected state ${value.state}"))
     }
   }
@@ -99,7 +99,7 @@ class ReversalSanctionsInfoCollectionController @Inject constructor(
     value: Deposit
   ): Result<UserInteraction.Notification<RequirementId>?> = result {
     when (value.state) {
-      WaitingForSanctionsHeldDecision -> DepositReversalNotification.DepositReversalSanctionsHeld
+      WaitingForReversalSanctionsHeldDecision -> DepositReversalNotification.DepositReversalSanctionsHeld
       else -> null
     }
   }
@@ -111,7 +111,7 @@ class ReversalSanctionsInfoCollectionController @Inject constructor(
     requirementResults.find { it.result == ResultCode.CANCELLED }?.let {
       // In this case we don't want to fail the reversal if the user bails out because we will
       // still get a decision from interdiction
-      val updatedValue = value.transitionTo(WaitingForSanctionsHeldDecision, metricsClient).bind()
+      val updatedValue = stateMachine.transition(value, ReversalSanctionsInfoCollectionComplete()).bind()
       ProcessingState.Waiting(updatedValue)
     }
   }
@@ -126,8 +126,7 @@ class ReversalSanctionsInfoCollectionController @Inject constructor(
     value: Deposit
   ): Result<Deposit> = result {
     logger.error(failure) {
-      "An error occurred while collecting sanctions information. " +
-              "The reversal will not be failed."
+      "An error occurred while collecting sanctions information. The reversal will not be failed."
     }
     raise(failure)
   }
