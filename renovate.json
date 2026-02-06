@@ -3,7 +3,13 @@
   "extends": ["config:recommended", "helpers:pinGitHubActionDigests"],
   "packageRules": [
     {
-      "matchPackageNames": ["org.jetbrains.kotlin.**"],
+      "matchManagers": ["gradle-version-catalog"],
+      "matchPackageNames": ["kotlin"],
+      "enabled": false
+    },
+    {
+      "matchManagers": ["gradle"],
+      "matchPackageNames": ["org.jetbrains.kotlin:.*"],
       "enabled": false
     }
   ]
