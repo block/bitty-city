@@ -1,7 +1,9 @@
 package xyz.block.bittycity.innie.controllers
 
+import app.cash.kfsm.v2.WorkflowFailedException
 import app.cash.quiver.extensions.failure
 import app.cash.quiver.extensions.success
+import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.should
 import io.kotest.matchers.shouldBe
@@ -10,13 +12,12 @@ import jakarta.inject.Inject
 import org.junit.jupiter.api.Test
 import xyz.block.bittycity.common.client.Evaluation
 import xyz.block.bittycity.innie.api.DepositDomainController
-import xyz.block.bittycity.innie.models.CheckingReversalRisk
-import xyz.block.bittycity.innie.models.CheckingReversalSanctions
 import xyz.block.bittycity.innie.models.CollectingReversalInfo
 import xyz.block.bittycity.innie.models.CollectingReversalSanctionsInfo
 import xyz.block.bittycity.innie.models.DepositFailureReason.RISK_BLOCKED
 import xyz.block.bittycity.innie.models.DepositReversal
 import xyz.block.bittycity.innie.models.DepositReversalFailureReason
+import xyz.block.bittycity.innie.models.WaitingForReversalPendingConfirmationStatus
 import xyz.block.bittycity.innie.testing.Arbitrary
 import xyz.block.bittycity.innie.testing.Arbitrary.amount
 import xyz.block.bittycity.innie.testing.Arbitrary.balanceId
@@ -60,10 +61,13 @@ class ReversalSanctionsControllerTest : BittyCityTestCase() {
 
     sanctionsClient.nextEvaluation = Evaluation.APPROVE.success()
 
-    subject.execute(deposit, emptyList(), Operation.EXECUTE).getOrThrow()
-    app.effectProcessor.processAll()
-
-    depositWithToken(deposit.id).state shouldBe CheckingReversalRisk
+    startProcessingEffects()
+    try {
+      subject.execute(deposit, emptyList(), Operation.EXECUTE).getOrThrow()
+      depositWithToken(deposit.id).state shouldBe WaitingForReversalPendingConfirmationStatus
+    } finally {
+      stopProcessingEffects()
+    }
   }
 
   @Test
@@ -94,13 +98,16 @@ class ReversalSanctionsControllerTest : BittyCityTestCase() {
 
     sanctionsClient.nextEvaluation = Evaluation.FAIL.success()
 
-    subject.execute(deposit, emptyList(), Operation.EXECUTE).getOrThrow()
-    app.processAllEffects()
-
-    depositWithToken(deposit.id) should {
-      it.state shouldBe CollectingReversalInfo
-      it.currentReversal.shouldNotBeNull()
-      it.currentReversal?.failureReason shouldBe DepositReversalFailureReason.SANCTIONS_FAILED
+    startProcessingEffects()
+    try {
+      subject.execute(deposit, emptyList(), Operation.EXECUTE).getOrThrow()
+      depositWithToken(deposit.id) should {
+        it.state shouldBe CollectingReversalInfo
+        it.currentReversal.shouldNotBeNull()
+        it.currentReversal?.failureReason shouldBe DepositReversalFailureReason.SANCTIONS_FAILED
+      }
+    } finally {
+      stopProcessingEffects()
     }
   }
 
@@ -132,10 +139,13 @@ class ReversalSanctionsControllerTest : BittyCityTestCase() {
 
     sanctionsClient.nextEvaluation = RuntimeException("Something went wrong").failure()
 
-    subject.execute(deposit, emptyList(), Operation.EXECUTE).getOrThrow()
-    app.processAllEffects()
-
-    depositWithToken(deposit.id).state shouldBe CheckingReversalSanctions
+    startProcessingEffects()
+    try {
+      shouldThrow<WorkflowFailedException> { subject.execute(deposit, emptyList(), Operation.EXECUTE).getOrThrow() }
+      depositWithToken(deposit.id).state shouldBe CollectingReversalInfo
+    } finally {
+      stopProcessingEffects()
+    }
   }
 
   @Test
@@ -166,9 +176,12 @@ class ReversalSanctionsControllerTest : BittyCityTestCase() {
 
     sanctionsClient.nextEvaluation = Evaluation.HOLD.success()
 
-    subject.execute(deposit, emptyList(), Operation.EXECUTE).getOrThrow()
-    app.processAllEffects()
-
-    depositWithToken(deposit.id).state shouldBe CollectingReversalSanctionsInfo
+    startProcessingEffects()
+    try {
+      subject.execute(deposit, emptyList(), Operation.EXECUTE).getOrThrow()
+      depositWithToken(deposit.id).state shouldBe CollectingReversalSanctionsInfo
+    } finally {
+      stopProcessingEffects()
+    }
   }
 }
