@@ -11,6 +11,7 @@ import xyz.block.bittycity.common.client.CurrencyDisplayPreferenceClient
 import xyz.block.bittycity.common.client.EligibilityClient
 import xyz.block.bittycity.common.client.RiskClient
 import xyz.block.bittycity.common.client.SanctionsClient
+import xyz.block.bittycity.innie.client.DepositLedgerClient
 import xyz.block.bittycity.innie.models.DepositReversalToken
 import xyz.block.bittycity.common.idempotency.IdempotencyOperations
 import xyz.block.bittycity.common.store.Transactor
@@ -25,6 +26,7 @@ class TestModule : AbstractModule() {
 
   override fun configure() {
     install(BittyCityTestModule)
+    install(TestStateMachineModule)
 
     bind(TestApp::class.java).`in`(Scopes.SINGLETON)
     bind(TestRunData::class.java).toInstance(Arbitrary.testRunData.next())
@@ -51,9 +53,11 @@ class TestModule : AbstractModule() {
     bindSingletonFake<CurrencyDisplayPreferenceClient, FakeCurrencyDisplayPreferenceClient>()
     bindSingletonFake<MetricsClient, FakeMetricsClient>()
     bindSingletonFake<EligibilityClient, FakeEligibilityClient>()
+    bindSingletonFake<DepositLedgerClient, FakeLedgerClient>()
 
     // Bind fake operations
     bind(FakeDepositOperations::class.java).`in`(Scopes.SINGLETON)
+    bind(DepositOperations::class.java).to(FakeDepositOperations::class.java).`in`(Scopes.SINGLETON)
 
     bind(Moshi::class.java).toInstance(DepositMoshi.create())
   }

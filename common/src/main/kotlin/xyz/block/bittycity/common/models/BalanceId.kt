@@ -1,4 +1,4 @@
-package xyz.block.bittycity.outie.models
+package xyz.block.bittycity.common.models
 
 data class BalanceId(val id: String) {
   override fun toString() = id

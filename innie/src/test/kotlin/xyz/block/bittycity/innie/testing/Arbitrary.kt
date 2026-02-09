@@ -15,8 +15,10 @@ import org.bitcoinj.base.ScriptType
 import org.bitcoinj.crypto.ECKey
 import org.joda.money.CurrencyUnit
 import org.joda.money.Money
+import xyz.block.bittycity.common.models.BalanceId
 import xyz.block.bittycity.common.models.Bitcoins
 import xyz.block.bittycity.common.models.CustomerId
+import xyz.block.bittycity.common.models.LedgerTransactionId
 import xyz.block.bittycity.innie.models.CheckingDepositRisk.allStates
 import xyz.block.bittycity.innie.models.DepositFailureReason
 import xyz.block.bittycity.innie.models.DepositReversalFailureReason
@@ -31,6 +33,7 @@ object Arbitrary {
     Arb.stringPattern("[a-z0-9]{12}").map { CustomerId(it) }
   val stringToken: Arb<String> = Arb.stringPattern("[a-z0-9]{12}")
   val depositToken: Arb<DepositToken> = uuid.map { DepositToken(it) }
+  val balanceId: Arb<BalanceId> = Arbitrary.uuid.map { BalanceId(it.toString()) }
   val depositReversalToken : Arb<DepositReversalToken> = uuid.map { DepositReversalToken(it) }
   val walletAddress: Arb<Address> = arbitrary {
     ECKey().toAddress(ScriptType.P2WPKH, BitcoinNetwork.TESTNET)
@@ -47,7 +50,7 @@ object Arbitrary {
   val depositState: Arb<DepositState> = Arb.element(allStates)
   val depositFailureReason: Arb<DepositFailureReason> = Arb.enum<DepositFailureReason>()
   val depositReversalFailureReason: Arb<DepositReversalFailureReason> = Arb.enum<DepositReversalFailureReason>()
-
+  val ledgerTransactionId: Arb<LedgerTransactionId> = uuid.map { LedgerTransactionId("ledger-txn-$it") }
 
   val testRunData: Arb<TestRunData> = arbitrary {
     TestRunData(
@@ -58,7 +61,8 @@ object Arbitrary {
       targetWalletAddress = walletAddress.bind(),
       blockchainTransactionId = stringToken.bind(),
       blockchainTransactionOutputIndex = outputIndex.bind(),
-      paymentToken = stringToken.bind()
+      paymentToken = stringToken.bind(),
+      balanceId = balanceId.bind()
     )
   }
 }

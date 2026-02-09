@@ -1,4 +1,4 @@
-package xyz.block.bittycity.common.fsm
+package xyz.block.bittycity.outie.fsm
 
 import app.cash.kfsm.State
 import app.cash.kfsm.StateMachine

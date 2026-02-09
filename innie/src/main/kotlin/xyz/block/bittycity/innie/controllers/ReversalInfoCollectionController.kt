@@ -1,14 +1,15 @@
 package xyz.block.bittycity.innie.controllers
 
-import app.cash.kfsm.StateMachine
+import app.cash.kfsm.v2.AwaitableStateMachine
+import app.cash.kfsm.v2.StateMachine
 import app.cash.quiver.extensions.catch
 import arrow.core.raise.result
 import jakarta.inject.Inject
 import xyz.block.bittycity.common.client.CurrencyDisplayPreferenceClient
 import xyz.block.bittycity.common.utils.WalletAddressParser
-import xyz.block.bittycity.innie.client.MetricsClient
-import xyz.block.bittycity.innie.models.CheckingSanctions
-import xyz.block.bittycity.innie.models.CollectingInfo
+import xyz.block.bittycity.innie.fsm.DepositEffect
+import xyz.block.bittycity.innie.fsm.ReversalInfoCollectionComplete
+import xyz.block.bittycity.innie.models.CollectingReversalInfo
 import xyz.block.bittycity.innie.models.Deposit
 import xyz.block.bittycity.innie.models.DepositReversalHurdle
 import xyz.block.bittycity.innie.models.DepositReversalHurdleResponse
@@ -24,16 +25,16 @@ import xyz.block.domainapi.ResultCode
 import xyz.block.domainapi.UserInteraction
 
 class ReversalInfoCollectionController @Inject constructor(
-  stateMachine: StateMachine<DepositToken, Deposit, DepositState>,
+  stateMachine: StateMachine<DepositToken, Deposit, DepositState, DepositEffect>,
+  awaitableStateMachine: AwaitableStateMachine<DepositToken, Deposit, DepositState, DepositEffect>,
   depositStore: DepositStore,
-  metricsClient: MetricsClient,
   private val currencyDisplayPreferenceClient: CurrencyDisplayPreferenceClient,
   private val walletAddressParser: WalletAddressParser
-): DepositInfoCollectionController(
-  pendingCollectionState = CollectingInfo,
+) : DepositInfoCollectionController(
+  pendingCollectionState = CollectingReversalInfo,
   stateMachine = stateMachine,
-  depositStore = depositStore,
-  metricsClient = metricsClient,
+  awaitableStateMachine = awaitableStateMachine,
+  depositStore = depositStore
 ) {
 
   override fun findMissingRequirements(value: Deposit): Result<List<RequirementId>> = result {
@@ -73,9 +74,7 @@ class ReversalInfoCollectionController @Inject constructor(
 
   override fun transition(value: Deposit): Result<Deposit> = result {
     when (value.state) {
-      is CollectingInfo -> {
-        value.transitionTo(CheckingSanctions, metricsClient).bind()
-      }
+      is CollectingReversalInfo -> stateMachine.transition(value, ReversalInfoCollectionComplete()).bind()
       else -> raise(IllegalStateException("Unexpected state ${value.state}"))
     }
   }

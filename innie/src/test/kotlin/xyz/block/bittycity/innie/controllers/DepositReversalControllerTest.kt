@@ -8,20 +8,20 @@ import io.kotest.property.arbitrary.next
 import jakarta.inject.Inject
 import org.junit.jupiter.api.Test
 import xyz.block.bittycity.innie.api.DepositDomainController
-import xyz.block.bittycity.innie.models.CollectingInfo
+import xyz.block.bittycity.innie.models.CollectingReversalInfo
 import xyz.block.bittycity.innie.models.DepositFailureReason.RISK_BLOCKED
 import xyz.block.bittycity.innie.models.DepositReversal
 import xyz.block.bittycity.innie.models.DepositReversalHurdle
-import xyz.block.bittycity.innie.models.WaitingForReversal
 import xyz.block.bittycity.innie.testing.Arbitrary
 import xyz.block.bittycity.innie.testing.Arbitrary.amount
+import xyz.block.bittycity.innie.testing.Arbitrary.balanceId
 import xyz.block.bittycity.innie.testing.Arbitrary.customerId
 import xyz.block.bittycity.innie.testing.Arbitrary.exchangeRate
 import xyz.block.bittycity.innie.testing.Arbitrary.outputIndex
 import xyz.block.bittycity.innie.testing.Arbitrary.stringToken
 import xyz.block.bittycity.innie.testing.Arbitrary.walletAddress
 import xyz.block.bittycity.innie.testing.BittyCityTestCase
-import xyz.block.domainapi.util.Operation
+import xyz.block.domainapi.kfsm.v2.util.Operation
 
 class DepositReversalControllerTest : BittyCityTestCase() {
 
@@ -30,7 +30,7 @@ class DepositReversalControllerTest : BittyCityTestCase() {
   @Test
   fun `Starting a reversal returns hurdles for target wallet address and confirmation`() = runTest {
     val deposit = data.seedDeposit(
-      state = WaitingForReversal,
+      state = CollectingReversalInfo,
       customerId = customerId.next(),
       amount = amount.next(),
       exchangeRate = exchangeRate.next(),
@@ -38,6 +38,7 @@ class DepositReversalControllerTest : BittyCityTestCase() {
       blockchainTransactionId = stringToken.next(),
       blockchainTransactionOutputIndex = outputIndex.next(),
       paymentToken = stringToken.next(),
+      sourceBalanceToken = balanceId.next(),
       reversals = listOf(
         DepositReversal(Arbitrary.depositReversalToken.next())
       )
@@ -50,7 +51,7 @@ class DepositReversalControllerTest : BittyCityTestCase() {
     response.interactions[0] shouldBe DepositReversalHurdle.TargetWalletAddressHurdle
 
     depositWithToken(deposit.id) should {
-      it.state shouldBe CollectingInfo
+      it.state shouldBe CollectingReversalInfo
       it.failureReason shouldBe RISK_BLOCKED
     }
   }

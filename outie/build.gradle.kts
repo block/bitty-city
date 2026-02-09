@@ -24,6 +24,7 @@ dependencies {
     implementation(libs.arrowCore)
     implementation(libs.bitcoinj)
     implementation(libs.domainApi)
+    implementation(libs.domainApiKfsm)
     implementation(libs.guice)
     implementation(libs.guiceAssistedInject)
     implementation(libs.jodaMoney)

@@ -1,8 +1,8 @@
 package xyz.block.bittycity.outie.controllers
 
 import app.cash.quiver.extensions.success
-import xyz.block.bittycity.outie.models.BalanceId
-import xyz.block.bittycity.outie.models.BitcoinAccount
+import xyz.block.bittycity.common.models.BalanceId
+import xyz.block.bittycity.common.models.BitcoinAccount
 import xyz.block.bittycity.common.models.BitcoinDisplayUnits
 import xyz.block.bittycity.common.utils.CurrencyConversionUtils
 import xyz.block.bittycity.common.models.BitcoinDisplayUnits.BITCOIN

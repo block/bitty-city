@@ -2,14 +2,14 @@ package xyz.block.bittycity.outie.controllers
 
 import app.cash.kfsm.StateMachine
 import arrow.core.raise.result
-import xyz.block.bittycity.outie.client.BitcoinAccountClient
+import xyz.block.bittycity.common.client.BitcoinAccountClient
 import xyz.block.bittycity.common.client.CurrencyDisplayPreferenceClient
 import xyz.block.bittycity.outie.client.FeeQuoteClient
 import xyz.block.bittycity.outie.client.LedgerClient
 import xyz.block.bittycity.outie.client.LimitClient
 import xyz.block.bittycity.outie.client.MetricsClient
-import xyz.block.bittycity.outie.models.BalanceId
-import xyz.block.bittycity.outie.models.BitcoinAccount
+import xyz.block.bittycity.common.models.BalanceId
+import xyz.block.bittycity.common.models.BitcoinAccount
 import xyz.block.bittycity.common.models.Bitcoins
 import xyz.block.bittycity.outie.models.CheckingSanctions
 import xyz.block.bittycity.outie.models.CollectingInfo

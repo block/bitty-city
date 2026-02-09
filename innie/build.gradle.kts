@@ -24,10 +24,11 @@ dependencies {
   implementation(libs.arrowCore)
   implementation(libs.bitcoinj)
   implementation(libs.domainApi)
+  implementation(libs.domainApiKfsmv2)
   implementation(libs.guice)
   implementation(libs.guiceAssistedInject)
   implementation(libs.jodaMoney)
-  implementation(libs.kfsm)
+  implementation(libs.kfsmv2)
   implementation(libs.kotlinLogging)
   implementation(libs.kotlinReflect)
   implementation(libs.moshi)
@@ -49,7 +50,7 @@ tasks.register<JavaExec>("generateStateMachineDiagram") {
   description = "Generate state machine diagram in Mermaid format"
 
   classpath = sourceSets.test.get().runtimeClasspath
-  mainClass.set("xyz.block.bittycity.innie.fsm.StateMachineDiagramGeneratorKt")
+  mainClass.set("xyz.block.bittycity.innie.fsm.DepositDiagramGeneratorKt")
 
   val outputFile = project.file("docs/state-machine.md")
   args(outputFile.absolutePath)
@@ -58,7 +59,6 @@ tasks.register<JavaExec>("generateStateMachineDiagram") {
   inputs.files(fileTree("src/main/kotlin/xyz/block/bittycity/innie/fsm") {
     include("**/*.kt")
   })
-  inputs.file("src/test/kotlin/xyz/block/bittycity/innie/fsm/StateMachineDiagramGenerator.kt")
 
   // Declare output for incremental builds
   outputs.file(outputFile)

@@ -17,14 +17,16 @@ class FakeDepositOperations(
 ) : DepositOperations {
 
   // DepositEntityOperations methods
-  override fun insert(deposit: Deposit): Result<Deposit> =
-    entityOps.insert(deposit)
+  override fun insert(deposit: Deposit): Result<Deposit> {
+    return entityOps.insert(deposit)
+  }
 
   override fun getByToken(token: DepositToken): Result<Deposit> =
     entityOps.getByToken(token)
 
-  override fun findByToken(token: DepositToken): Result<Deposit?> =
-    entityOps.findByToken(token)
+  override fun findByToken(token: DepositToken): Result<Deposit?> {
+    return entityOps.findByToken(token)
+  }
 
   override fun getByTokens(tokens: List<DepositToken>): Result<Map<DepositToken, Deposit?>> =
     entityOps.getByTokens(tokens)

@@ -6,7 +6,7 @@ import io.kotest.matchers.types.shouldBeInstanceOf
 import io.kotest.property.arbitrary.next
 import jakarta.inject.Inject
 import org.junit.jupiter.api.Test
-import xyz.block.bittycity.innie.models.CollectingSanctionsInfo
+import xyz.block.bittycity.innie.models.CollectingReversalSanctionsInfo
 import xyz.block.bittycity.innie.models.Deposit
 import xyz.block.bittycity.innie.models.DepositFailureReason.RISK_BLOCKED
 import xyz.block.bittycity.innie.models.DepositReversal
@@ -14,9 +14,10 @@ import xyz.block.bittycity.innie.models.DepositReversalHurdle.ReversalReasonHurd
 import xyz.block.bittycity.innie.models.DepositReversalHurdleResponse.ConfirmationHurdleResponse
 import xyz.block.bittycity.innie.models.DepositReversalNotification
 import xyz.block.bittycity.innie.models.RequirementId
-import xyz.block.bittycity.innie.models.WaitingForSanctionsHeldDecision
+import xyz.block.bittycity.innie.models.WaitingForReversalSanctionsHeldDecision
 import xyz.block.bittycity.innie.testing.Arbitrary
 import xyz.block.bittycity.innie.testing.Arbitrary.amount
+import xyz.block.bittycity.innie.testing.Arbitrary.balanceId
 import xyz.block.bittycity.innie.testing.Arbitrary.customerId
 import xyz.block.bittycity.innie.testing.Arbitrary.exchangeRate
 import xyz.block.bittycity.innie.testing.Arbitrary.outputIndex
@@ -28,7 +29,7 @@ import xyz.block.domainapi.DomainApi.Endpoint.SECURE_EXECUTE
 import xyz.block.domainapi.DomainApiError
 import xyz.block.domainapi.ProcessingState
 import xyz.block.domainapi.ResultCode.CLEARED
-import xyz.block.domainapi.util.Operation
+import xyz.block.domainapi.kfsm.v2.util.Operation
 
 class ReversalSanctionsInfoCollectionControllerTest : BittyCityTestCase() {
 
@@ -37,7 +38,7 @@ class ReversalSanctionsInfoCollectionControllerTest : BittyCityTestCase() {
   @Test
   fun `returns hurdles when no reason for reversal present`() = runTest {
     val deposit = data.seedDeposit(
-      state = CollectingSanctionsInfo,
+      state = CollectingReversalSanctionsInfo,
       customerId = customerId.next(),
       amount = amount.next(),
       exchangeRate = exchangeRate.next(),
@@ -45,6 +46,7 @@ class ReversalSanctionsInfoCollectionControllerTest : BittyCityTestCase() {
       blockchainTransactionId = stringToken.next(),
       blockchainTransactionOutputIndex = outputIndex.next(),
       paymentToken = stringToken.next(),
+      sourceBalanceToken = balanceId.next(),
       reversals = listOf(
         DepositReversal(
           token = Arbitrary.depositReversalToken.next(),
@@ -69,7 +71,7 @@ class ReversalSanctionsInfoCollectionControllerTest : BittyCityTestCase() {
   @Test
   fun `returns hurdles when reason for reversal is empty`() = runTest {
     val deposit = data.seedDeposit(
-      state = CollectingSanctionsInfo,
+      state = CollectingReversalSanctionsInfo,
       customerId = customerId.next(),
       amount = amount.next(),
       exchangeRate = exchangeRate.next(),
@@ -77,6 +79,7 @@ class ReversalSanctionsInfoCollectionControllerTest : BittyCityTestCase() {
       blockchainTransactionId = stringToken.next(),
       blockchainTransactionOutputIndex = outputIndex.next(),
       paymentToken = stringToken.next(),
+      sourceBalanceToken = balanceId.next(),
       reversals = listOf(
         DepositReversal(
           token = Arbitrary.depositReversalToken.next(),
@@ -99,13 +102,13 @@ class ReversalSanctionsInfoCollectionControllerTest : BittyCityTestCase() {
     complete.hurdles[0] shouldBe DepositReversalNotification.DepositReversalSanctionsHeld
 
     depositWithToken(deposit.id)
-      .state shouldBe WaitingForSanctionsHeldDecision
+      .state shouldBe WaitingForReversalSanctionsHeldDecision
   }
 
   @Test
   fun `transitions if reason for reversal is present`() = runTest {
     val deposit = data.seedDeposit(
-      state = CollectingSanctionsInfo,
+      state = CollectingReversalSanctionsInfo,
       customerId = customerId.next(),
       amount = amount.next(),
       exchangeRate = exchangeRate.next(),
@@ -113,6 +116,7 @@ class ReversalSanctionsInfoCollectionControllerTest : BittyCityTestCase() {
       blockchainTransactionId = stringToken.next(),
       blockchainTransactionOutputIndex = outputIndex.next(),
       paymentToken = stringToken.next(),
+      sourceBalanceToken = balanceId.next(),
       reversals = listOf(
         DepositReversal(
           token = Arbitrary.depositReversalToken.next(),
@@ -135,13 +139,13 @@ class ReversalSanctionsInfoCollectionControllerTest : BittyCityTestCase() {
     complete.hurdles[0] shouldBe DepositReversalNotification.DepositReversalSanctionsHeld
 
     depositWithToken(deposit.id)
-      .state shouldBe WaitingForSanctionsHeldDecision
+      .state shouldBe WaitingForReversalSanctionsHeldDecision
   }
 
   @Test
   fun `reversal is not failed if something fails`() = runTest {
     val deposit = data.seedDeposit(
-      state = CollectingSanctionsInfo,
+      state = CollectingReversalSanctionsInfo,
       customerId = customerId.next(),
       amount = amount.next(),
       exchangeRate = exchangeRate.next(),
@@ -149,6 +153,7 @@ class ReversalSanctionsInfoCollectionControllerTest : BittyCityTestCase() {
       blockchainTransactionId = stringToken.next(),
       blockchainTransactionOutputIndex = outputIndex.next(),
       paymentToken = stringToken.next(),
+      sourceBalanceToken = balanceId.next(),
       reversals = listOf(
         DepositReversal(
           token = Arbitrary.depositReversalToken.next(),
@@ -166,6 +171,6 @@ class ReversalSanctionsInfoCollectionControllerTest : BittyCityTestCase() {
     ).shouldBeFailure<DomainApiError.InvalidRequirementResult>()
 
     depositWithToken(deposit.id)
-      .state shouldBe CollectingSanctionsInfo
+      .state shouldBe CollectingReversalSanctionsInfo
   }
 }

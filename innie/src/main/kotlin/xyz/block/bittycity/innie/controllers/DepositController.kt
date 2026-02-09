@@ -1,35 +1,36 @@
 package xyz.block.bittycity.innie.controllers
 
-import app.cash.kfsm.StateMachine
+import app.cash.kfsm.v2.AwaitableStateMachine
+import app.cash.kfsm.v2.StateMachine
 import arrow.core.raise.result
 import io.github.oshai.kotlinlogging.KLogger
 import io.github.oshai.kotlinlogging.KotlinLogging
-import xyz.block.bittycity.common.utils.retry
-import xyz.block.bittycity.innie.client.MetricsClient
+import xyz.block.bittycity.innie.fsm.DepositEffect
+import xyz.block.bittycity.innie.fsm.DepositFailed
+import xyz.block.bittycity.innie.fsm.ReversalFailed
+import xyz.block.bittycity.innie.models.CollectingReversalInfo
 import xyz.block.bittycity.innie.models.Deposit
 import xyz.block.bittycity.innie.models.DepositFailureReason
 import xyz.block.bittycity.innie.models.DepositReversalFailureReason
 import xyz.block.bittycity.innie.models.DepositState
 import xyz.block.bittycity.innie.models.DepositToken
 import xyz.block.bittycity.innie.models.RequirementId
-import xyz.block.bittycity.innie.models.WaitingForReversal
 import xyz.block.bittycity.innie.store.DepositStore
 import xyz.block.domainapi.Input
-import xyz.block.domainapi.util.Controller
-import java.util.concurrent.CompletableFuture.supplyAsync
+import xyz.block.domainapi.kfsm.v2.util.Controller
 
 abstract class DepositController(
-  override val stateMachine: StateMachine<DepositToken, Deposit, DepositState>,
-  private val metricsClient: MetricsClient,
+  override val stateMachine: StateMachine<DepositToken, Deposit, DepositState, DepositEffect>,
+  override val awaitableStateMachine: AwaitableStateMachine<DepositToken, Deposit, DepositState, DepositEffect>,
   private val depositStore: DepositStore,
-  ) : Controller<DepositToken, DepositState, Deposit, RequirementId>, DepositStateHelpers {
+) : Controller<DepositToken, DepositState, Deposit, RequirementId>, DepositStateHelpers {
   override val logger: KLogger = KotlinLogging.logger {}
 
   protected fun failDeposit(failure: Throwable, value: Deposit): Result<Deposit> = result {
     val valueFromDb = depositStore.getDepositByToken(value.id).bind()
-    if (valueFromDb.state != WaitingForReversal) {
+    if (valueFromDb.state != CollectingReversalInfo) {
       logger.info(failure) { "Failing deposit ${valueFromDb.id}" }
-      valueFromDb.fail(failure.toFailureReason(), metricsClient).bind()
+      valueFromDb.fail(failure.toFailureReason()).bind()
     } else {
       raise(failure)
     }
@@ -40,9 +41,9 @@ abstract class DepositController(
 
   protected fun failReversal(failureReason: DepositReversalFailureReason, value: Deposit): Result<Deposit> = result {
     val valueFromDb = depositStore.getDepositByToken(value.id).bind()
-    if (valueFromDb.state != WaitingForReversal) {
+    if (valueFromDb.state != CollectingReversalInfo) {
       logger.info { "Failing deposit ${valueFromDb.id}" }
-      valueFromDb.failReversal(failureReason, metricsClient).bind()
+      valueFromDb.failReversal(failureReason).bind()
     } else {
       logger.info { "No deposit reversal to fail for deposit: ${valueFromDb.id}" }
       valueFromDb
@@ -52,41 +53,21 @@ abstract class DepositController(
 
 interface DepositStateHelpers {
   val logger: KLogger
-  val stateMachine: StateMachine<DepositToken, Deposit, DepositState>
+  val stateMachine: StateMachine<DepositToken, Deposit, DepositState, DepositEffect>
+  val awaitableStateMachine: AwaitableStateMachine<DepositToken, Deposit, DepositState, DepositEffect>
 
-  fun Deposit.transitionTo(
-    state: DepositState,
-    metricsClient: MetricsClient,
-  ): Result<Deposit> = result {
-    stateMachine.transitionTo(this@transitionTo, state).bind()
+  fun Deposit.fail(reason: DepositFailureReason): Result<Deposit> = result {
+    stateMachine.transition(
+      value = copy(),
+      transition = DepositFailed(reason)
+    ).bind()
   }
 
-  fun Deposit.fail(reason: DepositFailureReason, metricsClient: MetricsClient): Result<Deposit> = result {
-    stateMachine.transitionTo(
-      value = copy(failureReason = reason),
-      targetState = WaitingForReversal
-    ).onSuccess {
-      supplyAsync {
-        retry {
-          metricsClient.failureReason(reason)
-            .recover { logger.warn(it) { "Failure to publish metrics" } }
-        }
-      }
-    }.bind()
-  }
-
-  fun Deposit.failReversal(reason: DepositReversalFailureReason, metricsClient: MetricsClient): Result<Deposit> = result {
-    stateMachine.transitionTo(
+  fun Deposit.failReversal(reason: DepositReversalFailureReason): Result<Deposit> = result {
+    stateMachine.transition(
       value = updateCurrentReversal { it.copy(failureReason = reason) }.bind(),
-      targetState = WaitingForReversal
-    ).onSuccess {
-      supplyAsync {
-        retry {
-          metricsClient.reversalFailureReason(reason)
-            .recover { logger.warn(it) { "Failure to publish metrics" } }
-        }
-      }
-    }.bind()
+      transition = ReversalFailed(reason)
+    ).bind()
   }
 
   fun mismatchedHurdle(response: Input.HurdleResponse<RequirementId>) = IllegalArgumentException(
