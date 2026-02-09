@@ -8,13 +8,13 @@ import xyz.block.bittycity.common.models.Bitcoins
 import xyz.block.bittycity.common.models.CustomerId
 import xyz.block.bittycity.common.models.LedgerTransactionId
 import xyz.block.bittycity.common.testing.TestFake
-import xyz.block.bittycity.innie.client.LedgerClient
+import xyz.block.bittycity.innie.client.DepositLedgerClient
 import xyz.block.bittycity.innie.models.DepositReversalToken
 import xyz.block.bittycity.innie.models.DepositToken
 import java.time.Instant
 import java.util.UUID
 
-class FakeLedgerClient : TestFake(), LedgerClient {
+class FakeLedgerClient : TestFake(), DepositLedgerClient {
 
   override fun confirmDepositTransaction(
     customerId: CustomerId,

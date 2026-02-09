@@ -10,7 +10,7 @@ import xyz.block.bittycity.innie.models.DepositReversalToken
 import xyz.block.bittycity.innie.models.DepositToken
 import java.time.Instant
 
-interface LedgerClient {
+interface DepositLedgerClient {
   /**
    * Confirms a ledger transaction after the blockchain confirms a deposit.
    *

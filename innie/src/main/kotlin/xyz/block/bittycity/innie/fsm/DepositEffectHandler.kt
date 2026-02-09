@@ -12,7 +12,7 @@ import xyz.block.bittycity.common.client.Evaluation
 import xyz.block.bittycity.common.client.RiskClient
 import xyz.block.bittycity.common.client.RiskEvaluation
 import xyz.block.bittycity.common.client.SanctionsClient
-import xyz.block.bittycity.innie.client.LedgerClient
+import xyz.block.bittycity.innie.client.DepositLedgerClient
 import xyz.block.bittycity.innie.models.Deposit
 import xyz.block.bittycity.innie.models.DepositFailureReason
 import xyz.block.bittycity.innie.models.DepositReversalFailureReason.RISK_BLOCKED
@@ -22,7 +22,7 @@ import xyz.block.bittycity.innie.models.DepositState
 import xyz.block.bittycity.innie.models.DepositToken
 
 class DepositEffectHandler @Inject constructor(
-  private val ledgerClient: LedgerClient,
+  private val ledgerClient: DepositLedgerClient,
   private val depositRiskClient: RiskClient<DepositToken>,
   private val reversalRiskClient: RiskClient<DepositReversalToken>,
   private val eligibilityClient: EligibilityClient,

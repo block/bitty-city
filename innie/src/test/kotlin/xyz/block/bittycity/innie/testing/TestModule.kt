@@ -11,7 +11,7 @@ import xyz.block.bittycity.common.client.CurrencyDisplayPreferenceClient
 import xyz.block.bittycity.common.client.EligibilityClient
 import xyz.block.bittycity.common.client.RiskClient
 import xyz.block.bittycity.common.client.SanctionsClient
-import xyz.block.bittycity.innie.client.LedgerClient
+import xyz.block.bittycity.innie.client.DepositLedgerClient
 import xyz.block.bittycity.innie.models.DepositReversalToken
 import xyz.block.bittycity.common.idempotency.IdempotencyOperations
 import xyz.block.bittycity.common.store.Transactor
@@ -53,7 +53,7 @@ class TestModule : AbstractModule() {
     bindSingletonFake<CurrencyDisplayPreferenceClient, FakeCurrencyDisplayPreferenceClient>()
     bindSingletonFake<MetricsClient, FakeMetricsClient>()
     bindSingletonFake<EligibilityClient, FakeEligibilityClient>()
-    bindSingletonFake<LedgerClient, FakeLedgerClient>()
+    bindSingletonFake<DepositLedgerClient, FakeLedgerClient>()
 
     // Bind fake operations
     bind(FakeDepositOperations::class.java).`in`(Scopes.SINGLETON)
