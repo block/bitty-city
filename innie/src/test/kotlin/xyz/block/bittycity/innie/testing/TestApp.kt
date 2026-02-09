@@ -17,6 +17,9 @@ import xyz.block.bittycity.innie.models.DepositState
 import xyz.block.bittycity.innie.models.DepositToken
 import xyz.block.bittycity.innie.store.DepositStore
 import java.time.Instant
+import java.util.concurrent.Executors
+import java.util.concurrent.ScheduledExecutorService
+import java.util.concurrent.TimeUnit
 
 class TestApp {
 
@@ -49,6 +52,8 @@ class TestApp {
     depositOperations.clear()
   }
 
+  private var effectProcessingExecutor: ScheduledExecutorService? = null
+
   /**
    * Process all pending effects until no more remain.
    * This is useful for tests that need to wait for multi-step workflows to complete.
@@ -57,6 +62,24 @@ class TestApp {
     while (effectProcessor.processAll() > 0) {
       // Keep processing until no more effects are pending
     }
+  }
+
+  /**
+   * Start continuously processing effects on a background thread.
+   * This is required for tests that use [AwaitableStateMachine.transitionAndAwait],
+   * since it blocks the calling thread while polling for a settled state.
+   */
+  fun startProcessingEffects() {
+    val executor = Executors.newSingleThreadScheduledExecutor { runnable ->
+      Thread(runnable, "effect-processor").apply { isDaemon = true }
+    }
+    executor.scheduleWithFixedDelay({ effectProcessor.processAll() }, 0, 10, TimeUnit.MILLISECONDS)
+    effectProcessingExecutor = executor
+  }
+
+  fun stopProcessingEffects() {
+    effectProcessingExecutor?.shutdownNow()
+    effectProcessingExecutor = null
   }
 
   fun TestRunData.seedDeposit(

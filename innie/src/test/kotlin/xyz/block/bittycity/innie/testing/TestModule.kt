@@ -4,6 +4,7 @@ import com.google.inject.AbstractModule
 import com.google.inject.Provides
 import com.google.inject.Scopes
 import com.google.inject.TypeLiteral
+import com.google.inject.name.Names
 import com.squareup.moshi.Moshi
 import io.kotest.property.arbitrary.next
 import jakarta.inject.Singleton
@@ -30,6 +31,8 @@ class TestModule : AbstractModule() {
 
     bind(TestApp::class.java).`in`(Scopes.SINGLETON)
     bind(TestRunData::class.java).toInstance(Arbitrary.testRunData.next())
+
+    bind(Long::class.java).annotatedWith(Names.named("deposit.stateMachineTimeoutInMilliSeconds")).toInstance(10000L)
 
     // Bind the concrete generic type that Guice expects
     bind(object : TypeLiteral<IdempotencyOperations<DepositToken, RequirementId>>() {})

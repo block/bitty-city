@@ -5,6 +5,8 @@ import app.cash.kfsm.v2.StateMachine
 import app.cash.quiver.extensions.catch
 import arrow.core.raise.result
 import jakarta.inject.Inject
+import jakarta.inject.Named
+import kotlin.time.Duration.Companion.milliseconds
 import xyz.block.bittycity.common.client.CurrencyDisplayPreferenceClient
 import xyz.block.bittycity.common.utils.WalletAddressParser
 import xyz.block.bittycity.innie.fsm.DepositEffect
@@ -29,7 +31,8 @@ class ReversalInfoCollectionController @Inject constructor(
   awaitableStateMachine: AwaitableStateMachine<DepositToken, Deposit, DepositState, DepositEffect>,
   depositStore: DepositStore,
   private val currencyDisplayPreferenceClient: CurrencyDisplayPreferenceClient,
-  private val walletAddressParser: WalletAddressParser
+  private val walletAddressParser: WalletAddressParser,
+  @param:Named("deposit.stateMachineTimeoutInMilliSeconds") private val stateMachineTimeoutInMilliSeconds: Long,
 ) : DepositInfoCollectionController(
   pendingCollectionState = CollectingReversalInfo,
   stateMachine = stateMachine,
@@ -74,7 +77,11 @@ class ReversalInfoCollectionController @Inject constructor(
 
   override fun transition(value: Deposit): Result<Deposit> = result {
     when (value.state) {
-      is CollectingReversalInfo -> stateMachine.transition(value, ReversalInfoCollectionComplete()).bind()
+      is CollectingReversalInfo -> awaitableStateMachine.transitionAndAwait(
+        value,
+        ReversalInfoCollectionComplete(),
+        stateMachineTimeoutInMilliSeconds.milliseconds
+      ).bind()
       else -> raise(IllegalStateException("Unexpected state ${value.state}"))
     }
   }

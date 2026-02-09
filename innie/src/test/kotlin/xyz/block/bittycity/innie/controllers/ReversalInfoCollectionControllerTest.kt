@@ -5,11 +5,11 @@ import io.kotest.matchers.types.shouldBeInstanceOf
 import io.kotest.property.arbitrary.next
 import jakarta.inject.Inject
 import org.junit.jupiter.api.Test
-import xyz.block.bittycity.innie.models.CheckingReversalSanctions
 import xyz.block.bittycity.innie.models.CollectingReversalInfo
 import xyz.block.bittycity.innie.models.DepositFailureReason.RISK_BLOCKED
 import xyz.block.bittycity.innie.models.DepositReversal
 import xyz.block.bittycity.innie.models.DepositReversalHurdle
+import xyz.block.bittycity.innie.models.WaitingForReversalPendingConfirmationStatus
 import xyz.block.bittycity.innie.testing.Arbitrary
 import xyz.block.bittycity.innie.testing.Arbitrary.amount
 import xyz.block.bittycity.innie.testing.Arbitrary.balanceId
@@ -82,14 +82,19 @@ class ReversalInfoCollectionControllerTest : BittyCityTestCase() {
       it.copy(failureReason = RISK_BLOCKED)
     }
 
-    val result = subject.processInputs(
-      deposit,
-      emptyList(),
-      Operation.EXECUTE
-    ).getOrThrow()
+    try {
+      startProcessingEffects()
+      val result = subject.processInputs(
+        deposit,
+        emptyList(),
+        Operation.EXECUTE
+      ).getOrThrow()
 
-    result.shouldBeInstanceOf<ProcessingState.Complete<*, *>>()
+      result.shouldBeInstanceOf<ProcessingState.Complete<*, *>>()
 
-    depositWithToken(deposit.id).state shouldBe CheckingReversalSanctions
+      depositWithToken(deposit.id).state shouldBe WaitingForReversalPendingConfirmationStatus
+    } finally {
+      stopProcessingEffects()
+    }
   }
 }
