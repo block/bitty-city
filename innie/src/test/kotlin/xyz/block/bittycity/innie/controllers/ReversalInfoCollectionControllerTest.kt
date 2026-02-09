@@ -82,8 +82,8 @@ class ReversalInfoCollectionControllerTest : BittyCityTestCase() {
       it.copy(failureReason = RISK_BLOCKED)
     }
 
-    startProcessingEffects()
     try {
+      startProcessingEffects()
       val result = subject.processInputs(
         deposit,
         emptyList(),

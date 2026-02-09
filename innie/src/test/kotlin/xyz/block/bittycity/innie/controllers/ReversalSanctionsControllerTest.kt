@@ -61,8 +61,8 @@ class ReversalSanctionsControllerTest : BittyCityTestCase() {
 
     sanctionsClient.nextEvaluation = Evaluation.APPROVE.success()
 
-    startProcessingEffects()
     try {
+      startProcessingEffects()
       subject.execute(deposit, emptyList(), Operation.EXECUTE).getOrThrow()
       depositWithToken(deposit.id).state shouldBe WaitingForReversalPendingConfirmationStatus
     } finally {
@@ -98,8 +98,8 @@ class ReversalSanctionsControllerTest : BittyCityTestCase() {
 
     sanctionsClient.nextEvaluation = Evaluation.FAIL.success()
 
-    startProcessingEffects()
     try {
+      startProcessingEffects()
       subject.execute(deposit, emptyList(), Operation.EXECUTE).getOrThrow()
       depositWithToken(deposit.id) should {
         it.state shouldBe CollectingReversalInfo
@@ -139,8 +139,8 @@ class ReversalSanctionsControllerTest : BittyCityTestCase() {
 
     sanctionsClient.nextEvaluation = RuntimeException("Something went wrong").failure()
 
-    startProcessingEffects()
     try {
+      startProcessingEffects()
       shouldThrow<WorkflowFailedException> { subject.execute(deposit, emptyList(), Operation.EXECUTE).getOrThrow() }
       depositWithToken(deposit.id).state shouldBe CollectingReversalInfo
     } finally {
@@ -176,8 +176,8 @@ class ReversalSanctionsControllerTest : BittyCityTestCase() {
 
     sanctionsClient.nextEvaluation = Evaluation.HOLD.success()
 
-    startProcessingEffects()
     try {
+      startProcessingEffects()
       subject.execute(deposit, emptyList(), Operation.EXECUTE).getOrThrow()
       depositWithToken(deposit.id).state shouldBe CollectingReversalSanctionsInfo
     } finally {
