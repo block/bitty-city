@@ -9,7 +9,10 @@ import java.util.UUID
 import org.bitcoinj.base.Address
 import org.joda.money.CurrencyUnit
 import xyz.block.bittycity.common.client.BitcoinAccountClient
+import xyz.block.bittycity.common.client.Eligibility
+import xyz.block.bittycity.common.client.EligibilityClient
 import xyz.block.bittycity.common.client.ExchangeRateClient
+import xyz.block.bittycity.common.client.IneligibleCustomer
 import xyz.block.bittycity.common.models.BalanceId
 import xyz.block.bittycity.common.models.Bitcoins
 import xyz.block.bittycity.common.models.CustomerId
@@ -41,6 +44,7 @@ class OnChainDepositDomainApi @Inject constructor(
   private val transactor: Transactor<DepositOperations>,
   private val domainController: DepositDomainController,
   private val bitcoinAccountClient: BitcoinAccountClient,
+  private val eligibilityClient: EligibilityClient,
   private val exchangeRateClient: ExchangeRateClient,
   private val walletClient: WalletClient,
   private val idempotencyHandler: IdempotencyHandler
@@ -52,6 +56,13 @@ class OnChainDepositDomainApi @Inject constructor(
   ): Result<ExecuteResponse<DepositToken, RequirementId>> = result {
     val customerId = walletClient.lookupWallet(initialRequest.targetWalletAddress).bind()
       ?: raise(NoCustomerFoundForWalletAddress(initialRequest.targetWalletAddress))
+    when (val eligibility = eligibilityClient.productEligibility(customerId.id).bind()) {
+      is Eligibility.Eligible -> doCreate(id, customerId, initialRequest).bind()
+      is Eligibility.Ineligible -> raise(IneligibleCustomer(eligibility.violations))
+    }
+  }
+
+  private fun doCreate(id: DepositToken, customerId: CustomerId, initialRequest: InitialRequest) = result {
     val exchangeRateQuote = exchangeRateClient.quoteExchange(
       initialRequest.amount,
       CurrencyUnit.USD
