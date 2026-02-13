@@ -10,8 +10,8 @@ import org.bitcoinj.base.Address
 import org.joda.money.CurrencyUnit
 import xyz.block.bittycity.common.client.BitcoinAccountClient
 import xyz.block.bittycity.common.client.Eligibility
-import xyz.block.bittycity.common.client.EligibilityClient
 import xyz.block.bittycity.common.client.ExchangeRateClient
+import xyz.block.bittycity.innie.client.DepositEligibilityClient
 import xyz.block.bittycity.common.client.IneligibleCustomer
 import xyz.block.bittycity.common.models.BalanceId
 import xyz.block.bittycity.common.models.Bitcoins
@@ -44,7 +44,7 @@ class OnChainDepositDomainApi @Inject constructor(
   private val transactor: Transactor<DepositOperations>,
   private val domainController: DepositDomainController,
   private val bitcoinAccountClient: BitcoinAccountClient,
-  private val eligibilityClient: EligibilityClient,
+  private val eligibilityClient: DepositEligibilityClient,
   private val exchangeRateClient: ExchangeRateClient,
   private val walletClient: WalletClient,
   private val idempotencyHandler: IdempotencyHandler

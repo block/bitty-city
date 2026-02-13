@@ -1,15 +1,14 @@
 package xyz.block.bittycity.outie.testing
 
-import xyz.block.bittycity.common.testing.TestFake
-
 import app.cash.quiver.extensions.success
 import xyz.block.bittycity.common.client.Eligibility
 import xyz.block.bittycity.common.client.Eligibility.Eligible
-import xyz.block.bittycity.common.client.EligibilityClient
+import xyz.block.bittycity.common.testing.TestFake
+import xyz.block.bittycity.outie.client.WithdrawalEligibilityClient
 
 class FakeEligibilityClient :
   TestFake(),
-  EligibilityClient {
+  WithdrawalEligibilityClient {
 
   var nextEligibilityResult: Result<Eligibility> by resettable { Eligible(emptyList()).success() }
 

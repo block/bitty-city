@@ -3,8 +3,8 @@ package xyz.block.bittycity.outie.controllers
 import app.cash.kfsm.StateMachine
 import arrow.core.raise.result
 import xyz.block.bittycity.common.client.Eligibility
-import xyz.block.bittycity.common.client.EligibilityClient
 import xyz.block.bittycity.outie.client.MetricsClient
+import xyz.block.bittycity.outie.client.WithdrawalEligibilityClient
 import xyz.block.bittycity.outie.models.CheckingEligibility
 import xyz.block.bittycity.outie.models.FailureReason.CUSTOMER_IS_INELIGIBLE
 import xyz.block.bittycity.outie.models.HoldingSubmission
@@ -21,7 +21,7 @@ import xyz.block.domainapi.util.Operation
 class EligibilityController @Inject constructor(
   stateMachine: StateMachine<WithdrawalToken, Withdrawal, WithdrawalState>,
   withdrawalStore: WithdrawalStore,
-  private val eligibilityClient: EligibilityClient,
+  private val eligibilityClient: WithdrawalEligibilityClient,
   private val metricsClient: MetricsClient,
 ) : WithdrawalController(stateMachine, metricsClient, withdrawalStore) {
 

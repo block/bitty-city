@@ -7,8 +7,8 @@ import io.github.oshai.kotlinlogging.KLogger
 import io.github.oshai.kotlinlogging.KotlinLogging
 import jakarta.inject.Inject
 import xyz.block.bittycity.common.client.Eligibility
-import xyz.block.bittycity.common.client.EligibilityClient
 import xyz.block.bittycity.common.client.Evaluation
+import xyz.block.bittycity.innie.client.DepositEligibilityClient
 import xyz.block.bittycity.common.client.RiskClient
 import xyz.block.bittycity.common.client.RiskEvaluation
 import xyz.block.bittycity.common.client.SanctionsClient
@@ -25,7 +25,7 @@ class DepositEffectHandler @Inject constructor(
   private val ledgerClient: DepositLedgerClient,
   private val depositRiskClient: RiskClient<DepositToken>,
   private val reversalRiskClient: RiskClient<DepositReversalToken>,
-  private val eligibilityClient: EligibilityClient,
+  private val eligibilityClient: DepositEligibilityClient,
   private val sanctionsClient: SanctionsClient<DepositReversalToken>,
 ):
   EffectHandler<DepositToken, Deposit, DepositState, DepositEffect> {
