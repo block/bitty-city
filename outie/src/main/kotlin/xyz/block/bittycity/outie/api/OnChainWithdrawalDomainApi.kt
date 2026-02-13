@@ -5,32 +5,33 @@ import app.cash.quiver.extensions.success
 import arrow.core.flatMap
 import arrow.core.getOrElse
 import arrow.core.raise.result
+import jakarta.inject.Inject
+import jakarta.inject.Singleton
+import java.util.UUID
+import org.bitcoinj.base.Address
+import org.joda.money.CurrencyUnit
 import xyz.block.bittycity.common.client.BitcoinAccountClient
 import xyz.block.bittycity.common.client.Eligibility
-import xyz.block.bittycity.common.client.EligibilityClient
 import xyz.block.bittycity.common.client.ExchangeRateClient
 import xyz.block.bittycity.common.client.IneligibleCustomer
-import xyz.block.bittycity.outie.controllers.AdminFailController
-import xyz.block.bittycity.outie.controllers.DomainController
 import xyz.block.bittycity.common.models.BalanceId
 import xyz.block.bittycity.common.models.Bitcoins
-import xyz.block.bittycity.outie.models.CollectingInfo
 import xyz.block.bittycity.common.models.CustomerId
+import xyz.block.bittycity.common.store.Transactor
+import xyz.block.bittycity.outie.client.WithdrawalEligibilityClient
+import xyz.block.bittycity.outie.controllers.AdminFailController
+import xyz.block.bittycity.outie.controllers.DomainController
+import xyz.block.bittycity.outie.controllers.IdempotencyHandler
+import xyz.block.bittycity.outie.models.CollectingInfo
 import xyz.block.bittycity.outie.models.RequirementId
 import xyz.block.bittycity.outie.models.Withdrawal
 import xyz.block.bittycity.outie.models.WithdrawalState
 import xyz.block.bittycity.outie.models.WithdrawalToken
-import xyz.block.bittycity.outie.controllers.IdempotencyHandler
-import xyz.block.bittycity.common.store.Transactor
 import xyz.block.bittycity.outie.store.WithdrawalOperations
 import xyz.block.bittycity.outie.store.WithdrawalStore
 import xyz.block.bittycity.outie.utils.SearchParser
 import xyz.block.bittycity.outie.validation.InvalidSourceBalanceToken
 import xyz.block.bittycity.outie.validation.ValidationService
-import jakarta.inject.Inject
-import jakarta.inject.Singleton
-import org.bitcoinj.base.Address
-import org.joda.money.CurrencyUnit
 import xyz.block.domainapi.DomainApi
 import xyz.block.domainapi.ExecuteResponse
 import xyz.block.domainapi.InfoOnly
@@ -44,7 +45,6 @@ import xyz.block.domainapi.SearchResult
 import xyz.block.domainapi.UpdateResponse
 import xyz.block.domainapi.WarnOnly
 import xyz.block.domainapi.util.Operation
-import java.util.UUID
 
 typealias WithdrawalDomainController =
   DomainController<WithdrawalToken, WithdrawalState, Withdrawal, RequirementId>
@@ -56,7 +56,7 @@ class OnChainWithdrawalDomainApi @Inject constructor(
   private val withdrawalStore: WithdrawalStore,
   private val domainController: WithdrawalDomainController,
   private val bitcoinAccountClient: BitcoinAccountClient,
-  private val eligibilityClient: EligibilityClient,
+  private val eligibilityClient: WithdrawalEligibilityClient,
   private val exchangeRateClient: ExchangeRateClient,
   private val validationService: ValidationService,
   private val idempotencyHandler: IdempotencyHandler,
@@ -307,7 +307,7 @@ data class InitialRequest(
 
 sealed class ApiError :
   Exception(),
-    InfoOnly
+  InfoOnly
 
 data class WithdrawalTokenConflictError(
   val withdrawalToken: WithdrawalToken,
