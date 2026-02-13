@@ -1,223 +1,162 @@
-# AGENTS.md - LLM Contribution Guide for Bitty-City
+# Bitty-City
 
-## Project Overview
+Bitcoin on-chain withdrawals (`outie`) and deposits (`innie`) library.
 
-Bitty-City is a Bitcoin custodial product experience library for on-chain operations, used by Block for Square Bitcoin withdrawals. The project handles both withdrawals (`outie`) and deposits (`innie`) with a focus on Bitcoin on-chain operations.
+## Build
 
-## Technology Stack
+```bash
+. ./bin/activate-hermit   # hermit tooling
+bin/gradle build          # build + test
+bin/gradle :outie:generateStateMachineDiagram  # after FSM changes
+```
 
-- **Language**: Kotlin (JVM)
-- **Build System**: Gradle with Kotlin DSL
-- **Java Version**: JVM 11
-- **Test Framework**: JUnit 5 (Jupiter) + Kotest
-- **Database**: MySQL with jOOQ for type-safe SQL and Flyway for migrations
-- **Key Dependencies**:
-  - bitcoinj (Bitcoin operations)
-  - Arrow (Functional programming)
-  - kfsm (Finite state machine)
-  - Guice (Dependency injection)
-  - Resilience4j (Resilience patterns)
-  - Moshi (JSON)
-  - Kotest (Testing and assertions)
-  - Mockk (Mocking)
-  - TestContainers (Integration testing)
+## Structure
 
-## Build & Development Commands
+```
+common/   # Shared models
+innie/    # Deposits
+outie/    # Withdrawals (state machine, controllers, store)
+```
 
-### Prerequisites
-This project uses [Hermit](https://cashapp.github.io/hermit/) for consistent tooling. Activate it with:
- ```bash
- . ./bin/activate-hermit
- ```
+## Kotlin Style
 
-### Essential Commands
- ```bash
- # Build the entire project (includes tests)
- bin/gradle build
- 
- # Run tests only
- bin/gradle test
- 
- # Clean build
- bin/gradle clean build
- 
- # Generate state machine diagram (for outie module)
- bin/gradle :outie:generateStateMachineDiagram
- 
- # Publish to Maven Central
- bin/gradle publishToMavenCentral
- ```
+2-space indent. 100 char lines. No wildcard imports. Use expression syntax.
 
-## Project Structure
+### ✅ Do
 
- ```
- bitty-city/
- ├── common/             # Shared models and utilities
- ├── innie/              # Deposits module (WIP)
- └── outie/              # Withdrawals module
-     ├── docs/           # Documentation including state machine diagrams
-     └── src/
-         ├── main/kotlin/
-         └── test/kotlin/
- ```
+```kotlin
+fun parse(token: String): Result<WithdrawalToken> = result {
+  val uuid = Result.catch { UUID.fromString(token.removePrefix(PREFIX)) }
+    .mapFailure { IllegalArgumentException("Invalid UUID:「$token」", it) }
+    .bind()
+  WithdrawalToken(uuid)
+}
+```
 
-## Code Conventions
+```kotlin
+val name = customer?.name ?: "Unknown"
+```
 
-### General Style
-- **Indentation**: 2 spaces (NOT tabs)
-- **Line Length**: Maximum 100 characters
-- **Line Endings**: LF (Unix-style)
-- **Charset**: UTF-8
-- **Final Newline**: Always insert
+```kotlin
+val fees = speeds.associate { it.speed to it.totalFee }
+```
 
-### Kotlin-Specific
-- **Imports**: No wildcard imports (use explicit imports)
-- **Naming**: Follow standard Kotlin conventions
-- **Null Safety**: Leverage Kotlin's null safety features
-- **Functional Style**: Use Arrow for functional programming patterns
-- **Type Safety**: Prefer type-safe solutions (e.g., jOOQ for SQL)
-- **Expression Syntax**: Prefer expression syntax wherever possible (e.g., `when` expressions, `if` expressions)
-- **Error Handling**: Never use `try/catch` - use `Result.catch` instead
-- **Early Returns**: Avoid early return statements - prefer expression-based control flow
-- **Elvis Operator**: Prefer elvis operators (`?:`) over `if (x == null)` expressions
-- **Collections**: Prefer immutable collections over mutable collections (e.g., use `associate`, `associateWith`, `map` instead of `mutableMapOf`, `mutableListOf`)
+### ❌ Don't
 
-### Testing
+```kotlin
+// No try/catch - use Result.catch
+fun parse(token: String): WithdrawalToken {
+  try {
+    return WithdrawalToken(UUID.fromString(token.removePrefix(PREFIX)))
+  } catch (e: Exception) {
+    throw IllegalArgumentException("Invalid UUID", e)
+  }
+}
+```
 
-#### Testing Philosophy: Sociable Unit Testing
+```kotlin
+// No early returns - use expressions
+fun parse(token: String): Result<WithdrawalToken> {
+  if (!token.startsWith(PREFIX)) return Result.failure(...)
+  return Result.success(...)
+}
+```
 
-Bitty-City follows the **Sociable Unit Testing** approach for comprehensive, resilient test coverage.
+```kotlin
+// No mutable collections
+val fees = mutableMapOf<WithdrawalSpeed, Bitcoins>()
+speeds.forEach { fees[it.speed] = it.totalFee }
+```
 
-**Core Principle**: Write unit tests for all classes, but let them connect through to real dependencies until hitting the system boundary.
+```kotlin
+// No null checks when elvis works
+val name: String
+if (customer == null) {
+  name = "Unknown"
+} else {
+  name = customer.name
+}
+```
 
-- ✅ **Real object graphs**: Classes use their actual dependencies (services, stores, validators)
-- ✅ **Real database**: Tests run against actual database with TestContainers
-- ✅ **Fake external services**: Only external APIs and services are faked at system boundaries
-- ✅ **Fast execution**: Still runs quickly despite using real components
-- ✅ **Less brittle**: No need to update mocks when internal implementations change
+## Testing
 
-**System Boundaries** (what gets faked):
-- External APIs (Bitcoin RPC, blockchain explorers, etc.)
-- External event systems
+Sociable unit tests — real dependencies, fake only at system boundaries (external APIs).
 
-**Benefits over traditional mock-based testing**:
-- Tests behavior, not implementation details
-- Resilient to refactoring
-- Real integration confidence
-- Simpler test setup
+### ✅ Do
 
-#### Test Framework & Conventions
+```kotlin
+class EligibilityControllerTest : BittyCityTestCase() {
+  @Inject lateinit var subject: EligibilityController
 
-- **Framework**: JUnit 5 (Jupiter) - configured in root `build.gradle.kts`
-- **Base Class**: Extend `BittyCityTestCase` for integration tests with database and dependency injection
-- **Test Structure**: Use `runTest { ... }` wrapper for test body (resets fakes automatically)
-- **Test App**: Access `app` property for data seeding, fakes, and test utilities
-- **Test Data**: Access `app.data` for arbitrary test values (`TestRunData`)
-- **Assertions**: Use Kotest matchers (`shouldBe`, `shouldBeGreaterThan`, etc.) - NOT JUnit assertions
-- **Test Naming**: Test class suffix is `Test` (e.g., `BitcoinsTest.kt`)
-- **Test Names**: Use backtick syntax for readable test names
-- **Integration Tests**: Use TestContainers for database tests (provides real MySQL instance)
-- **Mocking**: Use Mockk only for external system boundaries, not internal dependencies
-- **Result Handling**: Always use `.getOrThrow()` to unwrap Arrow `Result` values in tests (never use `.shouldBeSuccess()` as it hides stack traces)
-- **Test Data Generation**: Prefer `Arb<T>` generators over hard-coded values. Compose existing `Arb` generators for new types
-- **Assertion Style**: For single assertions after `getOrThrow()`, chain directly instead of using `should { }` block. Use `should { }` only for multiple assertions with `assertSoftly`
+  @Test
+  fun `eligible customer transitions to holding submission`() = runTest {
+    val withdrawal = data.seedWithdrawal(state = CheckingEligibility)
 
-#### Test Example
+    subject.processInputs(withdrawal, emptyList(), Operation.EXECUTE)
+      .getOrThrow()
+      .shouldBeInstanceOf<ProcessingState.UserInteractions<Withdrawal, RequirementId>>()
 
- ```kotlin
- // Simple unit test (no database/DI needed)
- class BitcoinsTest {
-   @Test
-   fun `plus operator should add two Bitcoins values`() {
-     val bitcoins1 = Bitcoins(1000L)
-     val bitcoins2 = Bitcoins(500L)
-     val result = bitcoins1 + bitcoins2
-     result.units shouldBe 1500L
-   }
- }
- 
- // Integration test (extends BittyCityTestCase)
- class WithdrawalServiceTest : BittyCityTestCase() {
-   @Inject lateinit var withdrawalService: WithdrawalService
-   
-   @Test
-   fun `should process withdrawal with real store and validators`() = runTest {
-     val withdrawal = data.seedWithdrawal(
-       amount = Bitcoins(100_000L),
-       withdrawalSpeed = WithdrawalSpeed.STANDARD
-     )
-     
-     val result = withdrawalService.process(withdrawal.id).getOrThrow()
-     
-     assertSoftly(result) {
-       status shouldBe WithdrawalStatus.COMPLETED
-       amount shouldBe Bitcoins(100_000L)
-     }
-   }
- }
- ```
+    withdrawalWithToken(withdrawal.id).state shouldBe HoldingSubmission
+  }
 
-#### Testing Best Practices
+  @Test
+  fun `should fail with LIMITED reason when withdrawal exceeds limits`() = runTest {
+    val withdrawal = data.seedWithdrawal(state = HoldingSubmission)
+    limitClient.nextLimitResponse =
+      LimitResponse.Limited(listOf(LimitViolation.DAILY_USD_LIMIT)).success()
 
-1. **Use real dependencies** - Let controllers use real stores, validators, etc.
-2. **Fake at boundaries** - Only mock external APIs and services
-3. **Test both paths** - Write tests for success and failure cases
-4. **Use assertSoftly** - Show all assertion failures, not just the first
-5. **Avoid redundant comments** - Let test names be descriptive. Never add AAA (Arrange/Act/Assert) comments
-6. **Prefer brevity** - Keep tests concise and to the point
-7. **Independent tests** - Each test creates its own test data
-8. **Property-based test data** - Use Kotest's `Arb` generators where applicable
+    subject.processInputs(withdrawal, emptyList(), Operation.EXECUTE)
+      .shouldBeFailure<LimitWouldBeExceeded>()
 
-## Module Responsibilities
+    withdrawalWithToken(withdrawal.id) should {
+      it.state shouldBe Failed
+      it.failureReason shouldBe FailureReason.LIMITED
+    }
+  }
+}
+```
 
-### common/
-Shared models and utilities used across modules.
+### ❌ Don't
 
-### outie/ (Withdrawals)
-Handles Bitcoin withdrawal operations. See `outie/docs/state-machine.md` for the withdrawal state machine flow.
+```kotlin
+// No JUnit assertions
+assertEquals(HoldingSubmission, result.state)
+assertTrue(result.isSuccess)
 
-### innie/ (Deposits)
-Handles Bitcoin deposit operations (Work in Progress).
+// No .shouldBeSuccess() - hides stack traces
+service.process(id).shouldBeSuccess()
 
-## State Machine Documentation
+// No mocking internal dependencies
+val mockStore = mockk<WithdrawalStore>()
+every { mockStore.findByToken(any()) } returns ...
 
-Both modules use finite state machines (kfsm). The state machine diagrams can be regenerated with:
- ```bash
- bin/gradle :outie:generateStateMachineDiagram
- bin/gradle :innie:generateStateMachineDiagram
- ```
+// No AAA comments
+// Arrange
+val withdrawal = ...
+// Act
+val result = ...
+// Assert
+result shouldBe ...
+```
 
-### State Naming Conventions
+### Key patterns
 
-- **In-progress states**: Use present-participle verb phrases, e.g. `CheckingEligibility`, `CollectingReversalInfo`, `AwaitingDepositConfirmation`
-- **Terminal / outcome states**: Use past-participle or adjectival forms, e.g. `Sanctioned`, `Settled`, `Reversed`, `Voided`
-- Names should be as **succinct as possible** without losing context
+- Extend `BittyCityTestCase` for integration tests
+- Use `runTest { ... }` — it resets fakes automatically
+- Seed data via `data.seedWithdrawal(...)`
+- Use `.getOrThrow()` to unwrap `Result` values
+- Use Kotest: `shouldBe`, `shouldBeInstanceOf`, `shouldBeFailure`
+- Use `should { }` with `assertSoftly` only for multiple assertions
+- Use `Arb<T>` generators over hard-coded values
 
-## Publishing
+## State Machines (kfsm)
 
-The project is published to Maven Central:
-- **Group**: `xyz.block.bittycity`
-- **License**: Apache License 2.0
-- **Repository**: https://github.com/block/bitty-city
+- In-progress states: present participle — `CheckingEligibility`, `AwaitingDepositConfirmation`
+- Terminal states: past participle — `Settled`, `Reversed`, `Voided`
+- Regenerate diagrams after changes
 
-## Contributing Guidelines
+## Database
 
-1. **Code Style**: Follow the `.editorconfig` settings (automatically enforced by IntelliJ IDEA)
-2. **Testing**: All new features must include comprehensive tests
-3. **Type Safety**: Prefer type-safe solutions over stringly-typed or dynamic approaches
-4. **Functional Programming**: Use Arrow's functional patterns where appropriate
-5. **Documentation**: Update module documentation and regenerate diagrams when modifying state machines
-6. **Build Verification**: Always run `bin/gradle build` before committing to ensure tests pass
-7. **Dependencies**: Check existing dependencies before adding new ones
-8. **Licensing**: New runtime dependencies must be licensed with Apache 2.0, MIT, BSD, ISC, or Creative Commons Attribution (test & build dependencies can be more flexible)
-
-## Important Notes for LLMs
-
-- **Never add wildcard imports** - use explicit imports for all Kotlin files
-- **Database changes require Flyway migrations** - never modify schema directly
-- **Use Kotest for assertions**, not JUnit assertions
-- **Follow the established pattern** of state machines in the outie module
-- **Regenerate diagrams** after modifying FSM code
-- **Check `.editorconfig`** before making formatting decisions
-- **Use jOOQ** for database operations in the outie module (type-safe SQL)
-- **All tests use JUnit 5** (Jupiter) - configured in root `build.gradle.kts`
+- Schema changes require Flyway migrations — never modify schema directly
+- Use the `Transactor<WithdrawalOperations>` pattern for database access
+- jOOQ for type-safe SQL in the `outie-jooq-provider` module
