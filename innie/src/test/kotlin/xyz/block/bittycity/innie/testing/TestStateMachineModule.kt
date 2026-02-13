@@ -11,20 +11,20 @@ import com.google.inject.TypeLiteral
 import jakarta.inject.Singleton
 import xyz.block.bittycity.innie.fsm.DepositEffect
 import xyz.block.bittycity.innie.fsm.DepositEffectHandler
-import xyz.block.bittycity.innie.models.CollectingReversalInfo
-import xyz.block.bittycity.innie.models.CollectingReversalSanctionsInfo
+import xyz.block.bittycity.innie.models.PendingReversal
+import xyz.block.bittycity.innie.models.CollectingSanctionsInfo
 import xyz.block.bittycity.innie.models.Deposit
-import xyz.block.bittycity.innie.models.DepositExpiredPending
-import xyz.block.bittycity.innie.models.DepositSettled
+import xyz.block.bittycity.innie.models.Evicted
+import xyz.block.bittycity.innie.models.Settled
 import xyz.block.bittycity.innie.models.DepositState
 import xyz.block.bittycity.innie.models.DepositToken
-import xyz.block.bittycity.innie.models.DepositVoided
-import xyz.block.bittycity.innie.models.ReversalConfirmedComplete
-import xyz.block.bittycity.innie.models.ReversalSanctioned
-import xyz.block.bittycity.innie.models.WaitingForDepositConfirmedOnChainStatus
-import xyz.block.bittycity.innie.models.WaitingForReversalConfirmedOnChainStatus
-import xyz.block.bittycity.innie.models.WaitingForReversalPendingConfirmationStatus
-import xyz.block.bittycity.innie.models.WaitingForReversalSanctionsHeldDecision
+import xyz.block.bittycity.innie.models.Voided
+import xyz.block.bittycity.innie.models.Reversed
+import xyz.block.bittycity.innie.models.Sanctioned
+import xyz.block.bittycity.innie.models.AwaitingDepositConfirmation
+import xyz.block.bittycity.innie.models.AwaitingReversalConfirmation
+import xyz.block.bittycity.innie.models.AwaitingReversalPendingConfirmation
+import xyz.block.bittycity.innie.models.AwaitingSanctionsDecision
 import kotlin.time.Duration.Companion.milliseconds
 
 object TestStateMachineModule : AbstractModule() {
@@ -80,25 +80,25 @@ object TestStateMachineModule : AbstractModule() {
  * cannot continue and the workflow is either complete or waiting for external input.
  *
  * Settled states include:
- * - Terminal states (DepositSettled, DepositVoided, ReversalConfirmedComplete, ReversalSanctioned)
- * - States awaiting external events (WaitingForDepositConfirmedOnChainStatus, etc.)
- * - States awaiting user input (CollectingReversalInfo, CollectingReversalSanctionsInfo)
+ * - Terminal states (Settled, Voided, Reversed, Sanctioned)
+ * - States awaiting external events (AwaitingDepositConfirmation, etc.)
+ * - States awaiting user input (PendingReversal, CollectingSanctionsInfo)
  */
 private fun isSettled(state: DepositState): Boolean = when (state) {
   // Terminal states
-  DepositSettled,
-  DepositVoided,
-  ReversalConfirmedComplete,
-  ReversalSanctioned,
+  Settled,
+  Voided,
+  Reversed,
+  Sanctioned,
   // States waiting for external blockchain events
-  WaitingForDepositConfirmedOnChainStatus,
-  DepositExpiredPending,
-  WaitingForReversalPendingConfirmationStatus,
-  WaitingForReversalConfirmedOnChainStatus,
+  AwaitingDepositConfirmation,
+  Evicted,
+  AwaitingReversalPendingConfirmation,
+  AwaitingReversalConfirmation,
   // States waiting for user input or external decisions
-  CollectingReversalInfo,
-  CollectingReversalSanctionsInfo,
-  WaitingForReversalSanctionsHeldDecision -> true
+  PendingReversal,
+  CollectingSanctionsInfo,
+  AwaitingSanctionsDecision -> true
   // All other states are intermediate - effects should continue processing
   else -> false
 }

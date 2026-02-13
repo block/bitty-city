@@ -12,7 +12,7 @@ import xyz.block.bittycity.common.models.CustomerId
 import xyz.block.bittycity.innie.models.DepositReversalToken
 import xyz.block.bittycity.innie.models.DepositState
 import xyz.block.bittycity.innie.models.DepositToken
-import xyz.block.bittycity.innie.models.WaitingForDepositConfirmedOnChainStatus
+import xyz.block.bittycity.innie.models.AwaitingDepositConfirmation
 import java.time.Instant
 
 /**
@@ -77,7 +77,7 @@ object DepositMoshi {
 
     @FromJson
     fun fromJson(name: String): DepositState =
-      WaitingForDepositConfirmedOnChainStatus.byName(name).getOrThrow()
+      AwaitingDepositConfirmation.byName(name).getOrThrow()
   }
 
   object RequirementIdJsonAdapter : JsonAdapter<xyz.block.bittycity.innie.models.RequirementId>() {

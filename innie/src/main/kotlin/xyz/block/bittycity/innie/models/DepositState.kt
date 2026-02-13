@@ -43,35 +43,35 @@ data object New : DepositState() {
 }
 
 data object CreatingDepositTransaction: DepositState() {
-  override fun transitions(): Set<DepositState> = setOf(WaitingForDepositConfirmedOnChainStatus)
+  override fun transitions(): Set<DepositState> = setOf(AwaitingDepositConfirmation)
 }
 
-data object WaitingForDepositConfirmedOnChainStatus : DepositState() {
-  override fun transitions(): Set<DepositState> = setOf(CheckingDepositEligibility, DepositExpiredPending, DepositVoided)
+data object AwaitingDepositConfirmation : DepositState() {
+  override fun transitions(): Set<DepositState> = setOf(CheckingEligibility, Evicted, Voided)
 }
 
-data object DepositExpiredPending : DepositState() {
-  override fun transitions(): Set<DepositState> = setOf(CheckingDepositEligibility, DepositVoided)
+data object Evicted : DepositState() {
+  override fun transitions(): Set<DepositState> = setOf(CheckingEligibility, Voided)
 }
 
-data object DepositVoided : DepositState() {
+data object Voided : DepositState() {
   override fun transitions(): Set<DepositState> = emptySet()
 }
 
-data object CheckingDepositEligibility : DepositState() {
-  override fun transitions(): Set<DepositState> = setOf(CheckingDepositRisk, CollectingReversalInfo)
+data object CheckingEligibility : DepositState() {
+  override fun transitions(): Set<DepositState> = setOf(CheckingDepositRisk, PendingReversal)
 }
 
 data object CheckingDepositRisk : DepositState() {
-  override fun transitions(): Set<DepositState> = setOf(DepositSettled, CollectingReversalInfo)
+  override fun transitions(): Set<DepositState> = setOf(Settled, PendingReversal)
 }
 
-data object DepositSettled : DepositState() {
+data object Settled : DepositState() {
   override fun transitions(): Set<DepositState> = emptySet()
 }
 
-data object CollectingReversalInfo : DepositState(), StateWithInvariants<Deposit> {
-  override fun transitions(): Set<DepositState> = setOf(CheckingReversalSanctions)
+data object PendingReversal : DepositState(), StateWithInvariants<Deposit> {
+  override fun transitions(): Set<DepositState> = setOf(CheckingSanctions)
 
   override fun invariants(): List<Invariant<Deposit>> = listOf(
     invariant("failure reason must be set") { deposit ->
@@ -80,12 +80,12 @@ data object CollectingReversalInfo : DepositState(), StateWithInvariants<Deposit
   )
 }
 
-data object CheckingReversalSanctions : DepositState() {
-  override fun transitions(): Set<DepositState> = setOf(CheckingReversalRisk, CollectingReversalSanctionsInfo, CollectingReversalInfo)
+data object CheckingSanctions : DepositState() {
+  override fun transitions(): Set<DepositState> = setOf(CheckingReversalRisk, CollectingSanctionsInfo, PendingReversal)
 }
 
 data object CheckingReversalRisk : DepositState(), StateWithInvariants<Deposit> {
-  override fun transitions(): Set<DepositState> = setOf(WaitingForReversalPendingConfirmationStatus, CollectingReversalInfo)
+  override fun transitions(): Set<DepositState> = setOf(AwaitingReversalPendingConfirmation, PendingReversal)
 
   override fun invariants(): List<Invariant<Deposit>> = listOf(
     invariant("target address must be set") { deposit ->
@@ -94,33 +94,33 @@ data object CheckingReversalRisk : DepositState(), StateWithInvariants<Deposit> 
   )
 }
 
-data object CollectingReversalSanctionsInfo : DepositState() {
+data object CollectingSanctionsInfo : DepositState() {
   override fun transitions(): Set<DepositState> = setOf(
-    WaitingForReversalSanctionsHeldDecision,
-    ReversalSanctioned, // These are possible from this state if the user abandons the sanctions collection screen
-    WaitingForReversalPendingConfirmationStatus,
-    CollectingReversalInfo
+    AwaitingSanctionsDecision,
+    Sanctioned, // These are possible from this state if the user abandons the sanctions collection screen
+    AwaitingReversalPendingConfirmation,
+    PendingReversal
   )
 }
 
-data object WaitingForReversalSanctionsHeldDecision : DepositState() {
+data object AwaitingSanctionsDecision : DepositState() {
   override fun transitions(): Set<DepositState> = setOf(
-    CheckingReversalRisk, ReversalSanctioned, CollectingReversalInfo
+    CheckingReversalRisk, Sanctioned, PendingReversal
   )
 }
 
-data object ReversalSanctioned : DepositState() {
+data object Sanctioned : DepositState() {
   override fun transitions(): Set<DepositState> = emptySet()
 }
 
-data object WaitingForReversalPendingConfirmationStatus : DepositState() {
-  override fun transitions(): Set<DepositState> = setOf(WaitingForReversalConfirmedOnChainStatus, CollectingReversalInfo)
+data object AwaitingReversalPendingConfirmation : DepositState() {
+  override fun transitions(): Set<DepositState> = setOf(AwaitingReversalConfirmation, PendingReversal)
 }
 
-data object WaitingForReversalConfirmedOnChainStatus : DepositState() {
-  override fun transitions(): Set<DepositState> = setOf(ReversalConfirmedComplete, CollectingReversalInfo)
+data object AwaitingReversalConfirmation : DepositState() {
+  override fun transitions(): Set<DepositState> = setOf(Reversed, PendingReversal)
 }
 
-data object ReversalConfirmedComplete : DepositState() {
+data object Reversed : DepositState() {
   override fun transitions(): Set<DepositState> = emptySet()
 }

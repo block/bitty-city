@@ -8,8 +8,8 @@ import xyz.block.bittycity.innie.fsm.DepositEffect
 import xyz.block.bittycity.innie.fsm.ReversalFailed
 import xyz.block.bittycity.innie.fsm.ReversalSanctionsApproved
 import xyz.block.bittycity.innie.fsm.ReversalSanctionsDecisionFrozen
-import xyz.block.bittycity.innie.models.CheckingReversalSanctions
-import xyz.block.bittycity.innie.models.CollectingReversalSanctionsInfo
+import xyz.block.bittycity.innie.models.CheckingSanctions
+import xyz.block.bittycity.innie.models.CollectingSanctionsInfo
 import xyz.block.bittycity.innie.models.Deposit
 import xyz.block.bittycity.innie.models.DepositReversalFailureReason.SANCTIONS_FAILED
 import xyz.block.bittycity.innie.models.DepositState
@@ -19,7 +19,7 @@ import xyz.block.bittycity.innie.models.SanctionsHeldDecision
 import xyz.block.bittycity.innie.models.SanctionsReviewDecision.APPROVE
 import xyz.block.bittycity.innie.models.SanctionsReviewDecision.DECLINE
 import xyz.block.bittycity.innie.models.SanctionsReviewDecision.FREEZE
-import xyz.block.bittycity.innie.models.WaitingForReversalSanctionsHeldDecision
+import xyz.block.bittycity.innie.models.AwaitingSanctionsDecision
 import xyz.block.bittycity.innie.store.DepositStore
 import xyz.block.domainapi.Input
 import xyz.block.domainapi.ProcessingState
@@ -37,8 +37,8 @@ class ReversalSanctionsController @Inject constructor(
     hurdleGroupId: String?
   ): Result<ProcessingState<Deposit, RequirementId>> = result {
     when (value.state) {
-      CheckingReversalSanctions -> ProcessingState.Complete(value)
-      WaitingForReversalSanctionsHeldDecision, CollectingReversalSanctionsInfo -> {
+      CheckingSanctions -> ProcessingState.Complete(value)
+      AwaitingSanctionsDecision, CollectingSanctionsInfo -> {
         val updatedValue = processInputs(value, inputs).bind()
         ProcessingState.Waiting(updatedValue)
       }

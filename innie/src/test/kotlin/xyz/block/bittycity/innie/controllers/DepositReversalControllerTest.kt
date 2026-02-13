@@ -8,7 +8,7 @@ import io.kotest.property.arbitrary.next
 import jakarta.inject.Inject
 import org.junit.jupiter.api.Test
 import xyz.block.bittycity.innie.api.DepositDomainController
-import xyz.block.bittycity.innie.models.CollectingReversalInfo
+import xyz.block.bittycity.innie.models.PendingReversal
 import xyz.block.bittycity.innie.models.DepositFailureReason.RISK_BLOCKED
 import xyz.block.bittycity.innie.models.DepositReversal
 import xyz.block.bittycity.innie.models.DepositReversalHurdle
@@ -30,7 +30,7 @@ class DepositReversalControllerTest : BittyCityTestCase() {
   @Test
   fun `Starting a reversal returns hurdles for target wallet address and confirmation`() = runTest {
     val deposit = data.seedDeposit(
-      state = CollectingReversalInfo,
+      state = PendingReversal,
       customerId = customerId.next(),
       amount = amount.next(),
       exchangeRate = exchangeRate.next(),
@@ -51,7 +51,7 @@ class DepositReversalControllerTest : BittyCityTestCase() {
     response.interactions[0] shouldBe DepositReversalHurdle.TargetWalletAddressHurdle
 
     depositWithToken(deposit.id) should {
-      it.state shouldBe CollectingReversalInfo
+      it.state shouldBe PendingReversal
       it.failureReason shouldBe RISK_BLOCKED
     }
   }

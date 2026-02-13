@@ -181,10 +181,17 @@ Handles Bitcoin deposit operations (Work in Progress).
 
 ## State Machine Documentation
 
-The outie module uses a finite state machine (kfsm) for withdrawal flow management. The state machine diagram can be regenerated with:
+Both modules use finite state machines (kfsm). The state machine diagrams can be regenerated with:
  ```bash
  bin/gradle :outie:generateStateMachineDiagram
+ bin/gradle :innie:generateStateMachineDiagram
  ```
+
+### State Naming Conventions
+
+- **In-progress states**: Use present-participle verb phrases, e.g. `CheckingEligibility`, `CollectingReversalInfo`, `AwaitingDepositConfirmation`
+- **Terminal / outcome states**: Use past-participle or adjectival forms, e.g. `Sanctioned`, `Settled`, `Reversed`, `Voided`
+- Names should be as **succinct as possible** without losing context
 
 ## Publishing
 

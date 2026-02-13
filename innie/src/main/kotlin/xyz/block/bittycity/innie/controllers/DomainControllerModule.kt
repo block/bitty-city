@@ -8,14 +8,14 @@ import jakarta.inject.Singleton
 import xyz.block.bittycity.common.idempotency.IdempotentInputs
 import xyz.block.bittycity.common.idempotency.IdempotentResumeInputs
 import xyz.block.bittycity.common.store.Transactor
-import xyz.block.bittycity.innie.models.CheckingReversalSanctions
-import xyz.block.bittycity.innie.models.CollectingReversalInfo
-import xyz.block.bittycity.innie.models.CollectingReversalSanctionsInfo
+import xyz.block.bittycity.innie.models.CheckingSanctions
+import xyz.block.bittycity.innie.models.PendingReversal
+import xyz.block.bittycity.innie.models.CollectingSanctionsInfo
 import xyz.block.bittycity.innie.models.Deposit
 import xyz.block.bittycity.innie.models.DepositState
 import xyz.block.bittycity.innie.models.DepositToken
 import xyz.block.bittycity.innie.models.RequirementId
-import xyz.block.bittycity.innie.models.WaitingForDepositConfirmedOnChainStatus
+import xyz.block.bittycity.innie.models.AwaitingDepositConfirmation
 import xyz.block.bittycity.innie.store.ResponseOperations
 import xyz.block.domainapi.kfsm.v2.util.Controller
 
@@ -30,10 +30,10 @@ object DomainControllerModule : AbstractModule() {
   ): DomainController<DepositToken, DepositState, Deposit, RequirementId> {
     val stateToController:
       Map<DepositState, Controller<DepositToken, DepositState, Deposit, RequirementId>> = mapOf(
-        WaitingForDepositConfirmedOnChainStatus to onChainController,
-        CollectingReversalInfo to infoCollectionController,
-        CheckingReversalSanctions to sanctionsController,
-        CollectingReversalSanctionsInfo to sanctionsInfoCollectionController,
+        AwaitingDepositConfirmation to onChainController,
+        PendingReversal to infoCollectionController,
+        CheckingSanctions to sanctionsController,
+        CollectingSanctionsInfo to sanctionsInfoCollectionController,
       ).mapValues { (_, controller) ->
         controller as Controller<DepositToken, DepositState, Deposit, RequirementId>
     }

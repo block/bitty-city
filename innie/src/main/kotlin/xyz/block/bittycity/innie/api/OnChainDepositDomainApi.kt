@@ -22,10 +22,10 @@ import xyz.block.bittycity.innie.controllers.DomainController
 import xyz.block.bittycity.innie.controllers.IdempotencyHandler
 import xyz.block.bittycity.innie.models.Deposit
 import xyz.block.bittycity.innie.models.DepositState
-import xyz.block.bittycity.innie.models.CheckingDepositEligibility
+import xyz.block.bittycity.innie.models.CheckingEligibility
 import xyz.block.bittycity.innie.models.DepositToken
 import xyz.block.bittycity.innie.models.RequirementId
-import xyz.block.bittycity.innie.models.WaitingForDepositConfirmedOnChainStatus
+import xyz.block.bittycity.innie.models.AwaitingDepositConfirmation
 import xyz.block.bittycity.innie.store.DepositOperations
 import xyz.block.domainapi.DomainApi
 import xyz.block.domainapi.ExecuteResponse
@@ -178,8 +178,8 @@ class OnChainDepositDomainApi @Inject constructor(
 
   companion object {
     fun mapPaymentState(state: PaymentState): DepositState = when (state) {
-      PaymentState.AWAITING_CONFIRMATION -> WaitingForDepositConfirmedOnChainStatus
-      PaymentState.COMPLETED_CONFIRMED -> CheckingDepositEligibility
+      PaymentState.AWAITING_CONFIRMATION -> AwaitingDepositConfirmation
+      PaymentState.COMPLETED_CONFIRMED -> CheckingEligibility
     }
   }
 }
