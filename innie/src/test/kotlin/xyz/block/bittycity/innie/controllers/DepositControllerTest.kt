@@ -9,13 +9,13 @@ import org.junit.jupiter.api.Test
 import xyz.block.bittycity.common.client.Eligibility
 import xyz.block.bittycity.common.client.RiskEvaluation
 import xyz.block.bittycity.innie.api.DepositDomainController
-import xyz.block.bittycity.innie.models.CollectingReversalInfo
+import xyz.block.bittycity.innie.models.PendingReversal
 import xyz.block.bittycity.innie.models.DepositFailureReason.INELIGIBLE
 import xyz.block.bittycity.innie.models.DepositFailureReason.RISK_BLOCKED
 import xyz.block.bittycity.innie.models.DepositFailureReason.UNEXPECTED_RISK_RESULT
 import xyz.block.bittycity.innie.models.DepositResumeResult
-import xyz.block.bittycity.innie.models.DepositSettled
-import xyz.block.bittycity.innie.models.WaitingForDepositConfirmedOnChainStatus
+import xyz.block.bittycity.innie.models.Settled
+import xyz.block.bittycity.innie.models.AwaitingDepositConfirmation
 import xyz.block.bittycity.innie.testing.Arbitrary.amount
 import xyz.block.bittycity.innie.testing.Arbitrary.balanceId
 import xyz.block.bittycity.innie.testing.Arbitrary.customerId
@@ -34,7 +34,7 @@ class DepositControllerTest : BittyCityTestCase() {
   @Test
   fun `Fail if risk blocked`() = runTest {
     val deposit = data.seedDeposit(
-      state = WaitingForDepositConfirmedOnChainStatus,
+      state = AwaitingDepositConfirmation,
       customerId = customerId.next(),
       amount = amount.next(),
       exchangeRate = exchangeRate.next(),
@@ -61,7 +61,7 @@ class DepositControllerTest : BittyCityTestCase() {
     app.processAllEffects()
 
     depositWithToken(deposit.id) should {
-      it.state shouldBe CollectingReversalInfo
+      it.state shouldBe PendingReversal
       it.failureReason shouldBe RISK_BLOCKED
     }
   }
@@ -69,7 +69,7 @@ class DepositControllerTest : BittyCityTestCase() {
   @Test
   fun `Fail if unexpected risk result`() = runTest {
     val deposit = data.seedDeposit(
-      state = WaitingForDepositConfirmedOnChainStatus,
+      state = AwaitingDepositConfirmation,
       customerId = customerId.next(),
       amount = amount.next(),
       exchangeRate = exchangeRate.next(),
@@ -96,7 +96,7 @@ class DepositControllerTest : BittyCityTestCase() {
     app.processAllEffects()
 
     depositWithToken(deposit.id) should {
-      it.state shouldBe CollectingReversalInfo
+      it.state shouldBe PendingReversal
       it.failureReason shouldBe UNEXPECTED_RISK_RESULT
     }
   }
@@ -104,7 +104,7 @@ class DepositControllerTest : BittyCityTestCase() {
   @Test
   fun `Continue after risk check is ok`() = runTest {
     val deposit = data.seedDeposit(
-      state = WaitingForDepositConfirmedOnChainStatus,
+      state = AwaitingDepositConfirmation,
       customerId = customerId.next(),
       amount = amount.next(),
       exchangeRate = exchangeRate.next(),
@@ -132,14 +132,14 @@ class DepositControllerTest : BittyCityTestCase() {
     app.processAllEffects()
 
     depositWithToken(deposit.id) should {
-      it.state shouldBe DepositSettled
+      it.state shouldBe Settled
     }
   }
 
   @Test
   fun `Fail when not eligible`() = runTest {
     val deposit = data.seedDeposit(
-      state = WaitingForDepositConfirmedOnChainStatus,
+      state = AwaitingDepositConfirmation,
       customerId = customerId.next(),
       amount = amount.next(),
       exchangeRate = exchangeRate.next(),
@@ -165,7 +165,7 @@ class DepositControllerTest : BittyCityTestCase() {
     app.processAllEffects()
 
     depositWithToken(deposit.id) should {
-      it.state shouldBe CollectingReversalInfo
+      it.state shouldBe PendingReversal
       it.failureReason shouldBe INELIGIBLE
     }
   }

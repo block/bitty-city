@@ -7,7 +7,7 @@ import xyz.block.bittycity.common.models.Bitcoins
 import xyz.block.bittycity.common.models.CustomerId
 import xyz.block.bittycity.innie.models.DepositToken
 import xyz.block.bittycity.innie.models.Deposit
-import xyz.block.bittycity.innie.models.WaitingForDepositConfirmedOnChainStatus
+import xyz.block.bittycity.innie.models.AwaitingDepositConfirmation
 import java.time.Instant
 
 data class TestRunData(
@@ -24,7 +24,7 @@ data class TestRunData(
   val newDeposit: Deposit by lazy {
     Deposit(
       id = depositToken,
-      state = WaitingForDepositConfirmedOnChainStatus,
+      state = AwaitingDepositConfirmation,
       createdAt = Instant.now(),
       updatedAt = Instant.now(),
       version = 1L,

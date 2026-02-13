@@ -8,7 +8,7 @@ import io.github.oshai.kotlinlogging.KotlinLogging
 import xyz.block.bittycity.innie.fsm.DepositEffect
 import xyz.block.bittycity.innie.fsm.DepositFailed
 import xyz.block.bittycity.innie.fsm.ReversalFailed
-import xyz.block.bittycity.innie.models.CollectingReversalInfo
+import xyz.block.bittycity.innie.models.PendingReversal
 import xyz.block.bittycity.innie.models.Deposit
 import xyz.block.bittycity.innie.models.DepositFailureReason
 import xyz.block.bittycity.innie.models.DepositReversalFailureReason
@@ -28,7 +28,7 @@ abstract class DepositController(
 
   protected fun failDeposit(failure: Throwable, value: Deposit): Result<Deposit> = result {
     val valueFromDb = depositStore.getDepositByToken(value.id).bind()
-    if (valueFromDb.state != CollectingReversalInfo) {
+    if (valueFromDb.state != PendingReversal) {
       logger.info(failure) { "Failing deposit ${valueFromDb.id}" }
       valueFromDb.fail(failure.toFailureReason()).bind()
     } else {
@@ -41,7 +41,7 @@ abstract class DepositController(
 
   protected fun failReversal(failureReason: DepositReversalFailureReason, value: Deposit): Result<Deposit> = result {
     val valueFromDb = depositStore.getDepositByToken(value.id).bind()
-    if (valueFromDb.state != CollectingReversalInfo) {
+    if (valueFromDb.state != PendingReversal) {
       logger.info { "Failing deposit ${valueFromDb.id}" }
       valueFromDb.failReversal(failureReason).bind()
     } else {

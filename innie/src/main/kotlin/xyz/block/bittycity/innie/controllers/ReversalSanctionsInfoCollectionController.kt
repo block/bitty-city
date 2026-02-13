@@ -8,7 +8,7 @@ import io.github.oshai.kotlinlogging.KotlinLogging
 import jakarta.inject.Inject
 import xyz.block.bittycity.innie.fsm.DepositEffect
 import xyz.block.bittycity.innie.fsm.ReversalSanctionsInfoCollectionComplete
-import xyz.block.bittycity.innie.models.CollectingReversalSanctionsInfo
+import xyz.block.bittycity.innie.models.CollectingSanctionsInfo
 import xyz.block.bittycity.innie.models.Deposit
 import xyz.block.bittycity.innie.models.DepositReversalHurdle.ReversalReasonHurdle
 import xyz.block.bittycity.innie.models.DepositReversalHurdleResponse
@@ -17,7 +17,7 @@ import xyz.block.bittycity.innie.models.DepositState
 import xyz.block.bittycity.innie.models.DepositToken
 import xyz.block.bittycity.innie.models.RequirementId
 import xyz.block.bittycity.innie.models.RequirementId.REVERSAL_SANCTIONS_REASON
-import xyz.block.bittycity.innie.models.WaitingForReversalSanctionsHeldDecision
+import xyz.block.bittycity.innie.models.AwaitingSanctionsDecision
 import xyz.block.bittycity.innie.store.DepositStore
 import xyz.block.bittycity.innie.validation.ParameterIsRequired
 import xyz.block.bittycity.innie.validation.ValidationService
@@ -33,7 +33,7 @@ class ReversalSanctionsInfoCollectionController @Inject constructor(
   awaitableStateMachine: AwaitableStateMachine<DepositToken, Deposit, DepositState, DepositEffect>,
   depositStore: DepositStore
 ) : DepositInfoCollectionController(
-  pendingCollectionState = CollectingReversalSanctionsInfo,
+  pendingCollectionState = CollectingSanctionsInfo,
   stateMachine = stateMachine,
   awaitableStateMachine = awaitableStateMachine,
   depositStore = depositStore
@@ -79,7 +79,7 @@ class ReversalSanctionsInfoCollectionController @Inject constructor(
 
   override fun transition(value: Deposit): Result<Deposit> = result {
     when (value.state) {
-      is CollectingReversalSanctionsInfo -> stateMachine.transition(value, ReversalSanctionsInfoCollectionComplete()).bind()
+      is CollectingSanctionsInfo -> stateMachine.transition(value, ReversalSanctionsInfoCollectionComplete()).bind()
       else -> raise(IllegalStateException("Unexpected state ${value.state}"))
     }
   }
@@ -99,7 +99,7 @@ class ReversalSanctionsInfoCollectionController @Inject constructor(
     value: Deposit
   ): Result<UserInteraction.Notification<RequirementId>?> = result {
     when (value.state) {
-      WaitingForReversalSanctionsHeldDecision -> DepositReversalNotification.DepositReversalSanctionsHeld
+      AwaitingSanctionsDecision -> DepositReversalNotification.DepositReversalSanctionsHeld
       else -> null
     }
   }

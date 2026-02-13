@@ -5,11 +5,11 @@ import io.kotest.matchers.types.shouldBeInstanceOf
 import io.kotest.property.arbitrary.next
 import jakarta.inject.Inject
 import org.junit.jupiter.api.Test
-import xyz.block.bittycity.innie.models.CollectingReversalInfo
+import xyz.block.bittycity.innie.models.PendingReversal
 import xyz.block.bittycity.innie.models.DepositFailureReason.RISK_BLOCKED
 import xyz.block.bittycity.innie.models.DepositReversal
 import xyz.block.bittycity.innie.models.DepositReversalHurdle
-import xyz.block.bittycity.innie.models.WaitingForReversalPendingConfirmationStatus
+import xyz.block.bittycity.innie.models.AwaitingReversalPendingConfirmation
 import xyz.block.bittycity.innie.testing.Arbitrary
 import xyz.block.bittycity.innie.testing.Arbitrary.amount
 import xyz.block.bittycity.innie.testing.Arbitrary.balanceId
@@ -30,7 +30,7 @@ class ReversalInfoCollectionControllerTest : BittyCityTestCase() {
   @Test
   fun `returns hurdles when no target wallet address for reversal present`() = runTest {
     val deposit = data.seedDeposit(
-      state = CollectingReversalInfo,
+      state = PendingReversal,
       customerId = customerId.next(),
       amount = amount.next(),
       exchangeRate = exchangeRate.next(),
@@ -62,7 +62,7 @@ class ReversalInfoCollectionControllerTest : BittyCityTestCase() {
   @Test
   fun `transitions if target wallet address and confirmation are present`() = runTest {
     val deposit = data.seedDeposit(
-      state = CollectingReversalInfo,
+      state = PendingReversal,
       customerId = customerId.next(),
       amount = amount.next(),
       exchangeRate = exchangeRate.next(),
@@ -92,7 +92,7 @@ class ReversalInfoCollectionControllerTest : BittyCityTestCase() {
 
       result.shouldBeInstanceOf<ProcessingState.Complete<*, *>>()
 
-      depositWithToken(deposit.id).state shouldBe WaitingForReversalPendingConfirmationStatus
+      depositWithToken(deposit.id).state shouldBe AwaitingReversalPendingConfirmation
     } finally {
       stopProcessingEffects()
     }

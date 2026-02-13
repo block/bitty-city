@@ -12,12 +12,12 @@ import jakarta.inject.Inject
 import org.junit.jupiter.api.Test
 import xyz.block.bittycity.common.client.Evaluation
 import xyz.block.bittycity.innie.api.DepositDomainController
-import xyz.block.bittycity.innie.models.CollectingReversalInfo
-import xyz.block.bittycity.innie.models.CollectingReversalSanctionsInfo
+import xyz.block.bittycity.innie.models.PendingReversal
+import xyz.block.bittycity.innie.models.CollectingSanctionsInfo
 import xyz.block.bittycity.innie.models.DepositFailureReason.RISK_BLOCKED
 import xyz.block.bittycity.innie.models.DepositReversal
 import xyz.block.bittycity.innie.models.DepositReversalFailureReason
-import xyz.block.bittycity.innie.models.WaitingForReversalPendingConfirmationStatus
+import xyz.block.bittycity.innie.models.AwaitingReversalPendingConfirmation
 import xyz.block.bittycity.innie.testing.Arbitrary
 import xyz.block.bittycity.innie.testing.Arbitrary.amount
 import xyz.block.bittycity.innie.testing.Arbitrary.balanceId
@@ -39,7 +39,7 @@ class ReversalSanctionsControllerTest : BittyCityTestCase() {
     val reversalTargetWallet = walletAddress.next()
 
     val deposit = data.seedDeposit(
-      state = CollectingReversalInfo,
+      state = PendingReversal,
       customerId = customerId.next(),
       amount = amount.next(),
       exchangeRate = exchangeRate.next(),
@@ -64,7 +64,7 @@ class ReversalSanctionsControllerTest : BittyCityTestCase() {
     try {
       startProcessingEffects()
       subject.execute(deposit, emptyList(), Operation.EXECUTE).getOrThrow()
-      depositWithToken(deposit.id).state shouldBe WaitingForReversalPendingConfirmationStatus
+      depositWithToken(deposit.id).state shouldBe AwaitingReversalPendingConfirmation
     } finally {
       stopProcessingEffects()
     }
@@ -76,7 +76,7 @@ class ReversalSanctionsControllerTest : BittyCityTestCase() {
     val reversalTargetWallet = walletAddress.next()
 
     val deposit = data.seedDeposit(
-      state = CollectingReversalInfo,
+      state = PendingReversal,
       customerId = customerId.next(),
       amount = amount.next(),
       exchangeRate = exchangeRate.next(),
@@ -102,7 +102,7 @@ class ReversalSanctionsControllerTest : BittyCityTestCase() {
       startProcessingEffects()
       subject.execute(deposit, emptyList(), Operation.EXECUTE).getOrThrow()
       depositWithToken(deposit.id) should {
-        it.state shouldBe CollectingReversalInfo
+        it.state shouldBe PendingReversal
         it.currentReversal.shouldNotBeNull()
         it.currentReversal?.failureReason shouldBe DepositReversalFailureReason.SANCTIONS_FAILED
       }
@@ -117,7 +117,7 @@ class ReversalSanctionsControllerTest : BittyCityTestCase() {
     val reversalTargetWallet = walletAddress.next()
 
     val deposit = data.seedDeposit(
-      state = CollectingReversalInfo,
+      state = PendingReversal,
       customerId = customerId.next(),
       amount = amount.next(),
       exchangeRate = exchangeRate.next(),
@@ -142,7 +142,7 @@ class ReversalSanctionsControllerTest : BittyCityTestCase() {
     try {
       startProcessingEffects()
       shouldThrow<WorkflowFailedException> { subject.execute(deposit, emptyList(), Operation.EXECUTE).getOrThrow() }
-      depositWithToken(deposit.id).state shouldBe CollectingReversalInfo
+      depositWithToken(deposit.id).state shouldBe PendingReversal
     } finally {
       stopProcessingEffects()
     }
@@ -154,7 +154,7 @@ class ReversalSanctionsControllerTest : BittyCityTestCase() {
     val reversalTargetWallet = walletAddress.next()
 
     val deposit = data.seedDeposit(
-      state = CollectingReversalInfo,
+      state = PendingReversal,
       customerId = customerId.next(),
       amount = amount.next(),
       exchangeRate = exchangeRate.next(),
@@ -179,7 +179,7 @@ class ReversalSanctionsControllerTest : BittyCityTestCase() {
     try {
       startProcessingEffects()
       subject.execute(deposit, emptyList(), Operation.EXECUTE).getOrThrow()
-      depositWithToken(deposit.id).state shouldBe CollectingReversalSanctionsInfo
+      depositWithToken(deposit.id).state shouldBe CollectingSanctionsInfo
     } finally {
       stopProcessingEffects()
     }

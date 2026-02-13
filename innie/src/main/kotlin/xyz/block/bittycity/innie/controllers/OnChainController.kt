@@ -11,7 +11,7 @@ import xyz.block.bittycity.innie.models.DepositResumeResult.ConfirmedOnChain
 import xyz.block.bittycity.innie.models.DepositState
 import xyz.block.bittycity.innie.models.DepositToken
 import xyz.block.bittycity.innie.models.RequirementId
-import xyz.block.bittycity.innie.models.WaitingForDepositConfirmedOnChainStatus
+import xyz.block.bittycity.innie.models.AwaitingDepositConfirmation
 import xyz.block.bittycity.innie.store.DepositStore
 import xyz.block.domainapi.Input
 import xyz.block.domainapi.ProcessingState
@@ -30,7 +30,7 @@ class OnChainController @Inject constructor(
     hurdleGroupId: String?
   ): Result<ProcessingState<Deposit, RequirementId>> = result {
     when (value.state) {
-      WaitingForDepositConfirmedOnChainStatus -> {
+      AwaitingDepositConfirmation -> {
         val updatedValue = handleResumeInputs(value, inputs).bind()
         ProcessingState.Waiting(updatedValue)
       }

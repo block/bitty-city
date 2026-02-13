@@ -4,27 +4,27 @@ import app.cash.kfsm.v2.Decision
 import app.cash.kfsm.v2.Transition
 import xyz.block.bittycity.common.models.LedgerTransactionId
 import xyz.block.bittycity.innie.models.CheckingDepositRisk
-import xyz.block.bittycity.innie.models.CheckingDepositEligibility
+import xyz.block.bittycity.innie.models.CheckingEligibility
 import xyz.block.bittycity.innie.models.CheckingReversalRisk
-import xyz.block.bittycity.innie.models.CheckingReversalSanctions
-import xyz.block.bittycity.innie.models.CollectingReversalInfo
-import xyz.block.bittycity.innie.models.CollectingReversalSanctionsInfo
+import xyz.block.bittycity.innie.models.CheckingSanctions
+import xyz.block.bittycity.innie.models.PendingReversal
+import xyz.block.bittycity.innie.models.CollectingSanctionsInfo
 import xyz.block.bittycity.innie.models.CreatingDepositTransaction
 import xyz.block.bittycity.innie.models.Deposit
 import xyz.block.bittycity.innie.models.DepositState
 import xyz.block.bittycity.innie.models.DepositToken
-import xyz.block.bittycity.innie.models.DepositExpiredPending
+import xyz.block.bittycity.innie.models.Evicted
 import xyz.block.bittycity.innie.models.DepositFailureReason
 import xyz.block.bittycity.innie.models.DepositReversalFailureReason
-import xyz.block.bittycity.innie.models.DepositSettled
-import xyz.block.bittycity.innie.models.DepositVoided
-import xyz.block.bittycity.innie.models.WaitingForDepositConfirmedOnChainStatus
+import xyz.block.bittycity.innie.models.Settled
+import xyz.block.bittycity.innie.models.Voided
+import xyz.block.bittycity.innie.models.AwaitingDepositConfirmation
 import xyz.block.bittycity.innie.models.New
-import xyz.block.bittycity.innie.models.ReversalConfirmedComplete
-import xyz.block.bittycity.innie.models.ReversalSanctioned
-import xyz.block.bittycity.innie.models.WaitingForReversalConfirmedOnChainStatus
-import xyz.block.bittycity.innie.models.WaitingForReversalPendingConfirmationStatus
-import xyz.block.bittycity.innie.models.WaitingForReversalSanctionsHeldDecision
+import xyz.block.bittycity.innie.models.Reversed
+import xyz.block.bittycity.innie.models.Sanctioned
+import xyz.block.bittycity.innie.models.AwaitingReversalConfirmation
+import xyz.block.bittycity.innie.models.AwaitingReversalPendingConfirmation
+import xyz.block.bittycity.innie.models.AwaitingSanctionsDecision
 import java.time.Instant
 
 abstract class DepositTransition(
@@ -47,10 +47,10 @@ abstract class DepositTransition(
 
 class DepositObservedInMempool() : DepositTransition(
   from = New,
-  to = WaitingForDepositConfirmedOnChainStatus
+  to = AwaitingDepositConfirmation
 ) {
   override fun transitionDecision(value: Deposit): Decision<Deposit, DepositState, DepositEffect> = Decision.accept(
-    value = value.copy(state = WaitingForDepositConfirmedOnChainStatus),
+    value = value.copy(state = AwaitingDepositConfirmation),
     effects = listOf(
       DepositEffect.RequestDepositTransactionCreation(
         depositId = value.id,
@@ -68,11 +68,11 @@ class DepositTransactionCreated(
   val ledgerTransactionId: LedgerTransactionId
 ) : DepositTransition(
   from = CreatingDepositTransaction,
-  to = WaitingForDepositConfirmedOnChainStatus
+  to = AwaitingDepositConfirmation
 ) {
   override fun transitionDecision(value: Deposit): Decision<Deposit, DepositState, DepositEffect> = Decision.accept(
     value = value.copy(
-      state = WaitingForDepositConfirmedOnChainStatus,
+      state = AwaitingDepositConfirmation,
       ledgerTransactionId = ledgerTransactionId
     )
   )
@@ -83,20 +83,20 @@ class DepositTransactionCreated(
  * transition to ConfirmedOnBlockchain if a late confirmation arrives.
  */
 class DepositExpiredLocally() : DepositTransition(
-  from = WaitingForDepositConfirmedOnChainStatus,
-  to = DepositExpiredPending
+  from = AwaitingDepositConfirmation,
+  to = Evicted
 ) {
   override fun transitionDecision(value: Deposit): Decision<Deposit, DepositState, DepositEffect> = Decision.accept(
-    value = value.copy(state = DepositExpiredPending)
+    value = value.copy(state = Evicted)
   )
 }
 
-class DepositVoided() : DepositTransition(
-  from = setOf(WaitingForDepositConfirmedOnChainStatus, DepositExpiredPending),
-  to = DepositVoided
+class Voided() : DepositTransition(
+  from = setOf(AwaitingDepositConfirmation, Evicted),
+  to = Voided
 ) {
   override fun transitionDecision(value: Deposit): Decision<Deposit, DepositState, DepositEffect> = Decision.accept(
-    value = value.copy(state = DepositVoided),
+    value = value.copy(state = Voided),
     effects = listOf(
       DepositEffect.VoidDepositTransaction(value.customerId, value.targetBalanceToken, value.ledgerTransactionId)
     )
@@ -104,11 +104,11 @@ class DepositVoided() : DepositTransition(
 }
 
 class DepositConfirmedOnChain() : DepositTransition(
-  from = setOf(WaitingForDepositConfirmedOnChainStatus, DepositExpiredPending),
-  to = CheckingDepositEligibility
+  from = setOf(AwaitingDepositConfirmation, Evicted),
+  to = CheckingEligibility
 ) {
   override fun transitionDecision(value: Deposit): Decision<Deposit, DepositState, DepositEffect> = Decision.accept(
-    value = value.copy(state = CheckingDepositEligibility),
+    value = value.copy(state = CheckingEligibility),
     effects = listOf(
       DepositEffect.RequestDepositEligibilityCheck(value.customerId)
     )
@@ -116,7 +116,7 @@ class DepositConfirmedOnChain() : DepositTransition(
 }
 
 class IsEligibleForDeposit() : DepositTransition(
-  from = setOf(CheckingDepositEligibility),
+  from = setOf(CheckingEligibility),
   to = CheckingDepositRisk
 ) {
   override fun transitionDecision(value: Deposit): Decision<Deposit, DepositState, DepositEffect> = Decision.accept(
@@ -128,7 +128,7 @@ class IsEligibleForDeposit() : DepositTransition(
 }
 
 class IsEligible() : DepositTransition(
-  from = setOf(CheckingDepositEligibility),
+  from = setOf(CheckingEligibility),
   to = CheckingDepositRisk
 ) {
   override fun transitionDecision(value: Deposit): Decision<Deposit, DepositState, DepositEffect> = Decision.accept(
@@ -139,24 +139,24 @@ class IsEligible() : DepositTransition(
 class DepositFailed(
   val reason: DepositFailureReason
 ) : DepositTransition(
-  from = setOf(CheckingDepositEligibility, CheckingDepositRisk),
-  to = CollectingReversalInfo
+  from = setOf(CheckingEligibility, CheckingDepositRisk),
+  to = PendingReversal
 ) {
   override fun transitionDecision(value: Deposit): Decision<Deposit, DepositState, DepositEffect> = Decision.accept(
-    value = value.copy(failureReason = reason, state = CollectingReversalInfo)
+    value = value.copy(failureReason = reason, state = PendingReversal)
   )
 }
 
 class DepositRiskApproved() : DepositTransition(
   from = setOf(CheckingDepositRisk),
-  to = DepositSettled
+  to = Settled
 ) {
   override fun transitionDecision(value: Deposit): Decision<Deposit, DepositState, DepositEffect> {
     val transactionId = value.ledgerTransactionId
 
     return if (transactionId != null) {
       Decision.accept(
-        value = value.copy(state = DepositSettled),
+        value = value.copy(state = Settled),
         effects = listOf(
           DepositEffect.ConfirmDepositTransaction(value.customerId, value.targetBalanceToken, transactionId)
         )
@@ -171,13 +171,13 @@ class ReversalFailed(
   val reason: DepositReversalFailureReason
 ) : DepositTransition(
   from = setOf(
-    CheckingReversalSanctions,
+    CheckingSanctions,
     CheckingReversalRisk,
-    WaitingForReversalPendingConfirmationStatus,
-    WaitingForReversalConfirmedOnChainStatus,
-    WaitingForReversalSanctionsHeldDecision
+    AwaitingReversalPendingConfirmation,
+    AwaitingReversalConfirmation,
+    AwaitingSanctionsDecision
   ),
-  to = CollectingReversalInfo
+  to = PendingReversal
 ) {
   override fun transitionDecision(value: Deposit): Decision<Deposit, DepositState, DepositEffect> {
     val currentReversal = value.currentReversal
@@ -186,7 +186,7 @@ class ReversalFailed(
         value = value.updateCurrentReversal {
           it.copy(failureReason = reason)
         }.getOrNull()!!
-          .copy(state = CollectingReversalInfo)
+          .copy(state = PendingReversal)
       )
     } else  {
       Decision.reject("Cannot fail a reversal that doesn't exist")
@@ -195,15 +195,15 @@ class ReversalFailed(
 }
 
 class ReversalInfoCollectionComplete : DepositTransition(
-  from = setOf(CollectingReversalInfo),
-  to = CheckingReversalSanctions
+  from = setOf(PendingReversal),
+  to = CheckingSanctions
 ) {
   override fun transitionDecision(value: Deposit): Decision<Deposit, DepositState, DepositEffect> {
     val targetWalletAddress = value.reversals.lastOrNull()?.targetWalletAddress
     val reversalId = value.reversals.lastOrNull()?.token
     return if (targetWalletAddress != null && reversalId != null) {
       Decision.accept(
-        value = value.copy(state = CheckingReversalSanctions),
+        value = value.copy(state = CheckingSanctions),
         effects = listOf(
           DepositEffect.RequestReversalSanctionsCheck(value.customerId, reversalId, targetWalletAddress, value.amount)
         )
@@ -215,7 +215,7 @@ class ReversalInfoCollectionComplete : DepositTransition(
 }
 
 class ReversalSanctionsApproved : DepositTransition(
-  from = setOf(CheckingReversalSanctions, WaitingForReversalSanctionsHeldDecision),
+  from = setOf(CheckingSanctions, AwaitingSanctionsDecision),
   to = CheckingReversalRisk
 ) {
   override fun transitionDecision(value: Deposit): Decision<Deposit, DepositState, DepositEffect> {
@@ -232,15 +232,15 @@ class ReversalSanctionsApproved : DepositTransition(
 }
 
 class ReversalSanctionsDecisionFrozen : DepositTransition(
-  from = setOf(WaitingForReversalSanctionsHeldDecision),
-  to = ReversalSanctioned
+  from = setOf(AwaitingSanctionsDecision),
+  to = Sanctioned
 ) {
   override fun transitionDecision(value: Deposit): Decision<Deposit, DepositState, DepositEffect> {
     val currentReversal = value.currentReversal
     val targetWalletAddress = currentReversal?.targetWalletAddress
     return if (currentReversal != null && targetWalletAddress != null) {
       Decision.accept(
-        value = value.copy(state = ReversalSanctioned),
+        value = value.copy(state = Sanctioned),
         effects = listOf(
           DepositEffect.FreezeReversal(
             depositReversalId = currentReversal.token,
@@ -260,41 +260,41 @@ class ReversalSanctionsDecisionFrozen : DepositTransition(
 }
 
 class ReversalSanctionsHold : DepositTransition(
-  from = setOf(CheckingReversalSanctions),
-  to = CollectingReversalSanctionsInfo
+  from = setOf(CheckingSanctions),
+  to = CollectingSanctionsInfo
 ) {
   override fun transitionDecision(value: Deposit): Decision<Deposit, DepositState, DepositEffect> = Decision.accept(
-    value = value.copy(state = CollectingReversalSanctionsInfo)
+    value = value.copy(state = CollectingSanctionsInfo)
   )
 }
 
 class ReversalRiskApproved : DepositTransition(
   from = setOf(CheckingReversalRisk),
-  to = WaitingForReversalPendingConfirmationStatus
+  to = AwaitingReversalPendingConfirmation
 ) {
   override fun transitionDecision(value: Deposit): Decision<Deposit, DepositState, DepositEffect> = Decision.accept(
-    value = value.copy(state = WaitingForReversalPendingConfirmationStatus)
+    value = value.copy(state = AwaitingReversalPendingConfirmation)
   )
 }
 
 class ReversalObservedInMempool : DepositTransition(
-  from = setOf(WaitingForReversalPendingConfirmationStatus),
-  to = WaitingForReversalConfirmedOnChainStatus
+  from = setOf(AwaitingReversalPendingConfirmation),
+  to = AwaitingReversalConfirmation
 ) {
   override fun transitionDecision(value: Deposit): Decision<Deposit, DepositState, DepositEffect> = Decision.accept(
-    value = value.copy(state = WaitingForReversalConfirmedOnChainStatus)
+    value = value.copy(state = AwaitingReversalConfirmation)
   )
 }
 
 class ReversalConfirmedOnChain : DepositTransition(
-  from = setOf(WaitingForReversalConfirmedOnChainStatus),
-  to = ReversalConfirmedComplete
+  from = setOf(AwaitingReversalConfirmation),
+  to = Reversed
 ) {
   override fun transitionDecision(value: Deposit): Decision<Deposit, DepositState, DepositEffect> {
     val ledgerTransactionId = value.ledgerTransactionId
     return if (ledgerTransactionId != null) {
       Decision.accept(
-        value = value.copy(state = ReversalConfirmedComplete),
+        value = value.copy(state = Reversed),
         effects = listOf(
           DepositEffect.ConfirmReversalTransaction(value.customerId, value.targetBalanceToken, ledgerTransactionId)
         )
@@ -306,11 +306,11 @@ class ReversalConfirmedOnChain : DepositTransition(
 }
 
 class ReversalSanctionsInfoCollectionComplete : DepositTransition(
-  from = setOf(CollectingReversalSanctionsInfo),
-  to = WaitingForReversalSanctionsHeldDecision
+  from = setOf(CollectingSanctionsInfo),
+  to = AwaitingSanctionsDecision
 ) {
   override fun transitionDecision(value: Deposit): Decision<Deposit, DepositState, DepositEffect> =
     Decision.accept(
-      value = value.copy(state = WaitingForReversalSanctionsHeldDecision)
+      value = value.copy(state = AwaitingSanctionsDecision)
   )
 }

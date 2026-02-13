@@ -11,7 +11,7 @@ import xyz.block.bittycity.common.client.CurrencyDisplayPreferenceClient
 import xyz.block.bittycity.common.utils.WalletAddressParser
 import xyz.block.bittycity.innie.fsm.DepositEffect
 import xyz.block.bittycity.innie.fsm.ReversalInfoCollectionComplete
-import xyz.block.bittycity.innie.models.CollectingReversalInfo
+import xyz.block.bittycity.innie.models.PendingReversal
 import xyz.block.bittycity.innie.models.Deposit
 import xyz.block.bittycity.innie.models.DepositReversalHurdle
 import xyz.block.bittycity.innie.models.DepositReversalHurdleResponse
@@ -34,7 +34,7 @@ class ReversalInfoCollectionController @Inject constructor(
   private val walletAddressParser: WalletAddressParser,
   @param:Named("deposit.stateMachineTimeoutInMilliSeconds") private val stateMachineTimeoutInMilliSeconds: Long,
 ) : DepositInfoCollectionController(
-  pendingCollectionState = CollectingReversalInfo,
+  pendingCollectionState = PendingReversal,
   stateMachine = stateMachine,
   awaitableStateMachine = awaitableStateMachine,
   depositStore = depositStore
@@ -77,7 +77,7 @@ class ReversalInfoCollectionController @Inject constructor(
 
   override fun transition(value: Deposit): Result<Deposit> = result {
     when (value.state) {
-      is CollectingReversalInfo -> awaitableStateMachine.transitionAndAwait(
+      is PendingReversal -> awaitableStateMachine.transitionAndAwait(
         value,
         ReversalInfoCollectionComplete(),
         stateMachineTimeoutInMilliSeconds.milliseconds
