@@ -7,8 +7,8 @@ import com.google.inject.name.Names
 import xyz.block.bittycity.common.client.PreFlightClient
 import xyz.block.bittycity.common.client.BitcoinAccountClient
 import xyz.block.bittycity.common.client.CurrencyDisplayPreferenceClient
-import xyz.block.bittycity.common.client.EligibilityClient
 import xyz.block.bittycity.outie.client.EventClient
+import xyz.block.bittycity.outie.client.WithdrawalEligibilityClient
 import xyz.block.bittycity.common.client.ExchangeRateClient
 import xyz.block.bittycity.outie.client.FeeQuoteClient
 import xyz.block.bittycity.outie.client.LedgerClient
@@ -60,7 +60,7 @@ class TestModule : AbstractModule() {
       .to(FakeSanctionsClient::class.java)
       .`in`(Scopes.SINGLETON)
     bindSingletonFake<TravelRuleClient, FakeTravelRuleClient>()
-    bindSingletonFake<EligibilityClient, FakeEligibilityClient>()
+    bindSingletonFake<WithdrawalEligibilityClient, FakeEligibilityClient>()
     bind(FakePreFlightClient::class.java).`in`(Scopes.SINGLETON)
     bind(object : com.google.inject.TypeLiteral<PreFlightClient<xyz.block.bittycity.outie.models.Withdrawal>>() {})
       .to(FakePreFlightClient::class.java)

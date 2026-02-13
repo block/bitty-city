@@ -9,8 +9,8 @@ import com.squareup.moshi.Moshi
 import io.kotest.property.arbitrary.next
 import jakarta.inject.Singleton
 import xyz.block.bittycity.common.client.CurrencyDisplayPreferenceClient
-import xyz.block.bittycity.common.client.EligibilityClient
 import xyz.block.bittycity.common.client.RiskClient
+import xyz.block.bittycity.innie.client.DepositEligibilityClient
 import xyz.block.bittycity.common.client.SanctionsClient
 import xyz.block.bittycity.innie.client.DepositLedgerClient
 import xyz.block.bittycity.innie.models.DepositReversalToken
@@ -55,7 +55,7 @@ class TestModule : AbstractModule() {
     // Bind fake clients
     bindSingletonFake<CurrencyDisplayPreferenceClient, FakeCurrencyDisplayPreferenceClient>()
     bindSingletonFake<MetricsClient, FakeMetricsClient>()
-    bindSingletonFake<EligibilityClient, FakeEligibilityClient>()
+    bindSingletonFake<DepositEligibilityClient, FakeEligibilityClient>()
     bindSingletonFake<DepositLedgerClient, FakeLedgerClient>()
 
     // Bind fake operations
