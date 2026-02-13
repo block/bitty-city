@@ -1,5 +1,10 @@
 # Change Log
 
+## [0.2.1]
+
+* Moved withdrawal eligibility client contract to common EligibilityClient.
+
+
 ## [0.2.0]
 
 * Moved BalanceId, BitcoinAccount and BitcoinAccount to the common module, because they are reusable across withdrawals and deposits.
