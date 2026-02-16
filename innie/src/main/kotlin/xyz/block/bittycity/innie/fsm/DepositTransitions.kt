@@ -46,6 +46,9 @@ abstract class DepositTransition(
               failureReason = decision.value.failureReason
             )
           )
+          if (decision.value.state == Settled) {
+            add(DepositEffect.PublishDepositSuccessAmountMetric(decision.value))
+          }
         }
       )
       is Decision.Reject -> decision

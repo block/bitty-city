@@ -17,6 +17,7 @@ import xyz.block.bittycity.innie.models.CollectingSanctionsInfo
 import xyz.block.bittycity.innie.models.DepositFailureReason.RISK_BLOCKED
 import xyz.block.bittycity.innie.models.DepositReversal
 import xyz.block.bittycity.innie.models.DepositReversalFailureReason
+import xyz.block.bittycity.innie.models.DepositReversalFailureReason.SANCTIONS_FAILED
 import xyz.block.bittycity.innie.models.AwaitingReversalPendingConfirmation
 import xyz.block.bittycity.innie.testing.Arbitrary
 import xyz.block.bittycity.innie.testing.Arbitrary.amount
@@ -104,8 +105,9 @@ class ReversalSanctionsControllerTest : BittyCityTestCase() {
       depositWithToken(deposit.id) should {
         it.state shouldBe PendingReversal
         it.currentReversal.shouldNotBeNull()
-        it.currentReversal?.failureReason shouldBe DepositReversalFailureReason.SANCTIONS_FAILED
+        it.currentReversal?.failureReason shouldBe SANCTIONS_FAILED
       }
+      app.metricsClient.reversalFailureReasons shouldBe listOf(SANCTIONS_FAILED)
     } finally {
       stopProcessingEffects()
     }
