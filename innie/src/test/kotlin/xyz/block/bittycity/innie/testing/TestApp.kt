@@ -42,12 +42,14 @@ class TestApp {
   @Inject lateinit var reversalRiskClient: FakeReversalRiskClient
   @Inject lateinit var riskClient: FakeRiskClient
   @Inject lateinit var sanctionsClient: FakeSanctionsClient
+  @Inject lateinit var metricsClient: FakeMetricsClient
 
   fun resetFakes() {
     eligibilityClient.reset()
     reversalRiskClient.reset()
     riskClient.reset()
     sanctionsClient.reset()
+    metricsClient.reset()
     outbox.clear()
     depositOperations.clear()
   }

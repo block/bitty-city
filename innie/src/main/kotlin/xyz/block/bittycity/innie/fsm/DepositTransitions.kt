@@ -37,7 +37,16 @@ abstract class DepositTransition(
     when (val decision = transitionDecision(value)) {
       is Decision.Accept -> Decision.accept(
         value = decision.value,
-        effects = decision.effects // Other effects that run for every transition can be added here
+        effects = buildList {
+          addAll(decision.effects)
+          add(
+            DepositEffect.PublishStateTransitionMetric(
+              from = value.state,
+              to = decision.value.state,
+              failureReason = decision.value.failureReason
+            )
+          )
+        }
       )
       is Decision.Reject -> decision
     }
@@ -143,7 +152,8 @@ class DepositFailed(
   to = PendingReversal
 ) {
   override fun transitionDecision(value: Deposit): Decision<Deposit, DepositState, DepositEffect> = Decision.accept(
-    value = value.copy(failureReason = reason, state = PendingReversal)
+    value = value.copy(failureReason = reason, state = PendingReversal),
+    effects = listOf(DepositEffect.PublishFailureReasonMetric(reason))
   )
 }
 
@@ -158,7 +168,8 @@ class DepositRiskApproved() : DepositTransition(
       Decision.accept(
         value = value.copy(state = Settled),
         effects = listOf(
-          DepositEffect.ConfirmDepositTransaction(value.customerId, value.targetBalanceToken, transactionId)
+          DepositEffect.ConfirmDepositTransaction(value.customerId, value.targetBalanceToken, transactionId),
+          DepositEffect.PublishDepositSuccessAmountMetric(value)
         )
       )
     } else {
@@ -186,7 +197,8 @@ class ReversalFailed(
         value = value.updateCurrentReversal {
           it.copy(failureReason = reason)
         }.getOrNull()!!
-          .copy(state = PendingReversal)
+          .copy(state = PendingReversal),
+        effects = listOf(DepositEffect.PublishReversalFailureReasonMetric(reason))
       )
     } else  {
       Decision.reject("Cannot fail a reversal that doesn't exist")

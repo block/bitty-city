@@ -13,8 +13,10 @@ import xyz.block.bittycity.common.client.RiskClient
 import xyz.block.bittycity.common.client.RiskEvaluation
 import xyz.block.bittycity.common.client.SanctionsClient
 import xyz.block.bittycity.innie.client.DepositLedgerClient
+import xyz.block.bittycity.innie.client.MetricsClient
 import xyz.block.bittycity.innie.models.Deposit
 import xyz.block.bittycity.innie.models.DepositFailureReason
+import xyz.block.bittycity.innie.models.DepositReversalFailureReason
 import xyz.block.bittycity.innie.models.DepositReversalFailureReason.RISK_BLOCKED
 import xyz.block.bittycity.innie.models.DepositReversalFailureReason.SANCTIONS_FAILED
 import xyz.block.bittycity.innie.models.DepositReversalToken
@@ -27,6 +29,7 @@ class DepositEffectHandler @Inject constructor(
   private val reversalRiskClient: RiskClient<DepositReversalToken>,
   private val eligibilityClient: DepositEligibilityClient,
   private val sanctionsClient: SanctionsClient<DepositReversalToken>,
+  private val metricsClient: MetricsClient,
 ):
   EffectHandler<DepositToken, Deposit, DepositState, DepositEffect> {
 
@@ -45,6 +48,11 @@ class DepositEffectHandler @Inject constructor(
     is DepositEffect.RequestReversalSanctionsCheck -> handleRequestReversalSanctionsCheck(valueId, effect)
     is DepositEffect.RequestDepositRiskCheck -> handleRequestDepositRiskCheck(valueId, effect)
     is DepositEffect.VoidDepositTransaction -> handleVoidDepositTransaction(effect)
+    is DepositEffect.PublishStateTransitionMetric -> handlePublishStateTransitionMetric(effect)
+    is DepositEffect.PublishFailureReasonMetric -> handlePublishFailureReasonMetric(effect.reason)
+    is DepositEffect.PublishReversalFailureReasonMetric ->
+      handlePublishReversalFailureReasonMetric(effect.reason)
+    is DepositEffect.PublishDepositSuccessAmountMetric -> handlePublishDepositSuccessAmountMetric(effect.deposit)
   }
 
   private fun handleConfirmDepositTransaction(
@@ -183,6 +191,38 @@ class DepositEffectHandler @Inject constructor(
       fiatEquivalent = effect.fiatEquivalent,
       targetWalletAddress = effect.targetWalletAddress
     )
+    EffectOutcome.Completed
+  }
+
+  private fun handlePublishStateTransitionMetric(
+    effect: DepositEffect.PublishStateTransitionMetric
+  ): Result<EffectOutcome<DepositToken, Deposit, DepositState, DepositEffect>> = result {
+    metricsClient.stateTransition(effect.from, effect.to, effect.failureReason)
+      .recover { logger.warn(it) { "Failure to publish deposit state transition metrics" } }
+    EffectOutcome.Completed
+  }
+
+  private fun handlePublishFailureReasonMetric(
+    reason: DepositFailureReason
+  ): Result<EffectOutcome<DepositToken, Deposit, DepositState, DepositEffect>> = result {
+    metricsClient.failureReason(reason)
+      .recover { logger.warn(it) { "Failure to publish deposit failure reason metrics" } }
+    EffectOutcome.Completed
+  }
+
+  private fun handlePublishReversalFailureReasonMetric(
+    reason: DepositReversalFailureReason
+  ): Result<EffectOutcome<DepositToken, Deposit, DepositState, DepositEffect>> = result {
+    metricsClient.reversalFailureReason(reason)
+      .recover { logger.warn(it) { "Failure to publish deposit reversal failure reason metrics" } }
+    EffectOutcome.Completed
+  }
+
+  private fun handlePublishDepositSuccessAmountMetric(
+    deposit: Deposit
+  ): Result<EffectOutcome<DepositToken, Deposit, DepositState, DepositEffect>> = result {
+    metricsClient.depositSuccessAmount(deposit)
+      .recover { logger.warn(it) { "Failure to publish deposit success amount metrics" } }
     EffectOutcome.Completed
   }
 }
