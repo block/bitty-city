@@ -50,6 +50,7 @@ class FakeLedgerClient : TestFake(), DepositLedgerClient {
     createdAt: Instant,
     amount: Bitcoins,
     fiatEquivalent: Money,
-    targetWalletAddress: Address
+    targetWalletAddress: Address,
+    ledgerTransactionId: LedgerTransactionId
   ): Result<Unit> = Unit.success()
 }

@@ -189,7 +189,8 @@ class DepositEffectHandler @Inject constructor(
       createdAt = effect.createdAt,
       amount = effect.amount,
       fiatEquivalent = effect.fiatEquivalent,
-      targetWalletAddress = effect.targetWalletAddress
+      targetWalletAddress = effect.targetWalletAddress,
+      ledgerTransactionId = effect.ledgerTransactionId
     )
     EffectOutcome.Completed
   }

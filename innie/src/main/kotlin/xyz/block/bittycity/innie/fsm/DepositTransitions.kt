@@ -252,7 +252,8 @@ class ReversalSanctionsDecisionFrozen : DepositTransition(
   override fun transitionDecision(value: Deposit): Decision<Deposit, DepositState, DepositEffect> {
     val currentReversal = value.currentReversal
     val targetWalletAddress = currentReversal?.targetWalletAddress
-    return if (currentReversal != null && targetWalletAddress != null) {
+    val ledgerTransactionId = currentReversal?.ledgerTransactionId
+    return if (currentReversal != null && targetWalletAddress != null && ledgerTransactionId != null) {
       Decision.accept(
         value = value.copy(state = Sanctioned),
         effects = listOf(
@@ -264,11 +265,14 @@ class ReversalSanctionsDecisionFrozen : DepositTransition(
             amount = value.amount,
             fiatEquivalent = value.fiatEquivalentAmount,
             targetWalletAddress = currentReversal.targetWalletAddress,
+            ledgerTransactionId = ledgerTransactionId
           )
         )
       )
     } else {
-      Decision.reject("Cannot freeze reversal that does not exist or doesn't have a target wallet address")
+      Decision.reject(
+        "Cannot freeze reversal that does not exist or is missing target wallet address or ledger transaction id"
+      )
     }
   }
 }
