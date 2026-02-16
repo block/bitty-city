@@ -7,7 +7,11 @@ import xyz.block.bittycity.common.models.BalanceId
 import xyz.block.bittycity.common.models.Bitcoins
 import xyz.block.bittycity.common.models.CustomerId
 import xyz.block.bittycity.common.models.LedgerTransactionId
+import xyz.block.bittycity.innie.models.Deposit
+import xyz.block.bittycity.innie.models.DepositFailureReason
+import xyz.block.bittycity.innie.models.DepositReversalFailureReason
 import xyz.block.bittycity.innie.models.DepositReversalToken
+import xyz.block.bittycity.innie.models.DepositState
 import xyz.block.bittycity.innie.models.DepositToken
 import java.time.Instant
 
@@ -53,4 +57,12 @@ sealed class DepositEffect : Effect {
     val amount: Bitcoins
   ) : DepositEffect()
   data class RequestReversalRiskCheck(val customerId: CustomerId, val depositReversalId: DepositReversalToken) : DepositEffect()
+  data class PublishStateTransitionMetric(
+    val from: DepositState,
+    val to: DepositState,
+    val failureReason: DepositFailureReason?
+  ) : DepositEffect()
+  data class PublishFailureReasonMetric(val reason: DepositFailureReason) : DepositEffect()
+  data class PublishReversalFailureReasonMetric(val reason: DepositReversalFailureReason) : DepositEffect()
+  data class PublishDepositSuccessAmountMetric(val deposit: Deposit) : DepositEffect()
 }

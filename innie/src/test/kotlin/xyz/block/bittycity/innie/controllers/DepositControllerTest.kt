@@ -64,6 +64,7 @@ class DepositControllerTest : BittyCityTestCase() {
       it.state shouldBe PendingReversal
       it.failureReason shouldBe RISK_BLOCKED
     }
+    app.metricsClient.failureReasons shouldBe listOf(RISK_BLOCKED)
   }
 
   @Test
@@ -134,6 +135,7 @@ class DepositControllerTest : BittyCityTestCase() {
     depositWithToken(deposit.id) should {
       it.state shouldBe Settled
     }
+    app.metricsClient.successAmounts.any { it.id == deposit.id } shouldBe true
   }
 
   @Test
@@ -168,5 +170,6 @@ class DepositControllerTest : BittyCityTestCase() {
       it.state shouldBe PendingReversal
       it.failureReason shouldBe INELIGIBLE
     }
+    app.metricsClient.failureReasons shouldBe listOf(INELIGIBLE)
   }
 }
