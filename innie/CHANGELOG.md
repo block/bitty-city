@@ -1,5 +1,9 @@
 # Change Log
 
+## [0.2.0]
+
+* Reviewed and renamed states.
+
 ## [0.1.1]
 
 * Added support for deposit eligibility checks when creating deposits.
