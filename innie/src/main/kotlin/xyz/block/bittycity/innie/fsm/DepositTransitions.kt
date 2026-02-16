@@ -46,9 +46,6 @@ abstract class DepositTransition(
               failureReason = decision.value.failureReason
             )
           )
-          if (decision.value.state == Settled) {
-            add(DepositEffect.PublishDepositSuccessAmountMetric(decision.value))
-          }
         }
       )
       is Decision.Reject -> decision
@@ -172,7 +169,7 @@ class DepositRiskApproved() : DepositTransition(
         value = value.copy(state = Settled),
         effects = listOf(
           DepositEffect.ConfirmDepositTransaction(value.customerId, value.targetBalanceToken, transactionId),
-          DepositEffect.PublishDepositSuccessAmountMetric(value)
+          DepositEffect.PublishDepositSuccessAmountMetric(value.copy(state = Settled))
         )
       )
     } else {
