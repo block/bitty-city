@@ -1,11 +1,16 @@
 package xyz.block.bittycity.innie.testing
 
 import arrow.core.raise.result
+import org.bitcoinj.base.Address
+import java.time.Instant
+import java.util.concurrent.ConcurrentHashMap
+import xyz.block.bittycity.common.models.Bitcoins
+import xyz.block.bittycity.common.models.CustomerId
 import xyz.block.bittycity.innie.models.Deposit
 import xyz.block.bittycity.innie.models.DepositReversal
+import xyz.block.bittycity.innie.models.DepositState
 import xyz.block.bittycity.innie.models.DepositToken
 import xyz.block.bittycity.innie.store.DepositEntityOperations
-import java.util.concurrent.ConcurrentHashMap
 
 /**
  * In-memory fake implementation of DepositEntityOperations for testing.
@@ -53,6 +58,28 @@ class FakeDepositEntityOperations : DepositEntityOperations {
     )
     deposits[deposit.id] = updated
     updated
+  }
+
+  override fun searchDeposits(
+    customerId: CustomerId?,
+    from: Instant?,
+    to: Instant?,
+    minAmount: Bitcoins?,
+    maxAmount: Bitcoins?,
+    states: Set<DepositState>,
+    targetWalletAddress: Address?,
+    paymentToken: String?
+  ): Result<List<Deposit>> = result {
+    deposits.values.filter { deposit ->
+      (customerId == null || deposit.customerId == customerId) &&
+        (from == null || deposit.createdAt?.let { !it.isBefore(from) } == true) &&
+        (to == null || deposit.createdAt?.let { !it.isAfter(to) } == true) &&
+        (minAmount == null || deposit.amount.units >= minAmount.units) &&
+        (maxAmount == null || deposit.amount.units <= maxAmount.units) &&
+        (states.isEmpty() || deposit.state in states) &&
+        (targetWalletAddress == null || deposit.targetWalletAddress == targetWalletAddress) &&
+        (paymentToken == null || deposit.paymentToken == paymentToken)
+    }
   }
 
   override fun addReversal(id: DepositToken, reversal: DepositReversal): Result<DepositReversal> = result {

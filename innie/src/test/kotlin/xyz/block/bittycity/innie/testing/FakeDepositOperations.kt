@@ -1,5 +1,9 @@
 package xyz.block.bittycity.innie.testing
 
+import org.bitcoinj.base.Address
+import java.time.Instant
+import xyz.block.bittycity.common.models.Bitcoins
+import xyz.block.bittycity.common.models.CustomerId
 import xyz.block.bittycity.innie.models.Deposit
 import xyz.block.bittycity.innie.models.DepositReversal
 import xyz.block.bittycity.innie.models.DepositState
@@ -33,6 +37,26 @@ class FakeDepositOperations(
 
   override fun update(deposit: Deposit): Result<Deposit> =
     entityOps.update(deposit)
+
+  override fun searchDeposits(
+    customerId: CustomerId?,
+    from: Instant?,
+    to: Instant?,
+    minAmount: Bitcoins?,
+    maxAmount: Bitcoins?,
+    states: Set<DepositState>,
+    targetWalletAddress: Address?,
+    paymentToken: String?
+  ): Result<List<Deposit>> = entityOps.searchDeposits(
+    customerId = customerId,
+    from = from,
+    to = to,
+    minAmount = minAmount,
+    maxAmount = maxAmount,
+    states = states,
+    targetWalletAddress = targetWalletAddress,
+    paymentToken = paymentToken
+  )
 
   override fun addReversal(id: DepositToken, reversal: DepositReversal): Result<DepositReversal> =
     entityOps.addReversal(id, reversal)
