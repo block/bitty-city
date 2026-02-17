@@ -77,14 +77,15 @@ interface DepositLedgerClient {
    * Freezes the funds in the reversal. This typically involves debiting the deposit funds that were previously reserved
    * and crediting them to a sanctions account.
    *
-   *  @param depositReversalId The ID of the reversal.
-   *  @param customerId The ID of the user receiving the deposit.
-   *  @param balanceId The ID representing the user's stored balance.
-   *  @param createdAt The date when the deposit was created.
-   *  @param amount The deposit amount in bitcoin.
-   *  @param fiatEquivalent The equivalent amount in fiat.
-   *  @param targetWalletAddress The target wallet address of the reversal.
-   *  @return a [Result] indicating whether the funds were frozen successfully.
+   * @param depositReversalId The ID of the reversal.
+   * @param customerId The ID of the user receiving the deposit.
+   * @param balanceId The ID representing the user's stored balance.
+   * @param createdAt The date when the reversal was created.
+   * @param amount The reversal amount in bitcoin.
+   * @param fiatEquivalent The equivalent amount in fiat.
+   * @param targetWalletAddress The target wallet address of the reversal.
+   * @param ledgerTransactionId The ID identifying the reversal ledger transaction.
+   * @return a [Result] indicating whether the funds were frozen successfully.
    */
   fun freezeFunds(
     depositReversalId: DepositReversalToken,
@@ -93,6 +94,7 @@ interface DepositLedgerClient {
     createdAt: Instant,
     amount: Bitcoins,
     fiatEquivalent: Money,
-    targetWalletAddress: Address
+    targetWalletAddress: Address,
+    ledgerTransactionId: LedgerTransactionId
   ): Result<Unit>
 }

@@ -2,6 +2,7 @@ package xyz.block.bittycity.innie.models
 
 import org.bitcoinj.base.Address
 import java.time.Instant
+import xyz.block.bittycity.common.models.LedgerTransactionId
 import xyz.block.bittycity.common.models.ServiceFee
 
 data class DepositReversal(
@@ -28,6 +29,9 @@ data class DepositReversal(
 
   /** The blockchain transaction id hash (if any) for this reversal. */
   val blockchainTransactionId: String? = null,
+
+  /** The ledger transaction id used to settle this reversal. */
+  val ledgerTransactionId: LedgerTransactionId? = null,
 
   /** The index of the output in the transaction. */
   val blockchainTransactionOutputIndex: Int? = null,

@@ -41,7 +41,8 @@ sealed class DepositEffect : Effect {
     val createdAt: Instant,
     val amount: Bitcoins,
     val fiatEquivalent: Money,
-    val targetWalletAddress: Address
+    val targetWalletAddress: Address,
+    val ledgerTransactionId: LedgerTransactionId
   ) : DepositEffect()
   data class ConfirmReversalTransaction(
     val customerId: CustomerId,

@@ -1,6 +1,7 @@
 package xyz.block.bittycity.innie.controllers
 
 import app.cash.quiver.extensions.success
+import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.should
 import io.kotest.matchers.shouldBe
 import io.kotest.property.arbitrary.next
@@ -135,7 +136,8 @@ class DepositControllerTest : BittyCityTestCase() {
     depositWithToken(deposit.id) should {
       it.state shouldBe Settled
     }
-    app.metricsClient.successAmounts.any { it.id == deposit.id } shouldBe true
+    app.metricsClient.successAmounts.shouldHaveSize(1)
+    app.metricsClient.successAmounts.first().id shouldBe deposit.id
   }
 
   @Test

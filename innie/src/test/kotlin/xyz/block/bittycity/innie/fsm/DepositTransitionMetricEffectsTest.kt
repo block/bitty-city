@@ -6,10 +6,12 @@ import io.kotest.property.arbitrary.next
 import org.junit.jupiter.api.Test
 import xyz.block.bittycity.innie.models.CheckingDepositRisk
 import xyz.block.bittycity.innie.models.CheckingSanctions
+import xyz.block.bittycity.innie.models.AwaitingSanctionsDecision
 import xyz.block.bittycity.innie.models.DepositFailureReason.RISK_BLOCKED
 import xyz.block.bittycity.innie.models.DepositReversal
 import xyz.block.bittycity.innie.models.DepositReversalFailureReason.SANCTIONS_FAILED
 import xyz.block.bittycity.innie.models.PendingReversal
+import xyz.block.bittycity.innie.models.Sanctioned
 import xyz.block.bittycity.innie.models.Settled
 import xyz.block.bittycity.innie.testing.Arbitrary
 import xyz.block.bittycity.innie.testing.Arbitrary.amount
@@ -114,5 +116,69 @@ class DepositTransitionMetricEffectsTest : BittyCityTestCase() {
         it.from == CheckingDepositRisk &&
         it.to == Settled
     } shouldBe true
+  }
+
+  @Test
+  fun `ReversalSanctionsDecisionFrozen passes reversal ledger transaction id to freeze effect`() = runTest {
+    val reversalLedgerTransactionId = ledgerTransactionId.next()
+    val deposit = data.seedDeposit(
+      state = AwaitingSanctionsDecision,
+      customerId = customerId.next(),
+      amount = amount.next(),
+      exchangeRate = exchangeRate.next(),
+      targetWalletAddress = walletAddress.next(),
+      blockchainTransactionId = stringToken.next(),
+      blockchainTransactionOutputIndex = outputIndex.next(),
+      paymentToken = stringToken.next(),
+      sourceBalanceToken = balanceId.next(),
+      reversals = listOf(
+        DepositReversal(
+          token = Arbitrary.depositReversalToken.next(),
+          targetWalletAddress = walletAddress.next(),
+          userHasConfirmed = true,
+          ledgerTransactionId = reversalLedgerTransactionId
+        )
+      )
+    )
+
+    val decision = ReversalSanctionsDecisionFrozen().decide(deposit)
+    (decision is Decision.Accept) shouldBe true
+
+    val effects = (decision as Decision.Accept).effects
+    effects.any {
+      it is DepositEffect.FreezeReversal &&
+        it.depositReversalId == deposit.currentReversal?.token &&
+        it.ledgerTransactionId == reversalLedgerTransactionId
+    } shouldBe true
+    effects.any {
+      it is DepositEffect.PublishStateTransitionMetric &&
+        it.from == AwaitingSanctionsDecision &&
+        it.to == Sanctioned
+    } shouldBe true
+  }
+
+  @Test
+  fun `ReversalSanctionsDecisionFrozen rejects when reversal ledger transaction id is missing`() = runTest {
+    val deposit = data.seedDeposit(
+      state = AwaitingSanctionsDecision,
+      customerId = customerId.next(),
+      amount = amount.next(),
+      exchangeRate = exchangeRate.next(),
+      targetWalletAddress = walletAddress.next(),
+      blockchainTransactionId = stringToken.next(),
+      blockchainTransactionOutputIndex = outputIndex.next(),
+      paymentToken = stringToken.next(),
+      sourceBalanceToken = balanceId.next(),
+      reversals = listOf(
+        DepositReversal(
+          token = Arbitrary.depositReversalToken.next(),
+          targetWalletAddress = walletAddress.next(),
+          userHasConfirmed = true
+        )
+      )
+    )
+
+    val decision = ReversalSanctionsDecisionFrozen().decide(deposit)
+    (decision is Decision.Reject) shouldBe true
   }
 }
