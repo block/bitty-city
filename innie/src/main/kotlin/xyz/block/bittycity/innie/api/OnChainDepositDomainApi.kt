@@ -17,6 +17,7 @@ import xyz.block.bittycity.common.models.BalanceId
 import xyz.block.bittycity.common.models.Bitcoins
 import xyz.block.bittycity.common.models.CustomerId
 import xyz.block.bittycity.common.store.Transactor
+import xyz.block.bittycity.common.utils.WalletAddressParser
 import xyz.block.bittycity.innie.client.WalletClient
 import xyz.block.bittycity.innie.controllers.DomainController
 import xyz.block.bittycity.innie.controllers.IdempotencyHandler
@@ -27,6 +28,8 @@ import xyz.block.bittycity.innie.models.DepositToken
 import xyz.block.bittycity.innie.models.RequirementId
 import xyz.block.bittycity.innie.models.AwaitingDepositConfirmation
 import xyz.block.bittycity.innie.store.DepositOperations
+import xyz.block.bittycity.innie.store.DepositStore
+import xyz.block.bittycity.innie.utils.SearchParser
 import xyz.block.domainapi.DomainApi
 import xyz.block.domainapi.ExecuteResponse
 import xyz.block.domainapi.InfoOnly
@@ -47,6 +50,8 @@ class OnChainDepositDomainApi @Inject constructor(
   private val eligibilityClient: DepositEligibilityClient,
   private val exchangeRateClient: ExchangeRateClient,
   private val walletClient: WalletClient,
+  private val walletAddressParser: WalletAddressParser,
+  private val depositStore: DepositStore,
   private val idempotencyHandler: IdempotencyHandler
 ) : DomainApi<InitialRequest, DepositToken, RequirementId, Unit, Deposit> {
   override fun create(
@@ -165,7 +170,36 @@ class OnChainDepositDomainApi @Inject constructor(
   override fun search(
     parameter: SearchParameter,
     limit: Int
-  ): Result<SearchResult<Unit, Deposit>> = UnsupportedOperationException().failure()
+  ): Result<SearchResult<Unit, Deposit>> = result {
+    val parsed = SearchParser().parseFilters(parameter).bind()
+    val targetWalletAddress = parsed.targetWalletAddress
+      ?.let { walletAddressParser.parse(it).bind() }
+
+    val results: List<ProcessInfo<Unit, Deposit>> = depositStore.search(
+      customerId = parsed.customerId,
+      from = parsed.from,
+      to = parsed.to,
+      minAmount = parsed.minAmount,
+      maxAmount = parsed.maxAmount,
+      states = parsed.states.toSet(),
+      targetWalletAddress = targetWalletAddress,
+      paymentToken = parsed.paymentToken
+    ).bind().map {
+      ProcessInfo<Unit, Deposit>(
+        id = it.id.toString(),
+        updatableAttributes = emptyList<Unit>(),
+        process = it
+      )
+    }
+
+    SearchResult(
+      results = results,
+      thisStart = 0,
+      nextStart = null,
+      prevStart = null,
+      limit = limit
+    )
+  }
 
   private fun getSourceBalanceToken(
     customerId: CustomerId
