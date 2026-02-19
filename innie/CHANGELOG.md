@@ -1,5 +1,10 @@
 # Change Log
 
+# [0.2.3]
+
+* Added support to search deposits by deposit reversal tokens.
+* Added a reversal not found error.
+
 ## [0.2.2]
 
 * Added missing method to domain API to determine is a secure endpoint is needed.
