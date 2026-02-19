@@ -463,6 +463,7 @@ class SpeedHandler @Inject constructor(
             selectable = isSelectable(
               speedOption,
               amount,
+              currentBalance,
               Bitcoins(amountFreeTierMin),
               Bitcoins(minimum),
               Bitcoins(amountFreeTierMin),
@@ -472,38 +473,35 @@ class SpeedHandler @Inject constructor(
         } else {
           speedOption.copy(selectable = false)
         }
-      else ->
-        if (currentBalance.units < amountFreeTierMin) {
-          val minAmount = Bitcoins(minimum)
-          val maxAmount = currentBalance - speedOption.totalFee
-          speedOption.copy(
-            minimumAmount = minAmount,
-            maximumAmount = maxAmount,
-            selectable = isSelectable(
-              speedOption,
-              amount,
-              Bitcoins(amountFreeTierMin),
-              Bitcoins(minimum),
-              minAmount,
-              maxAmount
-            )
-          )
+      else -> {
+        val minAmount = Bitcoins(minimum)
+        val maxAmount = currentBalance - speedOption.totalFee
+        // For Rush, if the fee pushes maxAmount below minAmount but the balance exceeds
+        // the minimum, the fee will be reduced at selection time. Reflect that here so the
+        // global min/max check in getHurdles doesn't reject the withdrawal.
+        val effectiveMaxAmount = if (
+          speedOption.speed == RUSH &&
+          maxAmount < minAmount &&
+          currentBalance > minAmount
+        ) {
+          minAmount
         } else {
-          val minAmount = Bitcoins(minimum)
-          val maxAmount = currentBalance - speedOption.totalFee
-          speedOption.copy(
-            minimumAmount = minAmount,
-            maximumAmount = maxAmount,
-            selectable = isSelectable(
-              speedOption,
-              amount,
-              Bitcoins(amountFreeTierMin),
-              Bitcoins(minimum),
-              minAmount,
-              maxAmount
-            )
-          )
+          maxAmount
         }
+        speedOption.copy(
+          minimumAmount = minAmount,
+          maximumAmount = effectiveMaxAmount,
+          selectable = isSelectable(
+            speedOption,
+            amount,
+            currentBalance,
+            Bitcoins(amountFreeTierMin),
+            Bitcoins(minimum),
+            minAmount,
+            effectiveMaxAmount
+          )
+        )
+      }
     }
   }
 
@@ -511,12 +509,19 @@ class SpeedHandler @Inject constructor(
   fun isSelectable(
     speedOption: WithdrawalSpeedOption,
     amount: Bitcoins,
+    currentBalance: Bitcoins,
     amountFreeTierMin: Bitcoins,
     minimumAmount: Bitcoins,
     calculatedMinAmount: Bitcoins,
     calculatedMaxAmount: Bitcoins,
   ): Boolean? = when (speedOption.speed) {
     STANDARD -> amount >= amountFreeTierMin
+    RUSH -> {
+      // Rush is selectable if the customer's balance exceeds the minimum withdrawal amount,
+      // even if fees would normally push maxAmount below minAmount. In that case, the fee
+      // will be reduced at selection time so the withdrawal amount is exactly the minimum.
+      amount >= minimumAmount && currentBalance > minimumAmount
+    }
     else -> {
       amount >= minimumAmount && calculatedMaxAmount >= calculatedMinAmount
     }
@@ -537,17 +542,32 @@ class SpeedHandler @Inject constructor(
     val selectedSpeed = response.selectedSpeed
       ?: raise(ParameterIsRequired(value.customerId, "selectedSpeed"))
 
+    val storedOption =
+      withdrawalStore.findSpeedOptionByWithdrawalTokenAndSpeed(value.id, selectedSpeed).bind()
+        ?: raise(
+          IllegalStateException(
+            "No speed option for speed $selectedSpeed for withdrawal ${value.id}"
+          )
+        )
+
+    // For Rush speed, if the normal fee would push the withdrawal amount below the minimum,
+    // reduce the fee so the customer can withdraw exactly the minimum amount.
+    val effectiveOption = if (
+      storedOption.speed == RUSH &&
+      balance - storedOption.totalFee < Bitcoins(minimum) &&
+      balance > Bitcoins(minimum)
+    ) {
+      val reducedFee = balance - Bitcoins(minimum)
+      storedOption.copy(
+        totalFee = reducedFee,
+        totalFeeFiatEquivalent = bitcoinsToUsd(reducedFee, exchangeRate),
+      )
+    } else {
+      storedOption
+    }
+
     val option =
-      addAmountsAndSelectability(
-        withdrawalStore.findSpeedOptionByWithdrawalTokenAndSpeed(value.id, selectedSpeed).bind()
-          ?: raise(
-            IllegalStateException(
-              "No speed option for speed $selectedSpeed for withdrawal ${value.id}"
-            )
-          ),
-        balance,
-        amount
-      ).map {
+      addAmountsAndSelectability(effectiveOption, balance, amount).map {
         addAdjustedAmount(it, amount, exchangeRate).bind()
       }.bind()
 
