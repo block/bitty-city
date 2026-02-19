@@ -3,6 +3,7 @@ package xyz.block.bittycity.innie.utils
 import arrow.core.raise.result
 import xyz.block.bittycity.common.models.Bitcoins
 import xyz.block.bittycity.common.models.CustomerId
+import xyz.block.bittycity.innie.models.DepositReversalToken
 import xyz.block.bittycity.innie.models.DepositState
 import xyz.block.domainapi.CompareOperator
 import xyz.block.domainapi.CompareValue
@@ -20,7 +21,8 @@ class SearchParser {
     val maxAmount: Bitcoins?,
     val states: List<DepositState>,
     val targetWalletAddress: String?,
-    val paymentToken: String?
+    val paymentToken: String?,
+    val reversalToken: DepositReversalToken?
   )
 
   private fun flattenExprs(
@@ -60,6 +62,7 @@ class SearchParser {
     val statesExpr = findSingleExpr(exprs, SearchParameterType.STATES).bind()
     val addressExpr = findSingleExpr(exprs, SearchParameterType.DESTINATION_ADDRESS).bind()
     val paymentTokenExpr = findSingleExpr(exprs, SearchParameterType.PAYMENT_TOKEN).bind()
+    val reversalTokenExpr = findSingleExpr(exprs, SearchParameterType.REVERSAL_TOKEN).bind()
 
     ParsedFilters(
       customerId = parseCustomerId(customerExpr).bind(),
@@ -69,7 +72,8 @@ class SearchParser {
       maxAmount = parseMaxAmount(maxAmountExpr).bind(),
       states = parseStates(statesExpr).bind(),
       targetWalletAddress = parseTargetWalletAddress(addressExpr).bind(),
-      paymentToken = parsePaymentToken(paymentTokenExpr).bind()
+      paymentToken = parsePaymentToken(paymentTokenExpr).bind(),
+      reversalToken = parseReversalToken(reversalTokenExpr).bind()
     )
   }
 
@@ -211,6 +215,22 @@ class SearchParser {
     (raw.values[0] as CompareValue.StringValue).value
   }
 
+  private fun parseReversalToken(
+    raw: SearchParameter.ParameterExpression<*>?
+  ): Result<DepositReversalToken?> = result {
+    if (raw == null) return Result.success(null)
+
+    require(
+      raw.compareOperator == CompareOperator.EQUALS &&
+              raw.values.size == 1 &&
+              raw.values[0] is CompareValue.StringValue
+    ) {
+      throw DomainApiError.InvalidSearchParameter(raw)
+    }
+
+    DepositReversalToken.parse((raw.values[0] as CompareValue.StringValue).value).bind()
+  }
+
   enum class SearchParameterType {
     CUSTOMER_ID,
     CREATED_AT_FROM,
@@ -219,6 +239,7 @@ class SearchParser {
     MAX_AMOUNT,
     STATES,
     DESTINATION_ADDRESS,
-    PAYMENT_TOKEN
+    PAYMENT_TOKEN,
+    REVERSAL_TOKEN
   }
 }

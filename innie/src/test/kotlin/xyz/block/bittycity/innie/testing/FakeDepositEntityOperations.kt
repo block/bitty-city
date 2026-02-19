@@ -8,6 +8,7 @@ import xyz.block.bittycity.common.models.Bitcoins
 import xyz.block.bittycity.common.models.CustomerId
 import xyz.block.bittycity.innie.models.Deposit
 import xyz.block.bittycity.innie.models.DepositReversal
+import xyz.block.bittycity.innie.models.DepositReversalToken
 import xyz.block.bittycity.innie.models.DepositState
 import xyz.block.bittycity.innie.models.DepositToken
 import xyz.block.bittycity.innie.store.DepositEntityOperations
@@ -68,7 +69,8 @@ class FakeDepositEntityOperations : DepositEntityOperations {
     maxAmount: Bitcoins?,
     states: Set<DepositState>,
     targetWalletAddress: Address?,
-    paymentToken: String?
+    paymentToken: String?,
+    reversalToken: DepositReversalToken?
   ): Result<List<Deposit>> = result {
     deposits.values.filter { deposit ->
       (customerId == null || deposit.customerId == customerId) &&
@@ -78,7 +80,8 @@ class FakeDepositEntityOperations : DepositEntityOperations {
         (maxAmount == null || deposit.amount.units <= maxAmount.units) &&
         (states.isEmpty() || deposit.state in states) &&
         (targetWalletAddress == null || deposit.targetWalletAddress == targetWalletAddress) &&
-        (paymentToken == null || deposit.paymentToken == paymentToken)
+        (paymentToken == null || deposit.paymentToken == paymentToken) &&
+        (reversalToken == null || deposit.reversals.any { it.token == reversalToken })
     }
   }
 

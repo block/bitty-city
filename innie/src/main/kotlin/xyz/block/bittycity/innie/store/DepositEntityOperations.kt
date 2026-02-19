@@ -6,6 +6,7 @@ import xyz.block.bittycity.common.models.Bitcoins
 import xyz.block.bittycity.common.models.CustomerId
 import xyz.block.bittycity.innie.models.Deposit
 import xyz.block.bittycity.innie.models.DepositReversal
+import xyz.block.bittycity.innie.models.DepositReversalToken
 import xyz.block.bittycity.innie.models.DepositState
 import xyz.block.bittycity.innie.models.DepositToken
 import xyz.block.domainapi.InfoOnly
@@ -31,7 +32,8 @@ interface DepositEntityOperations {
     maxAmount: Bitcoins? = null,
     states: Set<DepositState> = setOf(),
     targetWalletAddress: Address? = null,
-    paymentToken: String? = null
+    paymentToken: String? = null,
+    reversalToken: DepositReversalToken? = null
   ): Result<List<Deposit>>
 
   fun addReversal(id: DepositToken, reversal: DepositReversal): Result<DepositReversal>

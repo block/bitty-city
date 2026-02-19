@@ -6,6 +6,7 @@ import xyz.block.bittycity.common.models.Bitcoins
 import xyz.block.bittycity.common.models.CustomerId
 import xyz.block.bittycity.innie.models.Deposit
 import xyz.block.bittycity.innie.models.DepositReversal
+import xyz.block.bittycity.innie.models.DepositReversalToken
 import xyz.block.bittycity.innie.models.DepositState
 import xyz.block.bittycity.innie.models.DepositToken
 import xyz.block.bittycity.innie.models.DepositTransitionEvent
@@ -46,7 +47,8 @@ class FakeDepositOperations(
     maxAmount: Bitcoins?,
     states: Set<DepositState>,
     targetWalletAddress: Address?,
-    paymentToken: String?
+    paymentToken: String?,
+    reversalToken: DepositReversalToken?
   ): Result<List<Deposit>> = entityOps.searchDeposits(
     customerId = customerId,
     from = from,
@@ -55,7 +57,8 @@ class FakeDepositOperations(
     maxAmount = maxAmount,
     states = states,
     targetWalletAddress = targetWalletAddress,
-    paymentToken = paymentToken
+    paymentToken = paymentToken,
+    reversalToken = reversalToken
   )
 
   override fun addReversal(id: DepositToken, reversal: DepositReversal): Result<DepositReversal> =
