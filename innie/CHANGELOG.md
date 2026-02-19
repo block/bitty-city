@@ -1,5 +1,9 @@
 # Change Log
 
+## [0.2.2]
+
+* Added missing method to domain API to determine is a secure endpoint is needed.
+
 ## [0.2.0]
 
 * Reviewed and renamed states.
