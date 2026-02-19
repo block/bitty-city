@@ -59,3 +59,6 @@ class DepositVersionMismatch(val deposit: Deposit) :
   DepositStoreError(
     "Deposit not at expected version ${deposit.version}: ${deposit.id}"
   )
+
+class DepositReversalNotPresent(val reversalToken: DepositReversalToken) :
+  DepositStoreError("Deposit reversal not present: $reversalToken")
