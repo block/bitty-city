@@ -35,6 +35,9 @@ import xyz.block.domainapi.ExecuteResponse
 import xyz.block.domainapi.InfoOnly
 import xyz.block.domainapi.Input
 import xyz.block.domainapi.ProcessInfo
+import xyz.block.domainapi.ResultCode.CLEARED
+import xyz.block.domainapi.ResultCode.FAILED
+import xyz.block.domainapi.ResultCode.SKIPPED
 import xyz.block.domainapi.SearchParameter
 import xyz.block.domainapi.SearchResult
 import xyz.block.domainapi.UpdateResponse
@@ -134,6 +137,11 @@ class OnChainDepositDomainApi @Inject constructor(
       result.bind()
     }
   }
+
+  fun requiresSecureEndpoint(hurdleResponses: List<Input.HurdleResponse<RequirementId>>): Boolean =
+    hurdleResponses.any {
+      it.id.requiresSecureEndpoint && setOf(CLEARED, FAILED, SKIPPED).contains(it.result)
+    }
 
   override fun update(
     id: DepositToken,
