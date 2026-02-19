@@ -7,6 +7,7 @@ import xyz.block.bittycity.common.store.Transactor
 import xyz.block.bittycity.common.models.Bitcoins
 import xyz.block.bittycity.common.models.CustomerId
 import xyz.block.bittycity.innie.models.Deposit
+import xyz.block.bittycity.innie.models.DepositReversalToken
 import xyz.block.bittycity.innie.models.DepositState
 import xyz.block.bittycity.innie.models.DepositToken
 import java.time.Instant
@@ -41,7 +42,8 @@ class DepositStore @Inject constructor(
     maxAmount: Bitcoins? = null,
     states: Set<DepositState> = setOf(),
     targetWalletAddress: Address? = null,
-    paymentToken: String? = null
+    paymentToken: String? = null,
+    reversalToken: DepositReversalToken? = null
   ): Result<List<Deposit>> = depositTransactor.transactReadOnly("Search deposits") {
     searchDeposits(
       customerId = customerId,
@@ -51,7 +53,8 @@ class DepositStore @Inject constructor(
       maxAmount = maxAmount,
       states = states,
       targetWalletAddress = targetWalletAddress,
-      paymentToken = paymentToken
+      paymentToken = paymentToken,
+      reversalToken = reversalToken
     )
   }
 }
