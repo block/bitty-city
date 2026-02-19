@@ -189,7 +189,7 @@ class SpeedHandlerTest : BittyCityTestCase() {
   }
 
   @Test
-  fun `it's impossible to withdraw a balance that is too low`() = runTest {
+  fun `rush is selectable with reduced fee when balance barely covers minimum`() = runTest {
     val amount = Bitcoins(6_999L)
     val withdrawal = data.seedWithdrawal(
       state = CollectingInfo,
@@ -197,6 +197,39 @@ class SpeedHandlerTest : BittyCityTestCase() {
       amount = amount
     )
     val currentBalance = Bitcoins(6_999L)
+
+    setupFakes(currentBalance)
+
+    val speedHurdle = (
+      subject.getHurdles(withdrawal, currentBalance).getOrThrow()
+        .first() as WithdrawalHurdle.SpeedHurdle
+      )
+
+    speedHurdle.withdrawalSpeedOptions.size shouldBe 3
+    speedHurdle.withdrawalSpeedOptions[0].should { priority ->
+      priority.selectable shouldBe false
+      priority.adjustedAmount.shouldBeNull()
+    }
+    speedHurdle.withdrawalSpeedOptions[1].should { rush ->
+      rush.selectable shouldBe true
+      rush.maximumAmount shouldBe Bitcoins(5_000L)
+      rush.adjustedAmount shouldBe Bitcoins(5_000L)
+    }
+    speedHurdle.withdrawalSpeedOptions[2].should { standard ->
+      standard.selectable shouldBe false
+      standard.adjustedAmount.shouldBeNull()
+    }
+  }
+
+  @Test
+  fun `it's impossible to withdraw a balance that is too low`() = runTest {
+    val amount = Bitcoins(5_000L)
+    val withdrawal = data.seedWithdrawal(
+      state = CollectingInfo,
+      walletAddress = data.targetWalletAddress,
+      amount = amount
+    )
+    val currentBalance = Bitcoins(5_000L)
 
     setupFakes(currentBalance)
 
