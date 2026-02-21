@@ -33,7 +33,7 @@ domainApiKfsmv2 = { module = "xyz.block.domainapi:domain-api-kfsm-v2", version.r
 guice = { module = "com.google.inject:guice", version.ref = "guice" }
 guiceAssistedInject = { module = "com.google.inject.extensions:guice-assistedinject", version.ref = "guice" }
 jodaMoney = { module = "org.joda:joda-money", version.ref = "jodaMoney" }
-junitJupiter = { module = "org.junit.jupiter:junit-jupiter", version = "5.14.2" }
+junitJupiter = { module = "org.junit.jupiter:junit-jupiter", version = "6.0.3" }
 kfsm = { module = "app.cash.kfsm:kfsm", version.ref = "kfsm" }
 kfsmv2 = { module = "app.cash.kfsm:kfsm-v2", version.ref = "kfsmv2" }
 kotestAssertions = { module = "io.kotest:kotest-assertions-core", version.ref = "kotest" }
