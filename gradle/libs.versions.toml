@@ -8,7 +8,7 @@ guice = "7.0.0"
 jodaMoney = "1.0.7"
 kfsm = "0.12.0"
 kfsmv2 = "2.1.0"
-kotest = "5.9.1"
+kotest = "6.1.3"
 kotlinxCoroutines = "1.10.2"
 kotestArrow = "2.0.0"
 # @pin
