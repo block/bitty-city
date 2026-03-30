@@ -10,7 +10,6 @@ bin/gradle build          # build + test
 bin/gradle :outie:generateStateMachineDiagram  # after FSM changes
 ```
 
-## Structure
 
 ```
 common/   # Shared models
