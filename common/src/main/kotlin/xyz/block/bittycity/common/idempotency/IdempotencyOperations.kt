@@ -22,6 +22,11 @@ interface IdempotencyOperations<ID, REQ> : Operations {
     idempotencyKey: String,
     response: IdempotentResponse<ID, REQ>
   ): Result<IdempotentResponse<ID, REQ>>
+
+  fun deleteResponse(
+    idempotencyKey: String,
+    requestId: ID
+  ): Result<Unit>
 }
 
 sealed class IdempotencyStoreError(message: String) :

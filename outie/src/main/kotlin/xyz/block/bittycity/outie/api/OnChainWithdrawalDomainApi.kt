@@ -143,6 +143,9 @@ class OnChainWithdrawalDomainApi @Inject constructor(
       val shouldCacheError = withdrawal.state !in NON_CACHEABLE_ERROR_STATES
       if (result.isSuccess || shouldCacheError) {
         idempotencyHandler.updateCachedResponse(hash, id, result).bind()
+      } else {
+        // Delete the incomplete idempotency row to allow retries
+        idempotencyHandler.deleteCachedResponse(hash, id).bind()
       }
       result.bind()
     }
@@ -234,6 +237,9 @@ class OnChainWithdrawalDomainApi @Inject constructor(
       val shouldCacheError = withdrawal.state !in NON_CACHEABLE_ERROR_STATES
       if (result.isSuccess || shouldCacheError) {
         idempotencyHandler.updateCachedResponse(hash, id, result).bind()
+      } else {
+        // Delete the incomplete idempotency row to allow retries
+        idempotencyHandler.deleteCachedResponse(hash, id).bind()
       }
       result.bind()
     }

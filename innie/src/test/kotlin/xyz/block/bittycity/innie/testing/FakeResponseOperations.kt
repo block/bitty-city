@@ -51,6 +51,14 @@ class FakeResponseOperations : ResponseOperations {
     updated
   }
 
+  override fun deleteResponse(
+    idempotencyKey: String,
+    requestId: DepositToken
+  ): Result<Unit> = result {
+    val key = idempotencyKey to requestId
+    responses.remove(key)
+  }
+
   fun clear() {
     responses.clear()
   }
