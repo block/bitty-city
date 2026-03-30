@@ -24,6 +24,8 @@ import xyz.block.bittycity.outie.controllers.DomainController
 import xyz.block.bittycity.outie.controllers.IdempotencyHandler
 import xyz.block.bittycity.outie.models.CollectingInfo
 import xyz.block.bittycity.outie.models.RequirementId
+import xyz.block.bittycity.outie.models.WaitingForConfirmedOnChainStatus
+import xyz.block.bittycity.outie.models.WaitingForPendingConfirmationStatus
 import xyz.block.bittycity.outie.models.Withdrawal
 import xyz.block.bittycity.outie.models.WithdrawalState
 import xyz.block.bittycity.outie.models.WithdrawalToken
@@ -136,8 +138,12 @@ class OnChainWithdrawalDomainApi @Inject constructor(
         hurdleGroupId
       )
 
-      // Errors at the API level are never retryable for withdrawals so we can save error responses
-      idempotencyHandler.updateCachedResponse(hash, id, result).bind()
+      // For post-submission states, skip error caching to allow retries to discover real outcome.
+      // Successes are always cached regardless of state.
+      val shouldCacheError = withdrawal.state !in NON_CACHEABLE_ERROR_STATES
+      if (result.isSuccess || shouldCacheError) {
+        idempotencyHandler.updateCachedResponse(hash, id, result).bind()
+      }
       result.bind()
     }
   }
@@ -223,8 +229,12 @@ class OnChainWithdrawalDomainApi @Inject constructor(
         Operation.RESUME
       )
 
-      // Errors at the API level are never retryable for withdrawals so we can save error responses
-      idempotencyHandler.updateCachedResponse(hash, id, result).bind()
+      // For post-submission states, skip error caching to allow retries to discover real outcome.
+      // Successes are always cached regardless of state.
+      val shouldCacheError = withdrawal.state !in NON_CACHEABLE_ERROR_STATES
+      if (result.isSuccess || shouldCacheError) {
+        idempotencyHandler.updateCachedResponse(hash, id, result).bind()
+      }
       result.bind()
     }
   }
@@ -289,6 +299,17 @@ class OnChainWithdrawalDomainApi @Inject constructor(
         ?: raise(InvalidSourceBalanceToken(customerId, providedSourceBalanceToken))
     } ?: customerSourceBalanceTokens.firstOrNull()?.balanceId ?: raise(
       InvalidSourceBalanceToken(customerId, BalanceId("No default balance token found"))
+    )
+  }
+
+  companion object {
+    /**
+     * States where bitcoin has been submitted on-chain and error caching should be skipped.
+     * Transient errors in these states should allow retries to discover the real outcome.
+     */
+    private val NON_CACHEABLE_ERROR_STATES = setOf(
+      WaitingForPendingConfirmationStatus,
+      WaitingForConfirmedOnChainStatus,
     )
   }
 }
