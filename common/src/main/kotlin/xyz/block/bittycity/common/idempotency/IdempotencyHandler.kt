@@ -120,6 +120,22 @@ class IdempotencyHandler<ID, REQ>(
     }.bind()
   }
 
+  /**
+   * Deletes a cached response, allowing future retries with the same parameters.
+   * Used when error caching should be skipped (e.g., for post-submission withdrawal states).
+   *
+   * @param idempotencyKey The idempotency key.
+   * @param id The request identifier.
+   */
+  fun deleteCachedResponse(
+    idempotencyKey: String,
+    id: ID
+  ): Result<Unit> = result {
+    transactor.transact("Delete response") {
+      deleteResponse(idempotencyKey, id)
+    }.bind()
+  }
+
   private fun buildResponse(
     id: ID,
     idempotencyKey: String,

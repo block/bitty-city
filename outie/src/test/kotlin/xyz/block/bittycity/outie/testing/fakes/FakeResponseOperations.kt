@@ -50,6 +50,14 @@ class FakeResponseOperations : ResponseOperations {
     updatedResponse
   }
 
+  override fun deleteResponse(
+    idempotencyKey: String,
+    requestId: WithdrawalToken
+  ): Result<Unit> = result {
+    val key = CompositeKey(idempotencyKey, requestId)
+    responses.remove(key)
+  }
+
   fun reset() {
     responses.clear()
   }
