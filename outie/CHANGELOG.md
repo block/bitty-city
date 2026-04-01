@@ -1,5 +1,10 @@
 # Change Log
 
+## [0.2.2]
+
+* Reduce Rush fee when balance is above minimum but below minimum + fee.
+* Do not cache errors after on-chain submission to allow retries to discover real outcome.
+
 ## [0.2.1]
 
 * Moved withdrawal eligibility client contract to common EligibilityClient.
