@@ -14,7 +14,7 @@ kotestArrow = "2.0.0"
 # @pin
 kotlin = "2.2.21"
 kotlinBinaryCompatibilityPlugin = "0.18.1"
-kotlinLogging = "7.0.14"
+kotlinLogging = "8.0.01"
 mavenPublish = "0.36.0"
 mockk = "1.14.9"
 moshi = "1.15.2"
