@@ -9,7 +9,7 @@ jodaMoney = "2.0.3"
 kfsm = "0.12.0"
 kfsmv2 = "2.3.0"
 kotest = "5.9.1"
-kotlinxCoroutines = "1.10.2"
+kotlinxCoroutines = "1.11.0"
 kotestArrow = "2.0.0"
 # @pin
 kotlin = "2.3.21"
