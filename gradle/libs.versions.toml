@@ -20,7 +20,7 @@ mockk = "1.14.9"
 moshi = "1.15.2"
 quiver = "1.0.5"
 resilience4j = "1.7.1"
-slf4j = "2.0.17"
+slf4j = "2.0.18"
 versionCatalogUpdateGradlePlugin = "1.1.0"
 versionsGradlePlugin = "0.54.0"
 
