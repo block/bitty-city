@@ -60,7 +60,10 @@ data class WithdrawRequest(
       val withdrawalAmount = amount ?: raise(IllegalArgumentException("Amount is required"))
       val selectedSpeed =
         selectedSpeed ?: raise(IllegalArgumentException("Selected speed is required"))
-      val withdrawalFee = selectedSpeed.totalFee
+      // If the customer fee has been refunded (e.g. while held for sanctions review), the on-chain
+      // submission must reflect a zero fee since the corresponding ledger entry has already been
+      // voided and reposted with a zero fee.
+      val withdrawalFee = if (feeRefunded) Bitcoins.ZERO else selectedSpeed.totalFee
 
       Result.catch {
         WithdrawRequest(
