@@ -2,8 +2,10 @@ package xyz.block.bittycity.innie.testing
 
 import app.cash.kfsm.v2.AwaitableStateMachine
 import app.cash.kfsm.v2.EffectProcessor
+import io.kotest.common.runBlocking
 import io.kotest.property.arbitrary.next
 import jakarta.inject.Inject
+import java.time.Clock
 import org.bitcoinj.base.Address
 import org.joda.money.Money
 import xyz.block.bittycity.common.models.BalanceId
@@ -20,6 +22,8 @@ import java.time.Instant
 import java.util.concurrent.Executors
 import java.util.concurrent.ScheduledExecutorService
 import java.util.concurrent.TimeUnit
+import kotlin.time.Duration.Companion.milliseconds
+import kotlinx.coroutines.delay
 
 class TestApp {
 
@@ -43,6 +47,8 @@ class TestApp {
   @Inject lateinit var riskClient: FakeRiskClient
   @Inject lateinit var sanctionsClient: FakeSanctionsClient
   @Inject lateinit var metricsClient: FakeMetricsClient
+
+  private val clock = Clock.systemUTC()
 
   fun resetFakes() {
     eligibilityClient.reset()
@@ -82,6 +88,20 @@ class TestApp {
   fun stopProcessingEffects() {
     effectProcessingExecutor?.shutdownNow()
     effectProcessingExecutor = null
+  }
+
+  /**
+   * Wait for the background effect processor to drain all pending outbox messages.
+   * Use before asserting on state populated by an [EffectProcessor]-driven side effect.
+   */
+  fun awaitEffectsDrained(timeoutMillis: Long = 2_000) = runBlocking {
+    val deadline = clock.instant().plusMillis(timeoutMillis)
+    while (outbox.fetchPending(batchSize = 1).isNotEmpty()) {
+      check(clock.instant() < deadline) {
+        "Effects did not drain within ${timeoutMillis}ms; pending=${outbox.fetchPending(batchSize = 10)}"
+      }
+      delay(25L.milliseconds)
+    }
   }
 
   fun TestRunData.seedDeposit(

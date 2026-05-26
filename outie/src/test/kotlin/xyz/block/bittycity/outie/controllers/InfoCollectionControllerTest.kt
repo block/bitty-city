@@ -109,13 +109,13 @@ class InfoCollectionControllerTest : BittyCityTestCase() {
           balance - Bitcoins(2000L),
           selectable = true,
           adjustedAmount = null,
-          withdrawal.exchangeRate as Money
+          withdrawal.exchangeRate
         ),
         createSpeedOption(
           STANDARD,
           Bitcoins(0L),
           selectable = false,
-          exchangeRate = withdrawal.exchangeRate as Money
+          exchangeRate = withdrawal.exchangeRate
         )
       ),
       currentBalance = balance,

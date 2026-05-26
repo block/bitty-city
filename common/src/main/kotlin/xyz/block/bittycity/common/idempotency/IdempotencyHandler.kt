@@ -220,8 +220,8 @@ class IdempotencyHandler<ID, REQ>(
     id: ID
   ): Result<ExecuteResponse<ID, REQ>> = result {
     when {
-      response.result != null -> response.result!!
-      response.error != null -> raise((response.error as SerializableError).asCachedError())
+      response.result != null -> response.result
+      response.error != null -> raise(response.error.asCachedError())
       else -> raise(DomainApiError.AlreadyProcessing(id.toString()))
     }
   }

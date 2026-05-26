@@ -107,6 +107,7 @@ class ReversalSanctionsControllerTest : BittyCityTestCase() {
         it.currentReversal.shouldNotBeNull()
         it.currentReversal?.failureReason shouldBe SANCTIONS_FAILED
       }
+      app.awaitEffectsDrained()
       app.metricsClient.reversalFailureReasons shouldBe listOf(SANCTIONS_FAILED)
     } finally {
       stopProcessingEffects()
