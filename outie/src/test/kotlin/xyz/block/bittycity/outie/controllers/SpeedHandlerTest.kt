@@ -46,8 +46,7 @@ class SpeedHandlerTest : BittyCityTestCase() {
       val currentBalance = Bitcoins(15000L)
       setupFakes(currentBalance)
 
-      val result = subject.getHurdles(withdrawal, currentBalance).getOrThrow()
-        .first() as WithdrawalHurdle.SpeedHurdle
+      val result = subject.getHurdles(withdrawal, currentBalance).getOrThrow().first()
 
       assertSoftly {
         result.shouldBeInstanceOf<WithdrawalHurdle.SpeedHurdle>()
@@ -115,10 +114,7 @@ class SpeedHandlerTest : BittyCityTestCase() {
 
     setupFakes(currentBalance)
 
-    (
-      subject.getHurdles(withdrawal, currentBalance).getOrThrow()
-        .first() as WithdrawalHurdle.SpeedHurdle
-      )
+    subject.getHurdles(withdrawal, currentBalance).getOrThrow().first()
       .withdrawalSpeedOptions.find { it.speed == WithdrawalSpeed.STANDARD }.shouldNotBeNull()
       .selectable shouldBe true
   }
@@ -136,10 +132,7 @@ class SpeedHandlerTest : BittyCityTestCase() {
 
       setupFakes(currentBalance)
 
-      val speedHurdle = (
-        subject.getHurdles(withdrawal, currentBalance).getOrThrow()
-          .first() as WithdrawalHurdle.SpeedHurdle
-        )
+      val speedHurdle = subject.getHurdles(withdrawal, currentBalance).getOrThrow().first()
 
       speedHurdle.withdrawalSpeedOptions.size shouldBe 3
       speedHurdle.withdrawalSpeedOptions[0].should { priority ->
@@ -168,10 +161,7 @@ class SpeedHandlerTest : BittyCityTestCase() {
 
     setupFakes(currentBalance)
 
-    val speedHurdle = (
-      subject.getHurdles(withdrawal, currentBalance).getOrThrow()
-        .first() as WithdrawalHurdle.SpeedHurdle
-      )
+    val speedHurdle = subject.getHurdles(withdrawal, currentBalance).getOrThrow().first()
 
     speedHurdle.withdrawalSpeedOptions.size shouldBe 3
     speedHurdle.withdrawalSpeedOptions[0].should { priority ->
@@ -200,11 +190,7 @@ class SpeedHandlerTest : BittyCityTestCase() {
 
     setupFakes(currentBalance)
 
-    val speedHurdle = (
-      subject.getHurdles(withdrawal, currentBalance).getOrThrow()
-        .first() as WithdrawalHurdle.SpeedHurdle
-      )
-
+    val speedHurdle = subject.getHurdles(withdrawal, currentBalance).getOrThrow().first()
     speedHurdle.withdrawalSpeedOptions.size shouldBe 3
     speedHurdle.withdrawalSpeedOptions[0].should { priority ->
       priority.selectable shouldBe false
@@ -234,10 +220,7 @@ class SpeedHandlerTest : BittyCityTestCase() {
     setupFakes(currentBalance)
 
     shouldThrow<InsufficientBalance> {
-      (
-        subject.getHurdles(withdrawal, currentBalance).getOrThrow()
-          .first() as WithdrawalHurdle.SpeedHurdle
-        )
+      subject.getHurdles(withdrawal, currentBalance).getOrThrow().first()
     }
   }
 

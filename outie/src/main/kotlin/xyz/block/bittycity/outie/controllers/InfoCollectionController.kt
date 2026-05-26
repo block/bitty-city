@@ -401,7 +401,7 @@ class SpeedHandler @Inject constructor(
       withdrawalSpeedOptions = speedOptions.map {
         addAmountsAndSelectability(it, currentBalance, amount).bind()
       }.map {
-        addAdjustedAmount(it, amount, value.exchangeRate as Money).bind()
+        addAdjustedAmount(it, amount, value.exchangeRate).bind()
       },
       currentBalance = currentBalance,
       freeTierMinAmount = Bitcoins(amountFreeTierMin),
