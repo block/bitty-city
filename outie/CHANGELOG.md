@@ -1,5 +1,10 @@
 # Change Log
 
+## [0.2.3]
+
+* Use zero fee for on-chain submission when fee was refunded.
+* Add a failure reason for each validation failure.
+
 ## [0.2.2]
 
 * Reduce Rush fee when balance is above minimum but below minimum + fee.
