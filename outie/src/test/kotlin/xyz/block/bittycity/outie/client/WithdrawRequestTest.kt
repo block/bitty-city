@@ -87,7 +87,8 @@ class WithdrawRequestTest {
     targetWalletAddress: Address? = Arbitrary.walletAddress.next(),
     amount: Bitcoins? = Arbitrary.amount.next(),
     fee: Bitcoins = Arbitrary.fee.next(),
-    speed: WithdrawalSpeed = Arbitrary.speed.next()
+    speed: WithdrawalSpeed = Arbitrary.speed.next(),
+    feeRefunded: Boolean = false
   ) = Withdrawal(
     id = Arbitrary.withdrawalToken.next(),
     createdAt = Instant.now(),
@@ -106,7 +107,8 @@ class WithdrawRequestTest {
       serviceFee = FlatFee(Bitcoins(0)),
       approximateWaitTime = 1.minutes
     ),
-    exchangeRate = Arbitrary.exchangeRate.next()
+    exchangeRate = Arbitrary.exchangeRate.next(),
+    feeRefunded = feeRefunded
   )
 
   @Test
@@ -135,5 +137,25 @@ class WithdrawRequestTest {
     withdrawal.toWithdrawalRequest()
       .shouldBeFailure()
       .message shouldBe "Amount is required"
+  }
+
+  @Test
+  fun `fee is taken from selectedSpeed when feeRefunded is false`() {
+    val originalFee = Bitcoins(2724)
+    val withdrawal = createWithdrawal(fee = originalFee, feeRefunded = false)
+
+    val request = withdrawal.toWithdrawalRequest().getOrThrow()
+
+    request.fee shouldBe originalFee
+  }
+
+  @Test
+  fun `fee is zero when feeRefunded is true`() {
+    val originalFee = Bitcoins(2724)
+    val withdrawal = createWithdrawal(fee = originalFee, feeRefunded = true)
+
+    val request = withdrawal.toWithdrawalRequest().getOrThrow()
+
+    request.fee shouldBe Bitcoins.ZERO
   }
 }

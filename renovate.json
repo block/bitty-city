@@ -11,6 +11,19 @@
       "matchManagers": ["gradle"],
       "matchPackageNames": ["org.jetbrains.kotlin:.*"],
       "enabled": false
+    },
+    {
+      "description": "joda-money 2.x requires Java 21; this project targets Java 11 for downstream consumer compatibility. Stay on the 1.x line.",
+      "matchManagers": ["gradle", "gradle-version-catalog"],
+      "matchPackageNames": ["org.joda:joda-money"],
+      "matchUpdateTypes": ["major"],
+      "enabled": false
+    },
+    {
+      "description": "kfsm-v2 2.2+ changed the Outbox interface to return Result<…>. Pinned until the test fakes (InMemoryOutbox) and related code are updated to match.",
+      "matchManagers": ["gradle", "gradle-version-catalog"],
+      "matchPackageNames": ["app.cash.kfsm:kfsm-v2"],
+      "enabled": false
     }
   ]
 }

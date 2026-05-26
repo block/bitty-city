@@ -5,9 +5,13 @@ domainApi = "0.5.3"
 domainApiKfsm = "0.5.3"
 domainApiKfsmv2 = "0.1.0"
 guice = "7.0.0"
-jodaMoney = "2.0.3"
+# joda-money 2.x requires Java 21. This project targets Java 11 for
+# downstream consumer compatibility, so we stay on the 1.x line.
+jodaMoney = "1.0.7"
 kfsm = "0.12.0"
-kfsmv2 = "2.3.0"
+# kfsm-v2 2.2+ changed Outbox method signatures to return Result<…>.
+# Pinned to 2.1.0 until InMemoryOutbox and related code are updated to match.
+kfsmv2 = "2.1.0"
 kotest = "5.9.1"
 kotlinxCoroutines = "1.10.2"
 kotestArrow = "2.0.0"
