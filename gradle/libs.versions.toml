@@ -16,7 +16,7 @@ kotest = "6.2.3"
 kotlinxCoroutines = "1.10.2"
 kotestArrow = "2.0.0"
 # @pin
-kotlin = "2.3.21"
+kotlin = "2.4.10"
 kotlinBinaryCompatibilityPlugin = "0.18.1"
 kotlinLogging = "8.0.4"
 mavenPublish = "0.36.0"
