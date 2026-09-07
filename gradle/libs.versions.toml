@@ -12,21 +12,21 @@ kfsm = "0.12.0"
 # kfsm-v2 2.2+ changed Outbox method signatures to return Result<…>.
 # Pinned to 2.1.0 until InMemoryOutbox and related code are updated to match.
 kfsmv2 = "2.1.0"
-kotest = "6.2.3"
+kotest = "6.2.4"
 kotlinxCoroutines = "1.10.2"
 kotestArrow = "2.0.0"
 # @pin
-kotlin = "2.3.21"
-kotlinBinaryCompatibilityPlugin = "0.18.1"
+kotlin = "2.4.10"
+kotlinBinaryCompatibilityPlugin = "0.18.2"
 kotlinLogging = "8.0.4"
-mavenPublish = "0.36.0"
-mockk = "1.14.9"
+mavenPublish = "0.37.0"
+mockk = "1.14.11"
 moshi = "1.15.2"
 quiver = "1.0.5"
 resilience4j = "2.4.0"
 slf4j = "2.0.17"
-versionCatalogUpdateGradlePlugin = "1.1.0"
-versionsGradlePlugin = "0.54.0"
+versionCatalogUpdateGradlePlugin = "1.1.1"
+versionsGradlePlugin = "0.61.0"
 
 [libraries]
 arrowCore = { module = "io.arrow-kt:arrow-core", version.ref = "arrow" }
