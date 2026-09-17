@@ -68,6 +68,7 @@ object StateMachineModule : AbstractModule() {
       }
       CollectingSanctionsInfo.becomes {
         CheckingEligibility via logOnly()
+        Failed via fail
         Sanctioned via freezeFunds
         WaitingForSanctionsHeldDecision via logOnly()
       }
