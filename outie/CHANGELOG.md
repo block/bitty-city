@@ -1,5 +1,10 @@
 # Change Log
 
+## [0.2.4]
+
+* Allow a sanctions DECLINE to fail a withdrawal that is still in `CollectingSanctionsInfo`, instead of raising `NoPathToTargetState`.
+* Note: 0.2.3 was tagged but never published to Maven Central. 0.2.4 is the first published release containing its changes.
+
 ## [0.2.3]
 
 * Use zero fee for on-chain submission when fee was refunded.
