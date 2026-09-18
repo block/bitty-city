@@ -7,7 +7,11 @@ import io.kotest.matchers.types.shouldBeInstanceOf
 import jakarta.inject.Inject
 import org.junit.jupiter.api.Test
 import xyz.block.bittycity.outie.models.CollectingSanctionsInfo
+import xyz.block.bittycity.outie.models.Failed
+import xyz.block.bittycity.outie.models.FailureReason
 import xyz.block.bittycity.outie.models.RequirementId
+import xyz.block.bittycity.outie.models.SanctionsHeldDecision
+import xyz.block.bittycity.outie.models.SanctionsReviewDecision
 import xyz.block.bittycity.outie.models.WaitingForSanctionsHeldDecision
 import xyz.block.bittycity.outie.models.Withdrawal
 import xyz.block.bittycity.outie.models.WithdrawalHurdle.WithdrawalReasonHurdle
@@ -80,6 +84,22 @@ class SanctionsInfoCollectionControllerTest : BittyCityTestCase() {
 
     withdrawalWithToken(withdrawal.id)
       .state shouldBe WaitingForSanctionsHeldDecision
+  }
+
+  @Test
+  fun `resume with declined sanctions decision fails the withdrawal`() = runTest {
+    val withdrawal = data.seedWithdrawal(state = CollectingSanctionsInfo)
+
+    subject.processInputs(
+      withdrawal,
+      listOf(SanctionsHeldDecision(SanctionsReviewDecision.DECLINE)),
+      Operation.RESUME
+    ).getOrThrow()
+
+    withdrawalWithToken(withdrawal.id) should {
+      it.state shouldBe Failed
+      it.failureReason shouldBe FailureReason.SANCTIONS_DECLINED
+    }
   }
 
   @Test

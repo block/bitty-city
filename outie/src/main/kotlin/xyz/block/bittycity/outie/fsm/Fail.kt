@@ -7,6 +7,7 @@ import xyz.block.bittycity.outie.models.CheckingRisk
 import xyz.block.bittycity.outie.models.CheckingSanctions
 import xyz.block.bittycity.outie.models.CheckingTravelRule
 import xyz.block.bittycity.outie.models.CollectingInfo
+import xyz.block.bittycity.outie.models.CollectingSanctionsInfo
 import xyz.block.bittycity.outie.models.CollectingScamWarningDecision
 import xyz.block.bittycity.outie.models.CollectingSelfAttestation
 import xyz.block.bittycity.outie.models.Failed
@@ -33,6 +34,7 @@ class Fail :
       HoldingSubmission,
       CheckingSanctions,
       SubmittingOnChain,
+      CollectingSanctionsInfo,
       WaitingForSanctionsHeldDecision,
       CheckingTravelRule,
       CheckingEligibility,

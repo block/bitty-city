@@ -12,7 +12,7 @@ kfsm = "0.12.0"
 # kfsm-v2 2.2+ changed Outbox method signatures to return Result<…>.
 # Pinned to 2.1.0 until InMemoryOutbox and related code are updated to match.
 kfsmv2 = "2.1.0"
-kotest = "6.2.3"
+kotest = "5.9.1"
 kotlinxCoroutines = "1.10.2"
 kotestArrow = "2.0.0"
 # @pin
@@ -23,7 +23,7 @@ mavenPublish = "0.36.0"
 mockk = "1.14.9"
 moshi = "1.15.2"
 quiver = "1.0.5"
-resilience4j = "2.4.0"
+resilience4j = "1.7.1"
 slf4j = "2.0.17"
 versionCatalogUpdateGradlePlugin = "1.1.0"
 versionsGradlePlugin = "0.54.0"

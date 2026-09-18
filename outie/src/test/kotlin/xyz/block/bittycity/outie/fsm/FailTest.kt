@@ -2,8 +2,10 @@ package xyz.block.bittycity.outie.fsm
 
 import app.cash.kfsm.PreconditionNotMet
 import xyz.block.bittycity.outie.models.CheckingSanctions
+import xyz.block.bittycity.outie.models.CollectingSanctionsInfo
 import xyz.block.bittycity.outie.models.Failed
 import xyz.block.bittycity.outie.models.FailureReason.CUSTOMER_DECLINED_DUE_TO_SCAM_WARNING
+import xyz.block.bittycity.outie.models.FailureReason.SANCTIONS_DECLINED
 import xyz.block.bittycity.outie.models.LedgerEntryToken
 import xyz.block.bittycity.common.models.LedgerTransactionId
 import xyz.block.bittycity.outie.testing.BittyCityTestCase
@@ -87,6 +89,17 @@ class FailTest : BittyCityTestCase() {
 
     withdrawalStateMachine.transitionTo(withdrawal, Failed).shouldBeFailure<PreconditionNotMet>()
       .message shouldBe "Failure reason must be set"
+  }
+
+  @Test
+  fun `can transition to failed from collecting sanctions info`() = runTest {
+    val withdrawal = data.seedWithdrawal(state = CollectingSanctionsInfo)
+
+    withdrawalStateMachine.transitionTo(
+      withdrawal.copy(failureReason = SANCTIONS_DECLINED),
+      Failed
+    ).getOrThrow()
+      .state shouldBe Failed
   }
 
   @Test

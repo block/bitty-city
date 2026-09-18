@@ -15,6 +15,7 @@ stateDiagram-v2
     CollectingInfo --> CheckingSanctions
     CollectingInfo --> Failed
     CollectingSanctionsInfo --> CheckingEligibility
+    CollectingSanctionsInfo --> Failed
     CollectingSanctionsInfo --> Sanctioned
     CollectingSanctionsInfo --> WaitingForSanctionsHeldDecision
     CollectingScamWarningDecision --> CheckingTravelRule
