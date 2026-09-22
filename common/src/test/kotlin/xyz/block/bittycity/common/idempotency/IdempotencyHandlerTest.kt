@@ -25,45 +25,56 @@ class IdempotencyHandlerTest {
   )
 
   @Test
-  fun `clearCachedResponses removes every cached response for the id and returns the count`() {
+  fun `clearCachedErrors removes errors and keeps successes and placeholders for the id`() {
     val id = TestId("one")
-    val firstKey = handler.handle(id, 1, emptyList()).getOrThrow().leftOrNull().shouldNotBeNull()
-    handler.handle(id, 2, emptyList()).getOrThrow().leftOrNull().shouldNotBeNull()
+    val errorKey = handler.handle(id, 1, emptyList()).getOrThrow().leftOrNull().shouldNotBeNull()
+    val successKey = handler.handle(id, 2, emptyList()).getOrThrow().leftOrNull().shouldNotBeNull()
+    handler.handle(id, 3, emptyList()).getOrThrow().leftOrNull().shouldNotBeNull()
+    val cachedSuccess = ExecuteResponse<TestId, String>(
+      id = id,
+      interactions = emptyList(),
+      nextEndpoint = null
+    )
     handler.updateCachedResponse(
-      firstKey,
+      errorKey,
       id,
       Result.failure(RuntimeException("boom"))
     ).getOrThrow()
+    handler.updateCachedResponse(successKey, id, Result.success(cachedSuccess)).getOrThrow()
 
-    handler.clearCachedResponses(id).getOrThrow() shouldBe 2
-    operations.responsesFor(id) shouldBe 0
+    handler.clearCachedErrors(id).getOrThrow() shouldBe 1
+    operations.responsesFor(id) shouldBe 2
+    handler.handle(id, 2, emptyList()).getOrThrow().fold({ null }, { it }) shouldBe cachedSuccess
+    handler.handle(id, 3, emptyList())
+      .shouldBeFailure(DomainApiError.AlreadyProcessing(id.toString()))
   }
 
   @Test
-  fun `clearCachedResponses leaves other ids untouched`() {
+  fun `clearCachedErrors leaves other ids untouched`() {
     val id1 = TestId("one")
     val id2 = TestId("two")
-    handler.handle(id1, 1, emptyList()).getOrThrow()
+    val key = handler.handle(id1, 1, emptyList()).getOrThrow().leftOrNull().shouldNotBeNull()
+    handler.updateCachedResponse(key, id1, Result.failure(RuntimeException("boom"))).getOrThrow()
     handler.handle(id2, 1, emptyList()).getOrThrow()
 
-    handler.clearCachedResponses(id1).getOrThrow() shouldBe 1
+    handler.clearCachedErrors(id1).getOrThrow() shouldBe 1
     handler.handle(id2, 1, emptyList())
       .shouldBeFailure(DomainApiError.AlreadyProcessing(id2.toString()))
   }
 
   @Test
-  fun `clearCachedResponses returns 0 when nothing is cached`() {
-    handler.clearCachedResponses(TestId("empty")).getOrThrow() shouldBe 0
+  fun `clearCachedErrors returns 0 when nothing is cached`() {
+    handler.clearCachedErrors(TestId("empty")).getOrThrow() shouldBe 0
   }
 
   @Test
-  fun `handle runs again with the same inputs after clearCachedResponses removes a cached error`() {
+  fun `handle runs again with the same inputs after clearCachedErrors removes a cached error`() {
     val id = TestId("one")
     val key = handler.handle(id, 1, emptyList()).getOrThrow().leftOrNull().shouldNotBeNull()
     handler.updateCachedResponse(key, id, Result.failure(RuntimeException("boom"))).getOrThrow()
 
     handler.handle(id, 1, emptyList()).shouldBeFailure<CachedError>()
-    handler.clearCachedResponses(id).getOrThrow() shouldBe 1
+    handler.clearCachedErrors(id).getOrThrow() shouldBe 1
     handler.handle(id, 1, emptyList()).getOrThrow().leftOrNull() shouldBe key
   }
 }
@@ -115,8 +126,10 @@ private class InMemoryIdempotencyOperations : IdempotencyOperations<TestId, Stri
     responses.remove(CompositeKey(idempotencyKey, requestId))
   }
 
-  override fun deleteResponsesForRequest(requestId: TestId): Result<Int> = result {
-    val keys = responses.keys.filter { it.requestId == requestId }
+  override fun deleteErrorResponsesForRequest(requestId: TestId): Result<Int> = result {
+    val keys = responses.filter { (key, response) ->
+      key.requestId == requestId && response.error != null
+    }.keys
     keys.forEach { responses.remove(it) }
     keys.size
   }

@@ -137,15 +137,15 @@ class IdempotencyHandler<ID, REQ>(
   }
 
   /**
-   * Deletes every cached response for a request, regardless of idempotency key. Lets a request whose
-   * replays are blocked by a [CachedError] or a stale in-progress row run again with the same inputs.
+   * Deletes every cached error response for a request, regardless of idempotency key. Successful
+   * responses and in-flight placeholders are left in place.
    *
    * @param id The request identifier.
-   * @return The number of cached responses removed.
+   * @return The number of cached error responses removed.
    */
-  fun clearCachedResponses(id: ID): Result<Int> = result {
-    transactor.transact("Clear cached responses") {
-      deleteResponsesForRequest(id)
+  fun clearCachedErrors(id: ID): Result<Int> = result {
+    transactor.transact("Clear cached errors") {
+      deleteErrorResponsesForRequest(id)
     }.bind()
   }
 

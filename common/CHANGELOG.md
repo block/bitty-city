@@ -2,9 +2,9 @@
 
 ## [Unreleased]
 
-* Added `IdempotencyOperations.deleteResponsesForRequest` and
-  `IdempotencyHandler.clearCachedResponses` to remove every cached response for a request id, so a
-  `CachedError` that blocks replays can be cleared. Breaking: implementers of
+* Added `IdempotencyOperations.deleteErrorResponsesForRequest` and
+  `IdempotencyHandler.clearCachedErrors` to remove cached errors for a request id while preserving
+  successful responses and in-flight placeholders. Breaking: implementers of
   `IdempotencyOperations` must add the new method.
 
 ## [0.2.0]

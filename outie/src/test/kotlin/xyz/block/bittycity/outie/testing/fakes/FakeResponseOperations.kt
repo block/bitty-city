@@ -58,8 +58,10 @@ class FakeResponseOperations : ResponseOperations {
     responses.remove(key)
   }
 
-  override fun deleteResponsesForRequest(requestId: WithdrawalToken): Result<Int> = result {
-    val keys = responses.keys.filter { it.requestId == requestId }
+  override fun deleteErrorResponsesForRequest(requestId: WithdrawalToken): Result<Int> = result {
+    val keys = responses.filter { (key, response) ->
+      key.requestId == requestId && response.error != null
+    }.keys
     keys.forEach { responses.remove(it) }
     keys.size
   }

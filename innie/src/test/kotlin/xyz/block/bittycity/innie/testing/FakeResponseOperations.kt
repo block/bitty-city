@@ -59,8 +59,10 @@ class FakeResponseOperations : ResponseOperations {
     responses.remove(key)
   }
 
-  override fun deleteResponsesForRequest(requestId: DepositToken): Result<Int> = result {
-    val keys = responses.keys.filter { it.second == requestId }
+  override fun deleteErrorResponsesForRequest(requestId: DepositToken): Result<Int> = result {
+    val keys = responses.filter { (key, response) ->
+      key.second == requestId && response.error != null
+    }.keys
     keys.forEach { responses.remove(it) }
     keys.size
   }
