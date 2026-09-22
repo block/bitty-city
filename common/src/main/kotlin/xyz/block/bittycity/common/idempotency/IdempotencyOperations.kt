@@ -27,6 +27,13 @@ interface IdempotencyOperations<ID, REQ> : Operations {
     idempotencyKey: String,
     requestId: ID
   ): Result<Unit>
+
+  /**
+   * Deletes every cached response for [requestId], regardless of idempotency key.
+   *
+   * @return The number of cached responses removed.
+   */
+  fun deleteResponsesForRequest(requestId: ID): Result<Int>
 }
 
 sealed class IdempotencyStoreError(message: String) :

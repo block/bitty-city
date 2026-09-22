@@ -593,4 +593,39 @@ class IdempotencyHandlerTest : BittyCityTestCase() {
     // The hashes should be different because they use different input structures
     executeResult.getOrThrow() shouldNotBe resumeResultHash.getOrThrow()
   }
+
+  @Test
+  fun `clearCachedResponses lets handle run again after a cached error`() = runTest {
+    val withdrawalToken = Arbitrary.withdrawalToken.next()
+    val hurdleResponses = emptyList<Input.HurdleResponse<RequirementId>>()
+    val idempotencyKey = idempotencyHandler.handle(withdrawalToken, 1, hurdleResponses)
+      .getOrThrow().shouldBeLeft()
+    idempotencyHandler.updateCachedResponse(
+      idempotencyKey,
+      withdrawalToken,
+      Result.failure(RuntimeException("Test error"))
+    ).getOrThrow()
+
+    idempotencyHandler.handle(withdrawalToken, 1, hurdleResponses)
+      .shouldBeFailure<CachedError>()
+    idempotencyHandler.clearCachedResponses(withdrawalToken).getOrThrow() shouldBe 1
+    idempotencyHandler.handle(withdrawalToken, 1, hurdleResponses)
+      .getOrThrow().shouldBeLeft(idempotencyKey)
+  }
+
+  @Test
+  fun `clearCachedResponses removes execute and resume responses for the token but not other tokens`() = runTest {
+    val token1 = Arbitrary.withdrawalToken.next()
+    val token2 = Arbitrary.withdrawalToken.next()
+    val hurdleResponses = emptyList<Input.HurdleResponse<RequirementId>>()
+    val resumeResult = SanctionsHeldDecision(SanctionsReviewDecision.APPROVE)
+    idempotencyHandler.handle(token1, 1, hurdleResponses).getOrThrow().shouldBeLeft()
+    idempotencyHandler.handleResume(token1, resumeResult).getOrThrow().shouldBeLeft()
+    idempotencyHandler.handle(token2, 1, hurdleResponses).getOrThrow().shouldBeLeft()
+
+    idempotencyHandler.clearCachedResponses(token1).getOrThrow() shouldBe 2
+    idempotencyHandler.handleResume(token1, resumeResult).getOrThrow().shouldBeLeft()
+    idempotencyHandler.handle(token2, 1, hurdleResponses)
+      .shouldBeFailure(DomainApiError.AlreadyProcessing(token2.toString()))
+  }
 }
