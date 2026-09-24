@@ -136,6 +136,19 @@ class IdempotencyHandler<ID, REQ>(
     }.bind()
   }
 
+  /**
+   * Deletes every cached error response for a request, regardless of idempotency key. Successful
+   * responses and in-flight placeholders are left in place.
+   *
+   * @param id The request identifier.
+   * @return The number of cached error responses removed.
+   */
+  fun clearCachedErrors(id: ID): Result<Int> = result {
+    transactor.transact("Clear cached errors") {
+      deleteErrorResponsesForRequest(id)
+    }.bind()
+  }
+
   private fun buildResponse(
     id: ID,
     idempotencyKey: String,

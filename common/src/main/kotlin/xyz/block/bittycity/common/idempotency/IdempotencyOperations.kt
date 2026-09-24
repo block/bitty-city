@@ -27,6 +27,14 @@ interface IdempotencyOperations<ID, REQ> : Operations {
     idempotencyKey: String,
     requestId: ID
   ): Result<Unit>
+
+  /**
+   * Deletes every cached response for [requestId] whose error is set. Successful responses and
+   * in-flight placeholders are left in place.
+   *
+   * @return The number of cached error responses removed.
+   */
+  fun deleteErrorResponsesForRequest(requestId: ID): Result<Int>
 }
 
 sealed class IdempotencyStoreError(message: String) :

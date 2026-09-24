@@ -593,4 +593,69 @@ class IdempotencyHandlerTest : BittyCityTestCase() {
     // The hashes should be different because they use different input structures
     executeResult.getOrThrow() shouldNotBe resumeResultHash.getOrThrow()
   }
+
+  @Test
+  fun `clearCachedErrors lets handle run again after a cached error`() = runTest {
+    val withdrawalToken = Arbitrary.withdrawalToken.next()
+    val hurdleResponses = emptyList<Input.HurdleResponse<RequirementId>>()
+    val idempotencyKey = idempotencyHandler.handle(withdrawalToken, 1, hurdleResponses)
+      .getOrThrow().shouldBeLeft()
+    idempotencyHandler.updateCachedResponse(
+      idempotencyKey,
+      withdrawalToken,
+      Result.failure(RuntimeException("Test error"))
+    ).getOrThrow()
+
+    idempotencyHandler.handle(withdrawalToken, 1, hurdleResponses)
+      .shouldBeFailure<CachedError>()
+    idempotencyHandler.clearCachedErrors(withdrawalToken).getOrThrow() shouldBe 1
+    idempotencyHandler.handle(withdrawalToken, 1, hurdleResponses)
+      .getOrThrow().shouldBeLeft(idempotencyKey)
+  }
+
+  @Test
+  fun `clearCachedErrors keeps successes placeholders and other tokens`() = runTest {
+    val token1 = Arbitrary.withdrawalToken.next()
+    val token2 = Arbitrary.withdrawalToken.next()
+    val hurdleResponses = emptyList<Input.HurdleResponse<RequirementId>>()
+    val resumeResult = SanctionsHeldDecision(SanctionsReviewDecision.APPROVE)
+    val cachedSuccess = ExecuteResponse<WithdrawalToken, RequirementId>(
+      id = token1,
+      interactions = emptyList(),
+      nextEndpoint = null
+    )
+    val executeErrorKey = idempotencyHandler.handle(token1, 1, hurdleResponses)
+      .getOrThrow().shouldBeLeft()
+    val resumeErrorKey = idempotencyHandler.handleResume(token1, resumeResult)
+      .getOrThrow().shouldBeLeft()
+    val successKey = idempotencyHandler.handle(token1, 2, hurdleResponses)
+      .getOrThrow().shouldBeLeft()
+    idempotencyHandler.handle(token1, 3, hurdleResponses).getOrThrow().shouldBeLeft()
+    idempotencyHandler.handle(token2, 1, hurdleResponses).getOrThrow().shouldBeLeft()
+    idempotencyHandler.updateCachedResponse(
+      executeErrorKey,
+      token1,
+      Result.failure(RuntimeException("Execute error"))
+    ).getOrThrow()
+    idempotencyHandler.updateCachedResponse(
+      resumeErrorKey,
+      token1,
+      Result.failure(RuntimeException("Resume error"))
+    ).getOrThrow()
+    idempotencyHandler.updateCachedResponse(
+      successKey,
+      token1,
+      cachedSuccess.success()
+    ).getOrThrow()
+
+    idempotencyHandler.clearCachedErrors(token1).getOrThrow() shouldBe 2
+    idempotencyHandler.handleResume(token1, resumeResult)
+      .getOrThrow().shouldBeLeft(resumeErrorKey)
+    idempotencyHandler.handle(token1, 2, hurdleResponses)
+      .getOrThrow().shouldBeRight(cachedSuccess)
+    idempotencyHandler.handle(token1, 3, hurdleResponses)
+      .shouldBeFailure(DomainApiError.AlreadyProcessing(token1.toString()))
+    idempotencyHandler.handle(token2, 1, hurdleResponses)
+      .shouldBeFailure(DomainApiError.AlreadyProcessing(token2.toString()))
+  }
 }
