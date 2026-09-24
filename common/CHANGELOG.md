@@ -1,6 +1,6 @@
 # Change Log
 
-## [Unreleased]
+## [0.2.3]
 
 * Added `IdempotencyOperations.deleteErrorResponsesForRequest` and
   `IdempotencyHandler.clearCachedErrors` to remove cached errors for a request id while preserving
