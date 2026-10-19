@@ -7,6 +7,7 @@ import com.squareup.moshi.Types.newParameterizedType
 import xyz.block.bittycity.common.idempotency.IdempotentInputs
 import xyz.block.bittycity.common.idempotency.IdempotentResumeInputs
 import xyz.block.bittycity.common.store.Transactor
+import xyz.block.bittycity.outie.client.MetricsClient
 import xyz.block.bittycity.outie.models.CheckingEligibility
 import xyz.block.bittycity.outie.models.CheckingRisk
 import xyz.block.bittycity.outie.models.CheckingSanctions
@@ -33,7 +34,6 @@ object DomainControllerModule : AbstractModule() {
   @Singleton
   @Suppress("LongParameterList")
   fun provideDomainController(
-    // All controllers marked with @ControllerDefinition
     eligibilityController: EligibilityController,
     infoCollectionController: InfoCollectionController,
     sanctionsController: SanctionsController,
@@ -44,36 +44,28 @@ object DomainControllerModule : AbstractModule() {
     travelRuleController: TravelRuleController,
     onChainController: OnChainController,
     failedController: FailedController,
+    metricsClient: MetricsClient,
   ): DomainController<WithdrawalToken, WithdrawalState, Withdrawal, RequirementId> {
     val stateToController:
       Map<WithdrawalState, Controller<WithdrawalToken, WithdrawalState, Withdrawal, RequirementId>> =
       mapOf(
-        // EligibilityController handles CheckingEligibility state
         CheckingEligibility to eligibilityController,
 
-        // InfoCollectionController handles CollectingInfo state
         CollectingInfo to infoCollectionController,
 
-        // SanctionsController handles CheckingSanctions and WaitingForSanctionsHeldDecision states
         CheckingSanctions to sanctionsController,
         WaitingForSanctionsHeldDecision to sanctionsController,
 
-        // SanctionsInfoCollectionController handles CollectingSanctionsInfo state
         CollectingSanctionsInfo to sanctionsInfoCollectionController,
 
-        // AttestationInfoCollectionController handles CollectingSelfAttestation state
         CollectingSelfAttestation to attestationInfoCollectionController,
 
-        // RiskController handles CheckingRisk state
         CheckingRisk to riskController,
 
-        // ScamWarningController handles CollectingScamWarningDecision state
         CollectingScamWarningDecision to scamWarningController,
 
-        // TravelRuleController handles CheckingTravelRule state
         CheckingTravelRule to travelRuleController,
 
-        // OnChainController handles all on-chain related states
         HoldingSubmission to onChainController,
         SubmittingOnChain to onChainController,
         WaitingForPendingConfirmationStatus to onChainController,
@@ -81,7 +73,10 @@ object DomainControllerModule : AbstractModule() {
         Failed to failedController,
       ).mapValues { (_, controller) ->
         @Suppress("UNCHECKED_CAST")
-        controller as Controller<WithdrawalToken, WithdrawalState, Withdrawal, RequirementId>
+        TimedController(
+          controller as Controller<WithdrawalToken, WithdrawalState, Withdrawal, RequirementId>,
+          metricsClient
+        )
       }
 
     return DomainController(stateToController)

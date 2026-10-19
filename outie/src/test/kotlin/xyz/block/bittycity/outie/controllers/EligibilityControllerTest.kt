@@ -51,5 +51,10 @@ class EligibilityControllerTest : BittyCityTestCase() {
 
     withdrawalWithToken(withdrawal.id)
       .state shouldBe WaitingForPendingConfirmationStatus
+
+    metricsClient.stateProcessingDurations.first() should {
+      it.state shouldBe CheckingEligibility
+      it.succeeded shouldBe true
+    }
   }
 }
