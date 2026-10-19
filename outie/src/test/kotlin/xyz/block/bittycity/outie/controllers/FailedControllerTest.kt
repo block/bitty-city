@@ -32,6 +32,11 @@ class FailedControllerTest  : BittyCityTestCase() {
       Operation.EXECUTE
     ).shouldBeFailure<DomainApiError.InvalidProcessState>()
 
+    metricsClient.stateProcessingDurations.single() should {
+      it.state shouldBe Failed
+      it.succeeded shouldBe false
+    }
+
     withdrawalWithToken(withdrawal.id) should {
       it.state shouldBe Failed
       it.failureReason shouldBe FailureReason.RISK_BLOCKED

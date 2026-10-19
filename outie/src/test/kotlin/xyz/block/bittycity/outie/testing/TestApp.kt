@@ -50,6 +50,7 @@ class TestApp @Inject constructor(
   @Inject lateinit var feeQuoteClient: FakeFeeQuoteClient
   @Inject lateinit var ledgerClient: FakeLedgerClient
   @Inject lateinit var limitClient: FakeLimitClient
+  @Inject lateinit var metricsClient: FakeMetricsClient
   @Inject lateinit var onChainService: FakeOnChainClient
   @Inject lateinit var riskService: FakeRiskClient
   @Inject lateinit var sanctionsClient: FakeSanctionsClient
@@ -75,6 +76,7 @@ class TestApp @Inject constructor(
     feeQuoteClient.reset()
     ledgerClient.reset()
     limitClient.reset()
+    metricsClient.reset()
     onChainService.reset()
     riskService.reset()
     sanctionsClient.reset()
